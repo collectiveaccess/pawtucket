@@ -64,16 +64,16 @@ var caUI = caUI || {};
 			that.infoWindow.open(that.map);
 		};
 		// --------------------------------------------------------------------------------
-		that.makeMarker = function(lat, lng, label, content, ajaxContentUrl) {
+		that.makeMarker = function(lat, lng, label, content, ajaxContentUrl, options) {
 			var pt = new google.maps.LatLng(lat, lng);
 		
-			var marker = new google.maps.Marker({
+			var marker = new google.maps.Marker(jQuery.extend({
 				position: pt,
 				map: that.map,
 				title: label + ' ',
 				content: content + ' ',
 				ajaxContentUrl: ajaxContentUrl
-			});
+			}, options));
 			
 			google.maps.event.addListener(marker, 'click', function(e) { that.openMarkerInfoWindow(marker); });
 			

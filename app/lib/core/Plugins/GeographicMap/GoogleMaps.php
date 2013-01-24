@@ -48,6 +48,8 @@ class WLPlugGeographicMapGoogleMaps Extends BaseGeographicMapPlugIn Implements I
 		$this->info['NAME'] = 'GoogleMaps';
 		
 		$this->description = _t('Generates maps using the GoogleMaps API');
+		
+		JavascriptLoadManager::register("maps");
 	}
 	# ------------------------------------------------
 	/**
@@ -85,7 +87,7 @@ class WLPlugGeographicMapGoogleMaps Extends BaseGeographicMapPlugIn Implements I
 		$vn_min_zoom_level = (isset($pa_options['minZoomLevel']) && ((int)$pa_options['minZoomLevel'] > 0)) ? (int)$pa_options['minZoomLevel'] : null;
 		$vn_max_zoom_level = (isset($pa_options['maxZoomLevel']) && ((int)$pa_options['maxZoomLevel'] > 0)) ? (int)$pa_options['maxZoomLevel'] : null;
 		
-		$vs_path_color = (isset($pa_options['pathColor'])) ? $pa_options['pathColor'] : '#cc0000';
+		$vs_path_color = (isset($pa_options['pathColor'])) ? $pa_options['pathColor'] : $this->opo_config->get('google_maps_path_color');
 		$vn_path_weight = (isset($pa_options['pathWeight']) && ((int)$pa_options['pathWeight'] > 0)) ? (int)$pa_options['pathWeight'] : 2;
 		$vn_path_opacity = (isset($pa_options['pathOpacity']) && ((int)$pa_options['pathOpacity'] >= 0)  && ((int)$pa_options['pathOpacity'] <= 1)) ? (int)$pa_options['pathOpacity'] : 0.5;
 		
@@ -150,10 +152,33 @@ class WLPlugGeographicMapGoogleMaps Extends BaseGeographicMapPlugIn Implements I
 				
 				$vs_buf = "<div style='width:{$vn_width}px; height:{$vn_height}px' id='{$vs_id}'> </div>\n
 <script type='text/javascript'>
+	var caMap_{$vs_id};
+	var GeoMarker_{$vs_id};
 jQuery(document).ready(function() {
-	var caMap_{$vs_id} = caUI.initGoogleMap({id: '{$vs_id}', mapType: '{$vs_type}', navigationControl: {$vb_show_navigation_control} , mapTypeControl: {$vb_show_map_type_control}, scaleControl: {$vb_show_scale_control}});
+	caMap_{$vs_id} = caUI.initGoogleMap({id: '{$vs_id}', mapType: '{$vs_type}', navigationControl: {$vb_show_navigation_control} , mapTypeControl: {$vb_show_map_type_control}, scaleControl: {$vb_show_scale_control}});
 	var caMap_{$vs_id}_markers = [];
 	var caMap_{$vs_id}_current_marker = -1;
+
+		var styles = [
+		  {
+			stylers: [
+
+			  { saturation: -100 },
+
+			]
+		  },{
+			featureType: 'road',
+			elementType: 'geometry',
+			stylers: [
+			  { lightness: 100 },
+			  { visibility: 'simplified' }
+			]
+		  }
+		];
+			caMap_{$vs_id}.map.setOptions({styles: styles});
+			var mc_{$vs_id} = new MarkerClusterer(caMap_{$vs_id}.map);
+			GeoMarker_{$vs_id} = new GeolocationMarker(caMap_{$vs_id}.map);
+			GeoMarker_{$vs_id}.setCircleOptions({ fillColor: 'red', radius: '100', visible: true, map: caMap_{$vs_id}.map});
 ";
 	
 	if ($vn_zoom_level > 0) {
@@ -212,7 +237,8 @@ jQuery(document).ready(function() {
 					$va_buf[md5($va_marker_content_item['content'])] = $va_marker_content_item['content'];	// md5 is to ensure there is no duplicate content (eg. if something is mapped to the same location twice)
 				}	
 				if (!($vn_latitude && $vn_longitude)) { continue; }
-				$vs_buf .= "	caMap_{$vs_id}_markers.push(caMap_{$vs_id}.makeMarker(".$vn_latitude.", ".$vn_longitude.", '".preg_replace("![\n\r]+!", " ", addslashes($vs_label))."', '".preg_replace("![\n\r]+!", " ", addslashes(join($vs_delimiter, $va_buf)))."', '".preg_replace("![\n\r]+!", " ", ($vs_ajax_content_url ? addslashes($vs_ajax_content_url."/id/".join(';', $va_ajax_ids)) : ''))."'));\n";
+				$vs_buf .= "	caMap_{$vs_id}_markers.push(m=caMap_{$vs_id}.makeMarker(".$vn_latitude.", ".$vn_longitude.", '".preg_replace("![\n\r]+!", " ", addslashes($vs_label))."', '".preg_replace("![\n\r]+!", " ", addslashes(join($vs_delimiter, $va_buf)))."', '".preg_replace("![\n\r]+!", " ", ($vs_ajax_content_url ? addslashes($vs_ajax_content_url."/id/".join(';', $va_ajax_ids)) : ''))."', {icon: '/mobile/themes/parrishphone/graphics/blu-pointer.png'} ));\n";
+				$vs_buf .= "	mc_{$vs_id}.addMarker(m);\n";
 			}
 		}
 		
@@ -254,8 +280,12 @@ jQuery(document).ready(function() {
 	}
 	
 $vs_buf .= "
-});
-</script>\n";
+	});
+	function clickroute() { 
+		var latLng = GeoMarker_{$vs_id}.getPosition();
+		caMap_{$vs_id}.map.panTo(latLng);
+	}
+</script>\n"; 
 				break;
 			# ---------------------------------
 		}
