@@ -4,7 +4,7 @@
 	$o_result_context = new ResultContext($this->request, 'ca_objects', 'basic_search');
 	$vs_search = $o_result_context->getSearchExpression();
 ?>
-			<div id="nav">
+			<div id="nav" data-role="footer" data-position="fixed" data-tap-toggle="false">
 				<div class='homeNav'><?php print caNavLink($this->request, "<img src='".$this->request->getThemeUrlPath()."/graphics/home.png' height='28' width='28' border='0'>", '', '', '', ''); ?></div>			
 <?php				
 				if ((($this->request->getController() == "About") && ($this->request->getAction() == "map")) || (($this->request->getController() == "Search") && ($this->request->getAction() == "Index"))) {
@@ -21,6 +21,10 @@
 				<!--<a href="#" onclick='$("#navMenu").slideToggle(250); return false;'><?php print _t("Menu"); ?>&darr;</a>-->
 			<div style="clear:both;"><!-- empty --></div>
 			</div><!-- end nav -->
+		<div id='helpDiv'>
+			This feature requires you to enable Location Services.  Please adjust your browser settings and try again.
+			<div id='helpDivClose'><a href='#'>Close</a></div>
+		</div>	
 	</div><!-- end pageWidth -->
 <?php
 print TooltipManager::getLoadHTML();
@@ -30,6 +34,17 @@ print TooltipManager::getLoadHTML();
 		
 		</div>
 	</div>
+	<script type="text/javascript">
+		$(function(){  // $(document).ready shorthand
+		  
+		$("#helpDivClose").click(function(event) {
+        event.stopPropagation();
+        
+        $("#helpDiv").fadeOut();
+    })
+		  
+		});
+	</script>
 
 	<script type="text/javascript">
 	/*

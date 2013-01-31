@@ -9,8 +9,11 @@ body {
 	background-color:#fff;
 	margin: 0px;
 	padding:0px;
-	-webkit-text-size-adjust: none;
+	-webkit-text-size-adjust: none;	
+	
 }
+
+
 
 /* ------------------------------------- */
 /* general styles */
@@ -33,7 +36,7 @@ h1{
 #header h1 a{
 	font-family: "Avenir LT W01 95 Black";
 	font-size: 20px;
-	color: #71cde4;
+	color: #71cde4 !important;
 	text-transform: uppercase;
 	text-align:left;
 	line-height: 20px;
@@ -62,6 +65,15 @@ h3 a{
 a{
 	text-decoration:underline;
 	color: #000000;
+}
+.ui-body-c .ui-link {
+	color: #757575 !important;
+}
+.ui-body-c .ui-link:visited {
+	color: #757575 !important;
+}
+a:visited {
+    color: #757575; /*{c-body-link-visited}*/;
 }
 a:hover{
 	text-decoration:underline;
@@ -117,6 +129,9 @@ a.caption:hover{
 
 .listItems{
 	/*border-bottom:1px solid #828282;*/
+	-webkit-transform: translateZ(0);
+	-webkit-perspective: 1000;
+	-webkit-backface-visibility: hidden;
 }
 .listItems div.item{
 	clear:both;
@@ -127,6 +142,10 @@ a.caption:hover{
 	background-repeat:no-repeat;
 	background-position:right center;
 	font-family: "Avenir LT W01 35 Light", helvetica, arial;
+	color: #757575;
+	-webkit-transform: translateZ(0);
+	-webkit-perspective: 1000;
+	-webkit-backface-visibility: hidden;
 }
 .listItems div.item:hover{
 	background-color:#f7f7f7;
@@ -160,6 +179,9 @@ font-family: "Avenir LT W01 65 Medium";
 font-weight: normal;
 line-height: 1.4em;
 color: #757575;
+	-webkit-transform: translateZ(0);
+-webkit-perspective: 1000;
+-webkit-backface-visibility: hidden;
 }
 div.listHeading a{
 	color: #FFFFFF;
@@ -167,7 +189,7 @@ div.listHeading a{
 	text-decoration:none;
 }
 .collapseListHeading{
-	padding:5px 20px 5px 7px;
+	padding:7px 20px 7px 7px;
 	background-image:url('../graphics/listArrow.png');
 	background-repeat:no-repeat;
 	background-position:right center;
@@ -177,6 +199,9 @@ div.listHeading a{
 	font-weight:bold;
 	font-size:12px;
 	font-family: "Avenir LT W01 35 Light", helvetica, arial;
+		-webkit-transform: translateZ(0);
+-webkit-perspective: 1000;
+-webkit-backface-visibility: hidden;
 }
 .collapseListHeading a{
 	text-decoration: none;
@@ -192,38 +217,44 @@ div.listHeading a{
 /* page structure */
 /* ------------------------------------- */
 body.portrait #pageWidth{
-	width:320px;
+	
 	margin:0px auto 0px auto;
 }
 body.landscape #pageWidth{
-	width:480px;
+	
 	margin:0px auto 0px auto;
 }
 
 #pageArea{
 	width:100%;
-	margin: 0px auto 0px auto;
+	margin: 30px auto 0px auto;
 	background-color:#FFFFFF;
 	padding:0px;
-	max-height:319px;
-	overflow:auto;
-	overflow-x: hidden;
-	margin-bottom:37px;
+
 }
 #header{
 	text-align:center;
-	padding:3px 0px 0px 0px;
-	border-bottom: 3px solid #71cde4;
+	padding:0px;
+}
+#header.ui-bar-a {
+	background-color:#fff;
+	background-image:none;
+	border: 0px;
+	text-shadow: none;
+}
+#header .ui-title {
+	margin: 5px 7px 5px 7px;
 }
 #nav{
 	text-align:left;
 	background-color:#71cde4;
 	padding: 4px 5px 5px 5px;
-	margin:0px;
+	background-image: none;
+	border: none;
 	line-height:1em; 
-	position: absolute;
-	bottom:0;
-	width:310px;
+	-webkit-transform: translateZ(0);
+	-webkit-perspective: 1000;
+	-webkit-backface-visibility: hidden;
 }
 #nav a{
 	font-size:15px;
@@ -242,6 +273,7 @@ body.landscape #pageWidth{
 	background-repeat:no-repeat;
 	background-size:155px 20px;
 	margin-top:4px;
+	margin-right:15px;
 }
 #nav #search a {
 	float:right;
@@ -256,6 +288,11 @@ body.landscape #pageWidth{
 	margin-right:10px;
 	-webkit-appearance: none;
 	font-size:12px;
+	background-color: #fff;
+	text-shadow:none;
+	color: #000;
+	box-shadow: none;
+	-webkit-box-shadow: none;
 }
 #nav .homeNav {
 	float:left;
@@ -292,7 +329,6 @@ body.landscape #pageWidth{
 	padding: 7px;
 	color:#FFFFFF;
 	font-size:11px;
-	background-color:#828282;
 	margin:0px;
 }
 #footer a{
@@ -493,6 +529,37 @@ margin:0px;
 #mapBalloonText {
 	max-width:160px;
 	float:right;
+}
+#helpDiv {
+	width: 200px;
+	padding: 5px;
+	position: absolute;
+	top: 25%;
+	border: 2px solid #71cde4;
+	background-color: #fff;
+	z-index: 10000;
+	text-align: center;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;	
+	margin-left:-100px;
+	left: 50%;
+	color: #666;
+	display:none;
+}
+div#helpDivClose {
+	margin-top:10px;
+}
+#helpDivClose a{
+	background-color: #71cde4;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	border-radius: 5px;
+	color: #fff;
+	font-weight:bold;
+	padding:4px;
+	text-decoration: none;
+	text-transform: uppercase;	
 }
 /* image on - object detail */
 #objDetailImage{

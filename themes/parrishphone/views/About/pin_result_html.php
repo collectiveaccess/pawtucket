@@ -1,14 +1,14 @@
 <?php
 /* ----------------------------------------------------------------------
- * themes/default/views/About/ca_objects_results_map_balloon_html.php :
- * 		full search results
+ * themes/default/views/Results/ca_objects_results_thumbnail_html.php :
+ * 		thumbnail search results
  * ----------------------------------------------------------------------
  * CollectiveAccess
  * Open-source collections management software
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2010 Whirl-i-Gig
+ * Copyright 2008-2009 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -26,17 +26,22 @@
  *
  * ----------------------------------------------------------------------
  */
-$qr_data = $this->getVar('data');		// this is a search result row
 
-?>
-<div id="mapBalloon">
-<?php
+		$va_ids = $this->getVar('ids');
+		$vs_string_ids = implode(", ", $va_ids);
+ 	
+		
+		print '<div class="listItems">';
+		
+			print "<div class='item'><div class='thumb'><img src='".$this->request->getThemeUrlPath()."/graphics/blu-pointer.png' height='30' width='35' border='0'></div><!-- end thumb -->";
+			
+			print count($va_ids)." items at this location<br/>";
+			print caNavLink($this->request, 'Click to view', '', '', 'About', 'listview', array('pin_ids' => $vs_string_ids), array('data-transition' => 'slide') );
 
-	if($qr_data->getMediaTag('ca_object_representations.media', 'icon')){
-		print caNavLink($this->request, $qr_data->getMediaTag('ca_object_representations.media', 'icon'), '', 'Detail', 'Object', 'Show', array('object_id' => $qr_data->get("ca_objects.object_id")));
-	}
+			print "<div style='clear:left;'><!--empty --></div>";
+			print "</div>";
+			
+			
+		print "\n</div>\n";
+	  
 ?>
-	<div id="mapBalloonText">
-	<?php print caNavLink($this->request, $qr_data->get("ca_objects.preferred_labels"), '', 'Detail', 'Object', 'Show', array('object_id' => $qr_data->get("ca_objects.object_id"))); ?>
-	</div><!-- end mapBalloonText -->
-</div><!-- end mapBallon -->

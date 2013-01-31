@@ -39,7 +39,7 @@ $qr_objects = $o_object_search->search("*");
 $vn_num_hits = $qr_objects->numHits();
 
 if($qr_objects){
-	$o_map = new GeographicMap(320, 210, 'map');
+	$o_map = new GeographicMap(320, 380, 'map');
 	$va_map_stats = $o_map->mapFrom($qr_objects, 'ca_places.georeference', array('contentView' => 'About/ca_objects_results_map_balloon_html.php', 'request' => $this->request)); 
 	// map_stats is an array with two keys: 'points' = number of unique markers; 'items' = number of results hits than were plotted at least once on the map
 	
@@ -59,9 +59,9 @@ if($qr_objects){
 		}
 
 		
-		print '<div class="resultCount">'._t('You found %2 %3', $this->getVar('mode_type_singular'), $vn_num_hits, ($vn_num_hits == 1) ? _t('result') : _t('results'))."</div>";
+		#print '<div class="resultCount">'._t('You found %2 %3', $this->getVar('mode_type_singular'), $vn_num_hits, ($vn_num_hits == 1) ? _t('result') : _t('results'))."</div>";
 
-		print "<div>".$o_map->render('HTML', array('delimiter' => "<br/>"))."</div>";
+		print "<div>".$o_map->render('HTML', array('delimiter' => "<br/>", "balloonView" => "About/pin_result_html.php", "request" => $this->request))."</div>";
 	} else {
 ?>
 	<div>
@@ -71,4 +71,6 @@ if($qr_objects){
 <?php
 	}
 }
+	
+
 ?>

@@ -139,7 +139,7 @@
 			if($this->request->config->get('ca_objects_map_attribute') && $t_object->get($this->request->config->get('ca_objects_map_attribute'))){
 				$o_map = new GeographicMap(306, 200, 'map');
 				$o_map->mapFrom($t_object, $this->request->config->get('ca_objects_map_attribute'));
-				print "<div class='collapseListHeading'><a href='#' onclick='$(\"#itemMap\").slideToggle(250); return false;'>"._t("Map")."</a></div><!-- end collapseListHeading -->";
+				print "<div class='collapseListHeading'><a href='#' class='scrollButton' onclick='$(\"#itemMap\").slideToggle(250); return false;'>"._t("Map")."</a></div><!-- end collapseListHeading -->";
 				print "<div id='itemMap' style='display:none;'>";
 				print "<div id='detailMap'>".$o_map->render('HTML')."</div>";
 				print "</div><!-- end map -->";
@@ -149,7 +149,7 @@
 			$va_places = $t_object->get("ca_places", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			$va_collections = $t_object->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			if(sizeof($va_entities) || sizeof($va_occurrences) || sizeof($va_places) || sizeof($va_collections)){
-				print "<div class='collapseListHeading'><a href='#' onclick='$(\"#relatedAuthorities\").slideToggle(250); return false;'>"._t("Related Information")."</a></div><!-- end collapseListHeading -->";
+				print "<div class='collapseListHeading'><a href='#' class='scrollButton' onclick='$(\"#relatedAuthorities\").slideToggle(250); return false;'>"._t("Related Information")."</a></div><!-- end collapseListHeading -->";
 				print "<div id='relatedAuthorities' class='listItems' style='display:none;'>";
 				# --- entities
 				if(sizeof($va_entities) > 0){	
@@ -186,13 +186,14 @@
 						print "<div class='item'>".(($this->request->config->get('allow_detail_for_ca_collections')) ? caNavLink($this->request, $va_collection_info['label'], '', 'Detail', 'Collection', 'Show', array('collection_id' => $va_collection_info['collection_id'])) : $va_collection_info['label'])." (".$va_collection_info['relationship_typename'].")</div>";
 					}
 				}
+				
 				print "</div><!-- end relatedAuthorities -->";
 			}		
 
 			# --- vocabulary terms
 			$va_terms = $t_object->get("ca_list_items", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			if (sizeof($va_terms)) {
-				print "<div class='collapseListHeading'><a href='#' onclick='$(\"#relatedSubjects\").slideToggle(250); return false;'>"._t("Keywords")."</a></div><!-- end collapseListHeading -->";
+				print "<div class='collapseListHeading'><a href='#' class='scrollButton' onclick='$(\"#relatedSubjects\").slideToggle(250); return false;'>"._t("Keywords")."</a></div><!-- end collapseListHeading -->";
 				print "<div id='relatedSubjects' class='listItems' style='display:none;'>";
 			
 				foreach($va_terms as $va_term_info){
@@ -205,7 +206,7 @@
 			# --- output related object images as links
 			$va_related_objects = $t_object->get("ca_objects", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			if (sizeof($va_related_objects)) {
-				print "<div class='collapseListHeading'><a href='#' onclick='$(\"#relatedObjects\").slideToggle(250); return false;'>"._t("Related Objects")."</a></div><!-- end collapseListHeading -->";
+				print "<div class='collapseListHeading'><a href='#' class='scrollButton' onclick='$(\"#relatedObjects\").slideToggle(250); return false;'>"._t("Related Objects")."</a></div><!-- end collapseListHeading -->";
 				print "<div id='relatedObjects' class='listItems' style='display:none;'>";
 
 				foreach($va_related_objects as $vn_rel_id => $va_info){
@@ -298,4 +299,15 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 <?php
 	}
 ?>
+		<div id='bottom'></div>
 	</div><!-- end detailBody -->
+	<script>
+$(document).ready(function() {
+    $('.scrollButton').click(function(event){
+    	event.preventDefault();
+        $('html, body').stop(true, true).animate({scrollTop:$('#bottom').position().top});
+        return false;
+    });
+});
+	</script>
+ 

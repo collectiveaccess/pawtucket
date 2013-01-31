@@ -3,6 +3,7 @@
 <head>
 	<title><?php print $this->request->config->get('html_page_title'); ?></title>
 	<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<?php print MetaTagManager::getHTML(); ?>
 	
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/iphone.css" rel="stylesheet" type="text/css" />
@@ -10,6 +11,7 @@
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/sets.css" rel="stylesheet" type="text/css" />	
 	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/videojs/video-js.css" type="text/css" media="screen" />
 	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery-jplayer/jplayer.blue.monday.css" type="text/css" media="screen" />
+	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery.mobile-1.2.0/jquery.mobile-1.2.0.css" type="text/css" media="screen" />
 
 
 
@@ -17,9 +19,25 @@
 <?php 
 	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
 ?>
+	<script>
+
+	$(document).on("mobileinit", function(){
+  		$.mobile.defaultPageTransition = 'none';
+	});
+	
+	$(document).bind("mobileinit", function(){
+  		$.mobile.ajaxEnabled = false;
+	});
+	$(document).bind("mobileinit", function(){
+  		$.mobile.touchOverflowEnabled = true;
+	});
+	</script>
+	
     <script src="<?php print $this->request->getBaseUrlPath(); ?>/js/ca/markerclusterer.js" type="text/javascript"></script>
     <script src="<?php print $this->request->getBaseUrlPath(); ?>/js/ca/geolocationmarker.js" type="text/javascript"></script>
     <script src="<?php print $this->request->getBaseUrlPath(); ?>/js/ca/infobox.js" type="text/javascript"></script>
+    <script src="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery.mobile-1.2.0/jquery.mobile-1.2.0.js" type="text/javascript"></script>
+    
 	<meta name="viewport" id="_msafari_viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<link rel="apple-touch-icon" href="images/myiphone_ico.png"/>
 	<script type="text/javascript">
@@ -35,15 +53,25 @@
 	</script>
 </head>
 <body onload="setTimeout(function() { window.scrollTo(0, 1) }, 100);" class="portrait">
-		<div id="pageWidth"><div id="pageArea">
+		<div id="pageWidth" data-role="page">
 
-			<div id="header">
+			<div id="header" data-role="header" data-position="fixed" data-fullscreen="true">
 <?php
 				print "<h1>".caNavLink($this->request, _t('Parrish East End Stories'), "", "", "", "")."</h1>";
 				#print caNavLink($this->request, "<img src='".$this->request->getThemeUrlPath()."/graphics/".$this->request->config->get('header_img')."' border='0'>", "", "", "", "");
 ?>				
 			</div><!-- end header -->
-
+<?php
+		if (($this->request->getController() == "About") && ($this->request->getAction() == "map"))	{	
+?>			
+			<div id="pageArea" data-role="content" style='margin-top:0px;'>
+<?php
+		} else {
+?>
+			<div id="pageArea" data-role="content">
+<?php
+		}
+?>					
 			<div id="navMenu">
 <?php
 				print "<div>".caNavLink($this->request, _t("Home"), "", "", "", "")."</div>";
