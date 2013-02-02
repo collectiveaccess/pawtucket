@@ -10,10 +10,15 @@ body {
 	margin: 0px;
 	padding:0px;
 	-webkit-text-size-adjust: none;	
+	 -webkit-backface-visibility: hidden;
 	
 }
-
-
+html {
+	-webkit-backface-visibility: hidden;
+}
+    .ui-page {
+        -webkit-backface-visibility: hidden;
+    }
 
 /* ------------------------------------- */
 /* general styles */
@@ -133,7 +138,7 @@ a.caption:hover{
 	-webkit-perspective: 1000;
 	-webkit-backface-visibility: hidden;
 }
-.listItems div.item{
+div.item{
 	clear:both;
 	padding:7px 20px 7px 7px;
 	border-bottom:1px solid #eee;
@@ -216,21 +221,15 @@ div.listHeading a{
 /* ------------------------------------- */
 /* page structure */
 /* ------------------------------------- */
-body.portrait #pageWidth{
-	
-	margin:0px auto 0px auto;
-}
-body.landscape #pageWidth{
-	
-	margin:0px auto 0px auto;
-}
 
 #pageArea{
 	width:100%;
 	margin: 30px auto 0px auto;
 	background-color:#FFFFFF;
 	padding:0px;
-
+	-webkit-transform: translateZ(0);
+	-webkit-perspective: 1000;
+	-webkit-backface-visibility: hidden;
 }
 #header{
 	text-align:center;

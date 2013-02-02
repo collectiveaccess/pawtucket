@@ -149,8 +149,9 @@
 			$va_places = $t_object->get("ca_places", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			$va_collections = $t_object->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			if(sizeof($va_entities) || sizeof($va_occurrences) || sizeof($va_places) || sizeof($va_collections)){
-				print "<div class='collapseListHeading'><a href='#' class='scrollButton' onclick='$(\"#relatedAuthorities\").slideToggle(250); return false;'>"._t("Related Information")."</a></div><!-- end collapseListHeading -->";
-				print "<div id='relatedAuthorities' class='listItems' style='display:none;'>";
+				print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+				print "<h2>"._t("Related Information")."</h2><!-- end collapseListHeading -->";
+
 				# --- entities
 				if(sizeof($va_entities) > 0){	
 					foreach($va_entities as $va_entity) {
@@ -302,12 +303,14 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 		<div id='bottom'></div>
 	</div><!-- end detailBody -->
 	<script>
-$(document).ready(function() {
-    $('.scrollButton').click(function(event){
-    	event.preventDefault();
-        $('html, body').stop(true, true).animate({scrollTop:$('#bottom').position().top});
+$(document).ready(function(event) {
+        $('div.ui-collapsible').live('expand', function() {
+              $('html, body').animate({
+   				 scrollTop: (1000)
+  			});
+        });
+        
         return false;
-    });
 });
 	</script>
  
