@@ -35,31 +35,54 @@
 if (!$this->request->isAjax()) {		
 ?>
 	<div id="detailBody">
-		<div id="pageNav">
+<?php
+		if (($this->getVar('is_in_result_list')) && ($vs_back_link = ResultContext::getResultsLinkForLastFind($this->request, 'ca_objects', _t("Back"), ''))) {
+?>
+			<div id="pageNav">
 <?php
 			if ($this->getVar('previous_id')) {
-				print caNavLink($this->request, "&lsaquo; "._t("Previous"), '', 'Detail', 'Entity', 'Show', array('entity_id' => $this->getVar('previous_id')), array('id' => 'previous'));
+				print caNavLink($this->request, "&lsaquo; "._t("Previous"), 'value', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar('previous_id')), array('id' => 'previous'));
 			}else{
 				print "&lsaquo; "._t("Previous");
 			}
 			print "&nbsp;&nbsp;&nbsp;";
-			print ResultContext::getResultsLinkForLastFind($this->request, 'ca_entities', _t("Back"), '');
+			print ResultContext::getResultsLinkForLastFind($this->request, 'ca_objects', _t("Back"), 'value');
 			print "&nbsp;&nbsp;&nbsp;";
 			if ($this->getVar('next_id') > 0) {
-				print caNavLink($this->request, _t("Next")." &rsaquo;", '', 'Detail', 'Entity', 'Show', array('entity_id' => $this->getVar('next_id')), array('id' => 'next'));
+				print caNavLink($this->request, _t("Next")." &rsaquo;", 'value', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar('next_id')), array('id' => 'next'));
 			}else{
 				print _t("Next")." &rsaquo;";
 			}
 ?>
-		</div><!-- end nav -->
+			</div><!-- end pagenav -->
+<?php			
+		}
+?>
 		<h1><?php print $vs_title; ?></h1>		
 <?php
-			# --- identifier
-			if($t_entity->get('idno')){
-				print "<div class='unit'><b>"._t("Identifier")."</b>: ".$t_entity->get('idno')."</div><!-- end unit -->";
+			if($va_media = $t_entity->get('ca_objects.object_id', array('restrictToRelationshipTypes' => array('portrait')))){
+				$t_object = new ca_objects($va_media);
+				$rep_info = $t_object->getMediaInfo('ca_object_representations.media', 'small');
+				$rep_width = $rep_info['WIDTH'];
+				print "<div id='objDetailImageContainer' >";
+				print $t_object->getMediaTag('ca_object_representations.media', 'small');
+				print "<div class='photoCaption unit'><b>"._t("Caption")."</b>: ".$t_object->get('ca_objects.caption')."</div>";
+				print "</div>";
 			}
-			if($this->getVar('typename')){
-				print "<div class='unit'><b>"._t("Type").":</b> ".unicode_ucfirst($this->getVar('typename'))."</div><!-- end unit -->";
+			if($va_lifespan = $t_entity->get('ca_entities.lifespans_date')){
+				print "<div class='unit'><b>"._t("Lifespan")."</b>: ".$va_lifespan."</div><!-- end unit -->";
+			}			
+			if($va_nationality = $t_entity->get('ca_entities.nationalities', array('convertCodesToDisplayText' => true, 'delimiter' => ', '))){
+				print "<div class='unit'><b>"._t("Nationality")."</b>: ".$va_nationality."</div><!-- end unit -->";
+			}
+			if($va_style = $t_entity->get('ca_entities.style_school', array('convertCodesToDisplayText' => true, 'delimiter' => ', '))){
+				print "<div class='unit'><b>"._t("Style/School")."</b>: ".$va_style."</div><!-- end unit -->";
+			}			
+			if($va_medium = $t_entity->get('ca_entities.fields_mediums', array('convertCodesToDisplayText' => true, 'delimiter' => ', '))){
+				print "<div class='unit'><b>"._t("Medium")."</b>: ".$va_medium."</div><!-- end unit -->";
+			}						
+			if($va_scope = $t_entity->get('ca_entities.scope_notes')){
+				print "<div class='unit'>".$va_scope."</div><!-- end unit -->";
 			}
 			# --- attributes
 			$va_attributes = $this->request->config->get('ca_entities_detail_display_attributes');
@@ -93,8 +116,8 @@ if (!$this->request->isAjax()) {
 				#$o_map->mapFrom($t_entity, $this->request->config->get('ca_entities_map_attribute'));
 				$map_hits = $this->getVar('browse_results');
 				$o_map->mapFrom($map_hits, 'ca_places.georeference');
-				print "<div class='collapseListHeading'><a href='#' onclick='$(\"#itemMap\").slideToggle(250); return false;'>"._t("Map")."</a></div><!-- end collapseListHeading -->";
-				print "<div id='itemMap' style='display:none;'>";
+				print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+				print "<h2>"._t("Map")."</h2><!-- end collapseListHeading -->";
 				print "<div id='detailMap'>".$o_map->render('HTML')."</div>";
 				print "</div><!-- end map -->";
 			}			
@@ -103,8 +126,9 @@ if (!$this->request->isAjax()) {
 			$va_places = $t_entity->get("ca_places", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			$va_collections = $t_entity->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			if(sizeof($va_entities) || sizeof($va_occurrences) || sizeof($va_places) || sizeof($va_collections)){
-				print "<div class='collapseListHeading'><a href='#' onclick='$(\"#relatedAuthorities\").slideToggle(250); return false;'>"._t("Related Information")."</a></div><!-- end collapseListHeading -->";
-				print "<div id='relatedAuthorities' class='listItems' style='display:none;'>";
+				print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+				print "<h2>"._t("Related Information")."</h2><!-- end collapseListHeading -->";
+
 				# --- entities
 				if(sizeof($va_entities) > 0){	
 					foreach($va_entities as $va_entity) {

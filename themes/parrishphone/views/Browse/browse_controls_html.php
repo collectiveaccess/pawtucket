@@ -66,15 +66,7 @@
 			} else {
 ?>
 			<div id="browseList">
-				<script type="text/javascript">
-					jQuery(document).ready(function() {
-						jQuery('#introText').expander({
-							slicePoint: 250,
-							expandText: '<?php print _t('more &rsaquo;'); ?>',
-							userCollapse: false
-						});
-					});
-				</script>
+
 <?php
 				if (sizeof($va_facets)) { 
 					print "<div class='listHeading'>"._t("Browse by:")."</div>";

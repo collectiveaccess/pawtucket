@@ -6,12 +6,13 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<?php print MetaTagManager::getHTML(); ?>
 	
+	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery.mobile-1.2.0/jquery.mobile-1.2.0.css" type="text/css" media="screen" />	
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/iphone.css" rel="stylesheet" type="text/css" />
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/fonts.css" rel="stylesheet" type="text/css" />	
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/sets.css" rel="stylesheet" type="text/css" />	
 	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/videojs/video-js.css" type="text/css" media="screen" />
 	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery-jplayer/jplayer.blue.monday.css" type="text/css" media="screen" />
-	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery.mobile-1.2.0/jquery.mobile-1.2.0.css" type="text/css" media="screen" />
+
 
 
 
@@ -22,13 +23,8 @@
 	<script>
 
 	$(document).on("mobileinit", function(){
-  		$.mobile.defaultPageTransition = 'none';
-	});
-	
-	$(document).bind("mobileinit", function(){
+  		$.mobile.defaultPageTransition = 'slide';
   		$.mobile.ajaxEnabled = false;
-	});
-	$(document).bind("mobileinit", function(){
   		$.mobile.touchOverflowEnabled = true;
 	});
 	</script>
@@ -39,6 +35,8 @@
     <script src="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery.mobile-1.2.0/jquery.mobile-1.2.0.js" type="text/javascript"></script>
     
 	<meta name="viewport" id="_msafari_viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 	<link rel="apple-touch-icon" href="images/myiphone_ico.png"/>
 	<script type="text/javascript">
 		window.addEventListener('load', setOrientation, false);  

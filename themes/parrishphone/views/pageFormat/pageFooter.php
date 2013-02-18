@@ -4,7 +4,7 @@
 	$o_result_context = new ResultContext($this->request, 'ca_objects', 'basic_search');
 	$vs_search = $o_result_context->getSearchExpression();
 ?>
-			<div id="nav" data-role="footer" data-position="fixed" data-tap-toggle="false">
+			<div id="nav" data-role="footer" data-position="fixed" >
 				<div class='homeNav'><?php print caNavLink($this->request, "<img src='".$this->request->getThemeUrlPath()."/graphics/home.png' height='28' width='28' border='0'>", '', '', '', ''); ?></div>			
 <?php				
 				if ((($this->request->getController() == "About") && ($this->request->getAction() == "map")) || (($this->request->getController() == "Search") && ($this->request->getAction() == "Index"))) {
@@ -12,17 +12,34 @@
 				<div class='helpNav'><a href='#' onclick='clickroute()'><img src='<?php print $this->request->getThemeUrlPath()?>/graphics/crosshairs1.png' height='28' width='28' border='0'></a></div>
 <?php				
 				}
-?>
-				<div class='helpNav'><?php print caNavLink($this->request, "<img src='".$this->request->getThemeUrlPath()."/graphics/help.png' height='28' width='28' border='0'>", '', '', '', ''); ?></div>
 				
+				if (($this->request->getController() == "About") && ($this->request->getAction() == "map") || ($this->request->getController() != "About")) {
+?>
+				<div class='helpNav'><a href="#" onclick="$('#helpDiv').slideDown(250)"><?php print "<img src='".$this->request->getThemeUrlPath()."/graphics/help.png' height='28' width='28' border='0'>"; ?></a></div>
+<?php
+				}
+?>				
 				<div id="search"><form name="header_search" action="<?php print caNavUrl($this->request, '', 'Search', 'Index'); ?>" method="get">
 						<a href="#" name="searchButtonSubmit" onclick="document.forms.header_search.submit(); return false;"><img src='<?php print $this->request->getThemeUrlPath(); ?>/graphics/spacer.gif' border='0' width='17' height='16'></a><input type="text" name="search" value="<?php print ($vs_search) ? $vs_search : ''; ?>" autocomplete="off" size="100"/>
 				</form></div>
 				<!--<a href="#" onclick='$("#navMenu").slideToggle(250); return false;'><?php print _t("Menu"); ?>&darr;</a>-->
 			<div style="clear:both;"><!-- empty --></div>
 			</div><!-- end nav -->
+<?php
+	if ($this->request->getController() == "Splash") {
+		$vs_message = "To navigate the archive, select one of the available menu options";
+	} else if ($this->request->getController() == "Browse") {
+		$vs_message = "To browse the archive, choose a topic below";
+	} else if ($this->request->getController() == "Search") {
+		 $vs_message = "You may view your search results as a map";
+	} else if ($this->request->getController() == "Detail") {
+		 $vs_message = "To view related information about this item, expand the collapsible content at the bottom of this page";
+	} else {
+		 $vs_message = "This feature requires you to enable Location Services.  Please adjust your browser settings and try again.";	
+	}
+?>			
 		<div id='helpDiv'>
-			This feature requires you to enable Location Services.  Please adjust your browser settings and try again.
+			<?php print $vs_message; ?>
 			<div id='helpDivClose'><a href='#'>Close</a></div>
 		</div>	
 	</div><!-- end pageWidth -->
@@ -45,7 +62,77 @@ print TooltipManager::getLoadHTML();
 		  
 		});
 	</script>
+	<script>
 
+function smart_scroll(el, offset) { 
+
+
+offset = offset || 0; // manual correction, if other elem (eg. a header above) should also be visible
+
+var air         = 15; // above+below space so element is not tucked to the screen edge
+
+var el_height   = $(el).height()+ 2 * air + offset;
+var el_pos      = $(el).offset();
+var el_pos_top  = el_pos.top - air - offset;
+
+var vport_height = $(window).height();
+var win_top      = $(window).scrollTop();
+
+//  alert("el_pos_top:"+el_pos_top+"  el_height:"+el_height+"win_top:"+win_top+"  vport_height:"+vport_height);
+
+var hidden = (el_pos_top + el_height) - (win_top + vport_height);
+
+if ( hidden > 0 ) // element not fully visible
+    {
+    var scroll;
+
+    if(el_height > vport_height) scroll = el_pos_top;       // larger than viewport - scroll to top
+    else                         scroll = win_top + hidden; // smaller than vieport - scroll minimally but fully into view
+	 
+    $('html, body').animate({ scrollTop: (scroll) }, 500); 
+    }
+
+}
+
+
+
+
+// when using "on"  'expand' seems to fire before it's actually expanded. 
+// el_height will then be height of closed collaps. won't work.
+
+$('div.ui-collapsible').live('expand', function(e){ 
+	e.stopPropagation();
+	smart_scroll(e.target);
+	event.preventDefault(); 
+});
+
+$('div.ui-collapsible').live('expand', function(e){
+	e.stopPropagation(); 
+  smart_scroll( e.target, $('ui-collapsible-heading').height() + 20 ); 
+  event.preventDefault();
+});
+
+
+$(".zoomLink").bind("click", function(){
+        $("[data-position='fixed']").fixedtoolbar('toggle');
+});
+$(window).bind('orientationchange', function (e) { 
+    setTimeout(function () {
+        // Get height of div
+        var div   = $('#zoomImage'),
+            width = div.width();
+
+        // Set the height of the div
+        div.css({ height: Math.ceil(width / ratio) });
+    }, 500);
+});
+
+</script>
+
+<!--$(document).bind('swiperight', function (event) {
+    history.back($('body'), { transition: "slide"});
+    event.preventDefault();
+});-->
 	<script type="text/javascript">
 	/*
 		Set up the "caMediaPanel" panel that will be triggered by links in object detail

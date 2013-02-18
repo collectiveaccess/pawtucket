@@ -16,10 +16,40 @@ body {
 html {
 	-webkit-backface-visibility: hidden;
 }
-    .ui-page {
-        -webkit-backface-visibility: hidden;
-    }
+.ui-page {
+	-webkit-backface-visibility: hidden;
+}
 
+.ui-collapsible-heading {
+	margin:0px;
+}    
+.ui-btn-up-c {
+font-family: "Avenir LT W01 65 Medium";
+color: #545454;
+}
+.ui-btn-hover-c {
+font-family: "Avenir LT W01 65 Medium";
+color: #545454;
+}
+.ui-btn-up-c:hover {
+font-family: "Avenir LT W01 65 Medium";
+color: #545454;
+}
+.ui-btn-up-c:visited {
+font-family: "Avenir LT W01 65 Medium";
+color: #545454;
+}
+a.ui-link-inherit {
+font-family: "Avenir LT W01 65 Medium";
+color: #545454;
+}
+.ui-mobile, .ui-mobile body { 
+height: 100% !important;
+}
+.in,.out{-webkit-animation-timing-function: ease-in-out;-webkit-animation-duration:25ms !important;}
+.ui-collapsible-content {
+	padding: 0px 15px;
+}
 /* ------------------------------------- */
 /* general styles */
 /* ------------------------------------- */
@@ -68,7 +98,7 @@ h3 a{
 	text-decoration:none;
 }
 a{
-	text-decoration:underline;
+	text-decoration:none;
 	color: #000000;
 }
 .ui-body-c .ui-link {
@@ -81,7 +111,7 @@ a:visited {
     color: #757575; /*{c-body-link-visited}*/;
 }
 a:hover{
-	text-decoration:underline;
+	text-decoration:none;
 	color: #999999;
 }
 .formErrors{
@@ -217,16 +247,35 @@ div.listHeading a{
 .listItems div.item:hover {
 	background-color:#f7fdff;
 }
-
+.ui-btn-active {
+	border: 1px solid 		#cccccc /*{global-active-border}*/;
+	background: 			#999999 /*{global-active-background-color}*/;
+	font-weight: bold;
+	color: 					#333333 /*{global-active-color}*/;
+	cursor: pointer;
+	text-shadow: 0 /*{global-active-shadow-x}*/ 1px /*{global-active-shadow-y}*/ 1px /*{global-active-shadow-radius}*/ #f9f9f9 /*{global-active-shadow-color}*/;
+	text-decoration: none;
+	background-image: -webkit-gradient(linear, left top, left bottom, from( #999999 /*{global-active-background-start}*/), to( #666666 /*{global-active-background-end}*/)); /* Saf4+, Chrome */
+	background-image: -webkit-linear-gradient( #eeeeee /*{global-active-background-start}*/, #dddddd /*{global-active-background-end}*/); /* Chrome 10+, Saf5.1+ */
+	background-image:    -moz-linear-gradient( #eeeeee /*{global-active-background-start}*/, #dddddd /*{global-active-background-end}*/); /* FF3.6 */
+	background-image:     -ms-linear-gradient( #eeeeee /*{global-active-background-start}*/, #dddddd /*{global-active-background-end}*/); /* IE10 */
+	background-image:      -o-linear-gradient( #eeeeee /*{global-active-background-start}*/, #dddddd /*{global-active-background-end}*/); /* Opera 11.10+ */
+	background-image:         linear-gradient( #eeeeee /*{global-active-background-start}*/, #dddddd /*{global-active-background-end}*/);
+}
+.in, .out {
+    -webkit-animation-timing-function: ease-in-out;
+    -webkit-animation-duration: 350ms !important;
+}
 /* ------------------------------------- */
 /* page structure */
 /* ------------------------------------- */
 
 #pageArea{
-	width:100%;
-	margin: 30px auto 0px auto;
+
+	margin: 0px auto 0px auto;
 	background-color:#FFFFFF;
 	padding:0px;
+	padding-top:30px;
 	-webkit-transform: translateZ(0);
 	-webkit-perspective: 1000;
 	-webkit-backface-visibility: hidden;
@@ -489,6 +538,12 @@ margin:0px;
 	text-decoration:none;
 	color: #71cde4;
 }
+#detailBody .photoCaption{
+	text-align:left;
+	font-family: "Avenir LT W01 35 Light", helvetica, arial;
+	color: #757575; 
+	padding: 5px 0px 0px 0px;
+}
 #detailBody #addThis{	
 	float:right;
 	margin:0px 7px 3px 10px;
@@ -568,7 +623,6 @@ div#helpDivClose {
 #objDetailImageContainer {
 	margin: 5px auto 5px auto;
 	text-align:center;
-	width:100%;
 	clear:both;
 }
 #objDetailImageNav {

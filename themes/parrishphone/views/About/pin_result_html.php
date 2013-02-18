@@ -30,18 +30,37 @@
 		$va_ids = $this->getVar('ids');
 		$vs_string_ids = implode(", ", $va_ids);
  	
+ 		$va_id_count = count($va_ids);
+ 		
+ 	if ($va_id_count > 1) {	
 		
 		print '<div class="listItems">';
 		
-			print "<div class='item'><div class='thumb'><img src='".$this->request->getThemeUrlPath()."/graphics/blu-pointer.png' height='30' width='35' border='0'></div><!-- end thumb -->";
+			print "<div class='item'><div class='thumb'>".caNavLink($this->request, "<img src='".$this->request->getThemeUrlPath()."/graphics/blu-pointer.png' height='30' width='35' border='0'>", '', '', 'About', 'listview', array('pin_ids' => $vs_string_ids), array('data-transition' => 'slide'))."</div><!-- end thumb -->";
 			
-			print count($va_ids)." items at this location<br/>";
-			print caNavLink($this->request, 'Click to view', '', '', 'About', 'listview', array('pin_ids' => $vs_string_ids), array('data-transition' => 'slide') );
+			print $va_id_count." items at this location<br/>";
+			print caNavLink($this->request, 'Click to view', '', '', 'About', 'listview', array('pin_ids' => $vs_string_ids), array('data-transition' => 'slide'));
 
 			print "<div style='clear:left;'><!--empty --></div>";
 			print "</div>";
 			
 			
 		print "\n</div>\n";
+	
+	} else {
+		$pin_id = $va_ids[0];
+		$t_object = new ca_objects($pin_id);
+		print '<div class="listItems">';	
+	
+			print "<div class='item' style='padding:7px 0px 7px 0px;'><div class='thumb'>".caNavLink($this->request, $t_object->getMediaTag('ca_object_representations.media', 'icon'), '', 'Detail', 'Object', 'Show', array('object_id' => $pin_id), array('data-transition' => 'slide'))."</div><!-- end thumb -->";
+			
+			print caNavLink($this->request, $t_object->get("ca_objects.preferred_labels"), '', 'Detail', 'Object', 'Show', array('object_id' => $pin_id), array('data-transition' => 'slide'));
+
+			print "<div style='clear:left;'><!--empty --></div>";
+			print "</div>";
+			
+		print "\n</div>\n";
+	
+	}
 	  
 ?>

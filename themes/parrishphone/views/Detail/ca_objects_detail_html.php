@@ -63,12 +63,41 @@
 		<div id='detailTitle'><h1><?php print $vs_title; ?></h1></div>
 <?php
 			if ($t_rep && $t_rep->getPrimaryKey()) {
+			
+			$tag =	$t_rep->getMediaInfo('media', 'small');
+			$tag_width = $tag['WIDTH'];	
+			
+			$zoom_tag =	$t_rep->getMediaInfo('media', 'large');
+			$zoom_tag_width = $tag['WIDTH'];
+			$zoom_tag_height = $tag['HEIGHT'];			
+
+			print "<div id='objDetailImageContainer' >";
+		
+
 ?>
-				<div id="objDetailImageContainer">
-<?php				
-				print $t_rep->getMediaTag('media', 'small');
+			<a href='#' class='zoomLink' onclick="$('#zoomImage').show();$('#objDetailImageContainer').show();"><?php print $t_rep->getMediaTag('media', 'small');?></a>
+<?php			
+			# --- identifier
+			if($va_caption = $t_object->get('ca_objects.caption')){
+				print "<div class='photoCaption unit'><b>"._t("Caption").": </b>".$va_caption."</div><!-- end unit -->";
+			}
 ?>				
-				</div><!-- end objDetailImageContainer -->
+			</div><!-- end objDetailImageContainer -->
+<?php		
+		if ($zoom_tag_width >= $zoom_tag_height) {		
+			$imgStyle = "height:100%;";
+		} else {
+			
+			$imgStyle = "width:100%;";
+		}		
+			print "<div id='zoomImage' style='display:none; height:100%; width:100%; position:absolute; top:0; left:0; z-index:10000; overflow:auto;'>";
+?>
+				<a href='#' class='zoomLink' onclick="$('#zoomImage').hide();">
+<?php				
+					print "<img src='".$t_rep->getMediaUrl('media', 'large')."' style={$imgStyle}>";
+?>	
+				</a>		
+			</div>
 				
 <!--<script type="text/javascript">
 	jQuery(document).ready(function() { 
@@ -139,8 +168,9 @@
 			if($this->request->config->get('ca_objects_map_attribute') && $t_object->get($this->request->config->get('ca_objects_map_attribute'))){
 				$o_map = new GeographicMap(306, 200, 'map');
 				$o_map->mapFrom($t_object, $this->request->config->get('ca_objects_map_attribute'));
-				print "<div class='collapseListHeading'><a href='#' class='scrollButton' onclick='$(\"#itemMap\").slideToggle(250); return false;'>"._t("Map")."</a></div><!-- end collapseListHeading -->";
-				print "<div id='itemMap' style='display:none;'>";
+				print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+				print "<h2>"._t("Map")."</h2><!-- end collapseListHeading -->";
+				
 				print "<div id='detailMap'>".$o_map->render('HTML')."</div>";
 				print "</div><!-- end map -->";
 			}
@@ -302,15 +332,7 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 ?>
 		<div id='bottom'></div>
 	</div><!-- end detailBody -->
-	<script>
-$(document).ready(function(event) {
-        $('div.ui-collapsible').live('expand', function() {
-              $('html, body').animate({
-   				 scrollTop: (1000)
-  			});
-        });
-        
-        return false;
-});
-	</script>
- 
+
+	
+
+	

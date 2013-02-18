@@ -35,24 +35,29 @@
 if (!$this->request->isAjax()) {
 ?>
 	<div id="detailBody">
-		<div id="pageNav">
+<?php
+		if (($this->getVar('is_in_result_list')) && ($vs_back_link = ResultContext::getResultsLinkForLastFind($this->request, 'ca_objects', _t("Back"), ''))) {
+?>
+			<div id="pageNav">
 <?php
 			if ($this->getVar('previous_id')) {
-				print caNavLink($this->request, "&lsaquo; "._t("Previous"), '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $this->getVar('previous_id')), array('id' => 'previous'));
+				print caNavLink($this->request, "&lsaquo; "._t("Previous"), 'value', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar('previous_id')), array('id' => 'previous'));
 			}else{
 				print "&lsaquo; "._t("Previous");
 			}
 			print "&nbsp;&nbsp;&nbsp;";
-			print ResultContext::getResultsLinkForLastFind($this->request, 'ca_occurrences', _t("Back"), '');
+			print ResultContext::getResultsLinkForLastFind($this->request, 'ca_objects', _t("Back"), 'value');
 			print "&nbsp;&nbsp;&nbsp;";
-			
 			if ($this->getVar('next_id') > 0) {
-				print caNavLink($this->request, _t("Next")." &rsaquo;", '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $this->getVar('next_id')), array('id' => 'next'));
+				print caNavLink($this->request, _t("Next")." &rsaquo;", 'value', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar('next_id')), array('id' => 'next'));
 			}else{
 				print _t("Next")." &rsaquo;";
 			}
 ?>
-		</div><!-- end nav -->
+			</div><!-- end pagenav -->
+<?php			
+		}
+?>
 		<h1><?php print $vs_title; ?></h1>
 <?php
 			# --- identifier
@@ -74,18 +79,8 @@ if (!$this->request->isAjax()) {
 			# --- description
 			if($this->request->config->get('ca_occurrences_description_attribute')){
 				if($vs_description_text = $t_occurrence->get("ca_occurrences.".$this->request->config->get('ca_occurrences_description_attribute'))){
-					print "<div class='unit'><div id='description'><b>".$t_occurrence->getAttributeLabel($this->request->config->get('ca_occurrences_description_attribute')).":</b> ".$vs_description_text."</div></div><!-- end unit -->";				
-?>
-					<script type="text/javascript">
-						jQuery(document).ready(function() {
-							jQuery('#description').expander({
-								slicePoint: 300,
-								expandText: '<?php print _t('[more]'); ?>',
-								userCollapse: false
-							});
-						});
-					</script>
-<?php
+					print "<div class='unit'><div id='description'>".$vs_description_text."</div></div><!-- end unit -->";				
+
 				}
 			}
 			$va_entities = $t_occurrence->get("ca_entities", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
@@ -93,8 +88,8 @@ if (!$this->request->isAjax()) {
 			$va_places = $t_occurrence->get("ca_places", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			$va_collections = $t_occurrence->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			if(sizeof($va_entities) || sizeof($va_occurrences) || sizeof($va_places) || sizeof($va_collections)){
-				print "<div class='collapseListHeading'><a href='#' onclick='$(\"#relatedAuthorities\").slideToggle(250); return false;'>"._t("Related Information")."</a></div><!-- end collapseListHeading -->";
-				print "<div id='relatedAuthorities' class='listItems' style='display:none;'>";
+				print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+				print "<h2>"._t("Related Information")."</h2><!-- end collapseListHeading -->";
 				# --- entities
 				if(sizeof($va_entities) > 0){	
 					foreach($va_entities as $va_entity) {
