@@ -34,11 +34,13 @@
  	require_once(__CA_LIB_DIR__."/ca/Search/PlaceSearch.php");
  	require_once(__CA_LIB_DIR__."/ca/Search/OccurrenceSearch.php");
  	require_once(__CA_LIB_DIR__."/ca/Search/CollectionSearch.php");
+ 	require_once(__CA_LIB_DIR__."/ca/Search/TourStopSearch.php");
  	require_once(__CA_LIB_DIR__."/ca/Browse/ObjectBrowse.php");
  	require_once(__CA_LIB_DIR__."/ca/Browse/EntityBrowse.php");
  	require_once(__CA_LIB_DIR__."/ca/Browse/PlaceBrowse.php");
  	require_once(__CA_LIB_DIR__."/ca/Browse/CollectionBrowse.php");
  	require_once(__CA_LIB_DIR__."/ca/Browse/OccurrenceBrowse.php");
+ 	require_once(__CA_LIB_DIR__."/ca/Browse/TourStopBrowse.php");
  	require_once(__CA_LIB_DIR__.'/core/GeographicMap.php');
 	require_once(__CA_MODELS_DIR__."/ca_objects.php");
  	
@@ -228,6 +230,34 @@
 						$this->opa_views_options = array_merge($this->opa_views_options, $va_view_opts);
 					}
  					break;
+ 				case 'ca_tour_stops':
+ 					$this->ops_tablename = 'ca_tour_stops';
+ 					$this->opo_result_context = new ResultContext($po_request, $this->ops_tablename, $this->ops_find_type);
+ 					$this->opo_browse = new TourStopBrowse($this->opo_result_context->getParameter('browse_id', true), 'pawtucket2');
+ 					
+ 					// get configured result views, if specified
+					if ($va_result_views_for_ca_collections = $po_request->config->getAssoc('result_views_for_ca_tour_stops')) {
+						$this->opa_views = $va_result_views_for_ca_collections;
+					}else{
+						$this->opa_views = array(
+							'full' => _t('List')
+						 );
+					}
+					// get configured result sort options, if specified
+					if ($va_sort_options_for_ca_collections = $po_request->config->getAssoc('result_sort_options_for_ca_tour_stops')) {
+						$this->opa_sorts = $va_sort_options_for_ca_collections;
+					}else{						
+						$this->opa_sorts = array(
+							'ca_tour_stop_labels.name' => _t('Name'),
+							'ca_tour_stops.type_id' => _t('Type'),
+							'ca_tour_stops.idno_sort' => _t('Idno')
+						);
+					}
+					
+					if (is_array($va_view_opts = $po_request->config->get("result_views_options_for_ca_tour_stops"))) {
+						$this->opa_views_options = array_merge($this->opa_views_options, $va_view_opts);
+					}
+ 					break;
  				default:
  					$this->ops_tablename = 'ca_objects';
  					$this->opo_result_context = new ResultContext($po_request, $this->ops_tablename, $this->ops_find_type);
@@ -340,6 +370,12 @@
 					$this->view->setVar('secondary_search_ca_collections', $qr_res);
 					$this->_setResultContextForSecondarySearch('ca_collections', $ps_search, $qr_res);
 				}
+				if ($this->request->config->get('do_secondary_search_for_ca_tour_stops')) {
+					$o_search = new CollectionSearch();
+					$qr_res = $o_search->search($ps_search, array('no_cache' => true, 'checkAccess' => $va_access_values));
+					$this->view->setVar('secondary_search_ca_tour_stops', $qr_res);
+					$this->_setResultContextForSecondarySearch('ca_tour_stops', $ps_search, $qr_res);
+				}
 			}
  			$this->view->setVar('secondaryItemsPerPage', $this->opa_items_per_secondary_search_page);
  			
@@ -372,6 +408,10 @@
 					break;
 				case 'ca_collections':
 					$o_search = new CollectionSearch();
+					$qr_res = $o_search->search($ps_search, array('checkAccess' => $va_access_values));
+					break;
+				case 'ca_tour_stops':
+					$o_search = new TourStopSearch();
 					$qr_res = $o_search->search($ps_search, array('checkAccess' => $va_access_values));
 					break;
 				default:
@@ -453,6 +493,10 @@
 			
 			if ($this->request->config->get('quicksearch_return_ca_collections')) {
  				$va_data['ca_collections'][_t('Collections')] = caExtractValuesByUserLocale(SearchEngine::quickSearch($vs_search, 'ca_collections', 13, array('limit' => 3, 'checkAccess' => $va_access_values)));
+ 			}
+ 			
+			if ($this->request->config->get('quicksearch_return_ca_tour_stops')) {
+ 				$va_data['ca_collections'][_t('Tour stops')] = caExtractValuesByUserLocale(SearchEngine::quickSearch($vs_search, 'ca_tour_stops', 155, array('limit' => 3, 'checkAccess' => $va_access_values)));
  			}
  			
  			
