@@ -1,15 +1,12 @@
-require("../env");
-
 var vows = require("vows"),
-    assert = require("assert");
+    load = require("../load"),
+    assert = require("../assert");
 
 var suite = vows.describe("d3.svg.line");
 
 suite.addBatch({
   "line": {
-    topic: function() {
-      return d3.svg.line;
-    },
+    topic: load("svg/line").expression("d3.svg.line"),
 
     "x defaults to a function accessor": function(line) {
       var l = line();
@@ -56,6 +53,15 @@ suite.addBatch({
       var l = line().interpolate("step-before");
       assert.pathEqual(l([[0, 0], [1, 1]]), "M0,0V1H1");
       assert.equal(l.interpolate(), "step-before");
+    },
+    "interpolate can be defined as a function": function(line) {
+      var l = line().interpolate(interpolate);
+      assert.pathEqual(l([[0, 0], [1, 1]]), "M0,0T1,1");
+      assert.equal(l.interpolate(), interpolate);
+
+      function interpolate(points) {
+        return points.join("T");
+      }
     },
     "invalid interpolates fallback to linear": function(line) {
       assert.equal(line().interpolate("__proto__").interpolate(), "linear");
@@ -134,6 +140,10 @@ suite.addBatch({
       "observes the specified tension": function(line) {
         var l = line().interpolate("bundle").tension(1);
         assert.pathEqual(l([[0, 0], [1, 1], [2, 0], [3, 1], [4, 0]]), line().interpolate("basis")([[0, 0], [1, 1], [2, 0], [3, 1], [4, 0]]));
+      },
+      "supports a single-element array": function(line) {
+        var l = line().interpolate("bundle").tension(1);
+        assert.pathEqual(l([[0, 0]]), "M0,0");
       }
     },
 

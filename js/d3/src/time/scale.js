@@ -1,3 +1,18 @@
+import "../arrays/bisect";
+import "../core/rebind";
+import "../core/true";
+import "../scale/linear";
+import "../scale/nice";
+import "day";
+import "format";
+import "hour";
+import "minute";
+import "month";
+import "second";
+import "time";
+import "week";
+import "year";
+
 function d3_time_scale(linear, methods, format) {
 
   function scale(x) {
@@ -15,12 +30,11 @@ function d3_time_scale(linear, methods, format) {
   };
 
   scale.nice = function(m) {
-    var extent = d3_time_scaleExtent(scale.domain());
-    return scale.domain([m.floor(extent[0]), m.ceil(extent[1])]);
+    return scale.domain(d3_scale_nice(scale.domain(), function() { return m; }));
   };
 
   scale.ticks = function(m, k) {
-    var extent = d3_time_scaleExtent(scale.domain());
+    var extent = d3_scaleExtent(scale.domain());
     if (typeof m !== "function") {
       var span = extent[1] - extent[0],
           target = span / m,
@@ -43,14 +57,7 @@ function d3_time_scale(linear, methods, format) {
     return d3_time_scale(linear.copy(), methods, format);
   };
 
-  // TOOD expose d3_scale_linear_rebind?
-  return d3.rebind(scale, linear, "range", "rangeRound", "interpolate", "clamp");
-}
-
-// TODO expose d3_scaleExtent?
-function d3_time_scaleExtent(domain) {
-  var start = domain[0], stop = domain[domain.length - 1];
-  return start < stop ? [start, stop] : [stop, start];
+  return d3_scale_linearRebind(scale, linear);
 }
 
 function d3_time_scaleDate(t) {
@@ -121,7 +128,7 @@ var d3_time_scaleLocalMethods = [
 ];
 
 var d3_time_scaleLocalFormats = [
-  [d3.time.format("%Y"), function(d) { return true; }],
+  [d3.time.format("%Y"), d3_true],
   [d3.time.format("%B"), function(d) { return d.getMonth(); }],
   [d3.time.format("%b %d"), function(d) { return d.getDate() != 1; }],
   [d3.time.format("%a %d"), function(d) { return d.getDay() && d.getDate() != 1; }],

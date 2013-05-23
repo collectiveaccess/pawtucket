@@ -1,9 +1,15 @@
+import "../arrays/map";
+import "../core/functor";
+import "../core/identity";
+import "../core/true";
+import "svg";
+
 function d3_svg_line(projection) {
   var x = d3_svg_lineX,
       y = d3_svg_lineY,
       defined = d3_true,
-      interpolate = d3_svg_lineInterpolatorDefault,
-      interpolator = d3_svg_lineLinear,
+      interpolate = d3_svg_lineLinear,
+      interpolateKey = interpolate.key,
       tension = .7;
 
   function line(data) {
@@ -16,7 +22,7 @@ function d3_svg_line(projection) {
         fy = d3_functor(y);
 
     function segment() {
-      segments.push("M", interpolator(projection(points), tension));
+      segments.push("M", interpolate(projection(points), tension));
     }
 
     while (++i < n) {
@@ -52,9 +58,9 @@ function d3_svg_line(projection) {
   };
 
   line.interpolate = function(_) {
-    if (!arguments.length) return interpolate;
-    if (!d3_svg_lineInterpolators.has(_ += "")) _ = d3_svg_lineInterpolatorDefault;
-    interpolator = d3_svg_lineInterpolators.get(interpolate = _);
+    if (!arguments.length) return interpolateKey;
+    if (typeof _ === "function") interpolateKey = interpolate = _;
+    else interpolateKey = (interpolate = d3_svg_lineInterpolators.get(_) || d3_svg_lineLinear).key;
     return line;
   };
 
@@ -81,11 +87,10 @@ function d3_svg_lineY(d) {
   return d[1];
 }
 
-var d3_svg_lineInterpolatorDefault = "linear";
-
 // The various interpolators supported by the `line` class.
 var d3_svg_lineInterpolators = d3.map({
   "linear": d3_svg_lineLinear,
+  "linear-closed": d3_svg_lineLinearClosed,
   "step-before": d3_svg_lineStepBefore,
   "step-after": d3_svg_lineStepAfter,
   "basis": d3_svg_lineBasis,
@@ -98,14 +103,18 @@ var d3_svg_lineInterpolators = d3.map({
   "monotone": d3_svg_lineMonotone
 });
 
+d3_svg_lineInterpolators.forEach(function(key, value) {
+  value.key = key;
+  value.closed = /-closed$/.test(key);
+});
+
 // Linear interpolation; generates "L" commands.
 function d3_svg_lineLinear(points) {
-  var i = 0,
-      n = points.length,
-      p = points[0],
-      path = [p[0], ",", p[1]];
-  while (++i < n) path.push("L", (p = points[i])[0], ",", p[1]);
-  return path.join("");
+  return points.join("L");
+}
+
+function d3_svg_lineLinearClosed(points) {
+  return d3_svg_lineLinear(points) + "Z";
 }
 
 // Step interpolation; generates "H" and "V" commands.
@@ -146,7 +155,7 @@ function d3_svg_lineCardinalClosed(points, tension) {
 }
 
 // Cardinal spline interpolation; generates "C" commands.
-function d3_svg_lineCardinal(points, tension, closed) {
+function d3_svg_lineCardinal(points, tension) {
   return points.length < 3
       ? d3_svg_lineLinear(points)
       : points[0] + d3_svg_lineHermite(points,
@@ -298,19 +307,21 @@ function d3_svg_lineBasisClosed(points) {
 }
 
 function d3_svg_lineBundle(points, tension) {
-  var n = points.length - 1,
-      x0 = points[0][0],
-      y0 = points[0][1],
-      dx = points[n][0] - x0,
-      dy = points[n][1] - y0,
-      i = -1,
-      p,
-      t;
-  while (++i <= n) {
-    p = points[i];
-    t = i / n;
-    p[0] = tension * p[0] + (1 - tension) * (x0 + t * dx);
-    p[1] = tension * p[1] + (1 - tension) * (y0 + t * dy);
+  var n = points.length - 1;
+  if (n) {
+    var x0 = points[0][0],
+        y0 = points[0][1],
+        dx = points[n][0] - x0,
+        dy = points[n][1] - y0,
+        i = -1,
+        p,
+        t;
+    while (++i <= n) {
+      p = points[i];
+      t = i / n;
+      p[0] = tension * p[0] + (1 - tension) * (x0 + t * dx);
+      p[1] = tension * p[1] + (1 - tension) * (y0 + t * dy);
+    }
   }
   return d3_svg_lineBasis(points);
 }
@@ -353,7 +364,7 @@ function d3_svg_lineFiniteDifferences(points) {
       p1 = points[1],
       d = m[0] = d3_svg_lineSlope(p0, p1);
   while (++i < j) {
-    m[i] = d + (d = d3_svg_lineSlope(p0 = p1, p1 = points[i + 1]));
+    m[i] = (d + (d = d3_svg_lineSlope(p0 = p1, p1 = points[i + 1]))) / 2;
   }
   m[i] = d;
   return m;

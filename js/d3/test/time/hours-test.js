@@ -1,7 +1,6 @@
-require("../env");
-
 var vows = require("vows"),
-    assert = require("assert"),
+    load = require("../load"),
+    assert = require("../assert"),
     time = require("./time"),
     local = time.local,
     utc = time.utc;
@@ -10,9 +9,7 @@ var suite = vows.describe("d3.time.hours");
 
 suite.addBatch({
   "hours": {
-    topic: function() {
-      return d3.time.hours;
-    },
+    topic: load("time/hour").expression("d3.time.hours"),
     "returns hours": function(range) {
       assert.deepEqual(range(local(2010, 11, 31, 12, 30), local(2010, 11, 31, 15, 30)), [
         local(2010, 11, 31, 13),
@@ -49,7 +46,7 @@ suite.addBatch({
       ]);
     },
     "NPT": {
-      "observes 15-minute offset": tz("Asia/Kathmandu", function(range) {
+      "observes 15-minute offset": time.zone(345, function(range) {
         assert.deepEqual(range(local(2011, 10, 7, 0), local(2011, 10, 7, 3)), [
           utc(2011, 10, 6, 18, 15),
           utc(2011, 10, 6, 19, 15),
@@ -58,7 +55,7 @@ suite.addBatch({
       })
     },
     "IST": {
-      "observes 30-minute offset": tz("Asia/Calcutta", function(range) {
+      "observes 30-minute offset": time.zone(330, function(range) {
         assert.deepEqual(range(local(2011, 10, 7, 0), local(2011, 10, 7, 3)), [
           utc(2011, 10, 6, 18, 30),
           utc(2011, 10, 6, 19, 30),
@@ -108,21 +105,5 @@ suite.addBatch({
     }
   }
 });
-
-function tz(tz, scope) {
-  return function() {
-    var o = process.env.TZ;
-    try {
-      process.env.TZ = tz;
-      new Date(0).toString(); // invalidate node's dst cache
-      new Date().toString();
-      scope.apply(this, arguments);
-    } finally {
-      process.env.TZ = o;
-      new Date(0).toString(); // invalidate node's dst cache
-      new Date().toString();
-    }
-  };
-}
 
 suite.export(module);

@@ -1,15 +1,12 @@
-require("../env");
-
 var vows = require("vows"),
-    assert = require("assert");
+    load = require("../load"),
+    assert = require("../assert");
 
 var suite = vows.describe("d3.layout.treemap");
 
 suite.addBatch({
   "treemap": {
-    topic: function() {
-      return d3.layout.treemap;
-    },
+    topic: load("layout/treemap").expression("d3.layout.treemap"),
     "outputs a squarified treemap": function(treemap) {
       var t = treemap().size([1000, 1000]).sort(null);
       assert.deepEqual(t.nodes({children: [{value: 1}, {value: 2}, {children: [{value: 1}, {value: 2}]}]}).map(layout), [
@@ -141,7 +138,7 @@ suite.addBatch({
     },
     "no overhanging rectangles": function(treemap) {
       var t = treemap().size([100, 100]).sort(function(a, b) { return a.value - b.value; }),
-          data = [0, 0, 81681.85, 370881.9, 0, 0, 0, 255381.59, 0, 0, 0, 0, 0, 0, 0, 125323.95, 0, 0, 0, 186975.07, 185707.05, 267370.93, 0]
+          data = [0, 0, 81681.85, 370881.9, 0, 0, 0, 255381.59, 0, 0, 0, 0, 0, 0, 0, 125323.95, 0, 0, 0, 186975.07, 185707.05, 267370.93, 0],
           nodes = t.nodes({children: data.map(function(d) { return {value: d}; })}).map(layout);
       assert.equal(nodes.filter(function(n) { return n.dx < 0 || n.dy < 0 || n.x + n.dx > 100 || n.y + n.dy > 100; }).length, 0);
     },
@@ -153,6 +150,20 @@ suite.addBatch({
         {x: 0, y: 0, dx: 1, dy: 1},
         {x: 0, y: 0, dx: 0, dy: 1},
         {x: 0, y: 0, dx: 1, dy: 1}
+      ]);
+    },
+    "slice-dice": function(treemap) {
+      assert.deepEqual(treemap().size([100, 10]).mode("slice-dice").nodes({children: [
+        {children: [{value: 1}, {value: 1}]},
+        {children: [{value: 1}, {value: 1}]}
+      ]}).map(layout), [
+        {x: 0, y: 0, dx: 100, dy: 10},
+        {x: 50, y: 0, dx: 50, dy: 10},
+        {x: 50, y: 5, dx: 50, dy: 5},
+        {x: 50, y: 0, dx: 50, dy: 5},
+        {x: 0, y: 0, dx: 50, dy: 10},
+        {x: 0, y: 5, dx: 50, dy: 5},
+        {x: 0, y: 0, dx: 50, dy: 5}
       ]);
     }
   }

@@ -1,15 +1,12 @@
-require("../env");
-
 var vows = require("vows"),
-    assert = require("assert");
+    load = require("../load"),
+    assert = require("../assert");
 
 var suite = vows.describe("d3.time.year");
 
 suite.addBatch({
   "year": {
-    topic: function() {
-      return d3.time.year;
-    },
+    topic: load("time/year").expression("d3.time.year"),
     "defaults to floor": function(interval) {
       assert.strictEqual(interval, interval.floor);
     },
@@ -21,6 +18,9 @@ suite.addBatch({
         assert.deepEqual(floor(local(2010, 11, 31, 23, 59, 59)), local(2010, 00, 01));
         assert.deepEqual(floor(local(2011, 00, 01, 00, 00, 00)), local(2011, 00, 01));
         assert.deepEqual(floor(local(2011, 00, 01, 00, 00, 01)), local(2011, 00, 01));
+      },
+      "correctly handles years in the first century": function(floor) {
+        assert.deepEqual(floor(local(0011, 10, 06, 07)), local(0011, 00, 01));
       }
     },
     "ceil": {
