@@ -220,7 +220,7 @@ if (!$this->request->isAjax()) {
 
 </div><!-- end detailBody -->
 	<div id='entityFooter'>
-		<div><i>TODO: take from DB! Source: Ford, Brinsley and John Ingamells. _A Dictionary of British and Irish Travellers in Italy, 1701-1800_. New Haven: Yale University Press, 1997.</i></div>
+		<div><i>Source: Ford, Brinsley and John Ingamells. _A Dictionary of British and Irish Travellers in Italy, 1701-1800_. New Haven: Yale University Press, 1997.</i></div>
 		<div><i>Discovered by: The Itinera Team</i></div>
 	</div>
 <?php
