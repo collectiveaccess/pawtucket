@@ -134,6 +134,7 @@ class RequestDispatcher extends BaseObject {
 			$this->ops_action_extra = '';
 		}
 		
+		$this->opo_request->setPathParameterList($va_tmp);
 		while(sizeof($va_tmp) > 0) {
 			$this->opo_request->setParameter(array_shift($va_tmp), array_shift($va_tmp), 'PATH');
 		}

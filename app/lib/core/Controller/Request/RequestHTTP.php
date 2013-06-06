@@ -80,6 +80,8 @@ class RequestHTTP extends Request {
 	private $ops_request_method;
 	private $ops_raw_post_data = "";
 	
+	private $opa_path_parameter_list = array();
+	
 /**
  * Parsed request info: controller path, controller and action
  */
@@ -266,6 +268,16 @@ class RequestHTTP extends Request {
 	# -------------------------------------------------------
 	public function setRawPostData($ps_post_data) {
 		$this->ops_raw_post_data = $ps_post_data;
+	}
+	# -------------------------------------------------------
+	public function setPathParameterList($pa_params) {
+		if (is_array($pa_params)) {
+			$this->opa_path_parameter_list = $pa_params;
+		}
+	}
+	# -------------------------------------------------------
+	public function getPathParameterList() {
+		return is_array($this->opa_path_parameter_list) ? $this->opa_path_parameter_list : array();
 	}
 	# -------------------------------------------------------
 	public function getSession() {

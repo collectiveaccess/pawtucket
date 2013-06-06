@@ -225,6 +225,25 @@ abstract class BaseVisualizerPlugin Extends WLPlug {
 	public function numItemsRendered() {
 		return $this->opn_num_items_rendered;
 	}
+	
+	# ------------------------------------------------
+	/**
+	 * Return data for use with visualization. This is typically used for loading via AJAX of data for visualization.
+	 * 
+	 * 
+	 */
+	public function getDataForVisualization($pa_viz_settings, $pa_options=null) {
+		return null;
+	}
+	# ------------------------------------------------
+	/**
+	 * Return data for use with visualization. This is typically used for loading via AJAX of data for visualization.
+	 * 
+	 * 
+	 */
+	public function getJSONForVisualization($pa_viz_settings, $pa_options=null) {
+		return null;
+	}
 	# ------------------------------------------------
 }
 ?>

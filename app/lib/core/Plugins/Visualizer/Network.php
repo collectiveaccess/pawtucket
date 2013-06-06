@@ -51,6 +51,90 @@ class WLPlugVisualizerNetwork Extends BaseVisualizerPlugIn Implements IWLPlugVis
 	}
 	# ------------------------------------------------
 	/**
+	 * Get data
+	 *
+	 */
+	private function _getVisualizationData($pa_viz_settings) {
+		if (!($vo_data = $this->getData())) { return null; }
+		
+		$o_dm = Datamodel::load();
+		
+		$vs_table = $vo_data->tableName();
+		$vs_pk = $o_dm->getTablePrimaryKeyName($vs_table);
+		
+		$va_sources = $pa_viz_settings['sources'];
+		
+		$va_nodes = $va_links = array();
+		
+		$vn_c = 0;
+		
+		if (!($t_instance = $o_dm->getInstanceByTableName($vs_table, true))) { throw new Exception(_t("Invalid data table %1", $vs_table)); }
+		$vs_rel_table = $t_instance->tableName();
+		$vs_rel_pk = $t_instance->primaryKey();
+		
+		while($vo_data->nextHit()) {
+			foreach($va_sources as $vs_source_code => $va_source_info) {
+				$vn_source_id = $vo_data->get("{$vs_table}.{$vs_pk}");
+				$va_nodes[$vn_source_id] = array(
+					'id' => $vn_source_id,
+					'table' => $vs_table,
+					'focus' => 1,
+					'name' => $vo_data->get($pa_viz_settings['display']['title']),
+					'description' => $vo_data->get($pa_viz_settings['display']['description']),
+					'media' => $vo_data->get($pa_viz_settings['display']['media'], array('version' => 'icon', 'return' => 'url'))
+				);
+				$vn_source = $vn_c;
+				if (!$t_instance->load($vn_source_id)) { continue; }
+				if (!($qr_rel = $t_instance->getRelatedItemsAsSearchResult($va_source_info['data']))) { continue; }
+			
+				$va_related_items = $t_instance->getRelatedItems($va_source_info['data']);
+				$va_rel_info = array();
+				foreach($va_related_items as $vs_k => $va_rel) {
+					$vn_rel_id = $va_rel[$vs_rel_pk];
+					$va_rel_info["{$vs_rel_table}.{$vn_rel_id}/{$vs_table}.{$vn_source_id}"] = $va_rel_info["{$vs_table}.{$vn_source_id}/{$vs_rel_table}.{$vn_rel_id}"][] = array(
+						'relationship_typename' => $va_rel['relationship_typename'],
+						'relationship_type_code' => $va_rel['relationship_type_code'],
+						'relationship_type_id' => $va_rel['relationship_type_id'],
+						'direction' => $va_rel['direction']
+					);
+				}
+				$va_ids = array();
+				while($qr_rel->nextHit()) {
+					$vn_id = $qr_rel->get("{$vs_rel_table}.{$vs_rel_pk}");
+					if (isset($va_nodes[$vn_id])) { continue; }
+					$va_ids[] = $vn_id;
+				
+					$vn_c++;
+					$va_nodes[$vn_id] = array(
+						'id' => $vn_id,
+						'table' => $vs_rel_table,
+						'focus' => 0,
+						'name' => $qr_rel->get($va_source_info['display']['title']),
+						'description' => $qr_rel->get($va_source_info['display']['description']),
+						'media' => $qr_rel->get($va_source_info['display']['media'], array('version' => 'icon', 'return' => 'url'))
+					);
+					$va_links[$vn_id] = array_merge(array(
+						'source_id' => "{$vs_table}-{$vn_source_id}",
+						'target_id' => "{$vs_rel_table}-{$vn_id}"
+						),
+						$va_rel_info["{$vs_rel_table}.{$vn_id}/{$vs_table}.{$vn_source_id}"]
+					);
+				}
+			}
+		}
+		
+		$this->opn_num_items_rendered = sizeof($va_ids);
+		
+		$va_nodes = array_values($va_nodes);
+		$va_links = array_values($va_links);
+		
+		return array(
+			'nodes' => $va_nodes,
+			'links' => $va_links
+		);
+	}
+	# ------------------------------------------------
+	/**
 	 * Generate network output in specified format
 	 *
 	 * @param array $pa_viz_settings Array of visualization settings taken from visualization.conf
@@ -59,12 +143,19 @@ class WLPlugVisualizerNetwork Extends BaseVisualizerPlugIn Implements IWLPlugVis
 	 *		width =
 	 *		height =
 	 *		request = current request; required for generation of editor links
+	 *		nodeLinkURL = 
+	 *		linkColors = 
+	 *		linkWeights = 
+	 *		linkColorDefault = 
+	 *		linkWeightDefault = 
 	 */
 	public function render($pa_viz_settings, $ps_format='HTML', $pa_options=null) {
 		if (!($vo_data = $this->getData())) { return null; }
 		$this->opn_num_items_rendered = 0;
 		
 		$po_request = (isset($pa_options['request']) && $pa_options['request']) ? $pa_options['request'] : null;
+		$ps_node_link_url = (isset($pa_options['nodeLinkURL']) && $pa_options['nodeLinkURL']) ? $pa_options['nodeLinkURL'] : null;
+			
 		$vn_width = (isset($pa_options['width']) && $pa_options['width']) ? $pa_options['width'] : 690;
 		$vn_height = (isset($pa_options['height']) && $pa_options['height']) ? $pa_options['height'] : 300;
 		
@@ -77,144 +168,44 @@ class WLPlugVisualizerNetwork Extends BaseVisualizerPlugIn Implements IWLPlugVis
 			if ($vn_height < 1) { $vn_height = 300; }
 		}
 		
-		
-		$o_dm = Datamodel::load();
-		
-		// generate events
-		$va_events = array();
-		$va_sources = $pa_viz_settings['sources'];
-		
 		$vs_table = $vo_data->tableName();
-		$vs_pk = $o_dm->getTablePrimaryKeyName($vs_table);
-		
-		$va_nodes = $va_edges = array();
-		
-		//$va_nodes[] = array(
-		//	'id' => $t_instance->get('ca_entities.entity_id'),
-		//	'name' => $t_instance->get('ca_entities.preferred_labels')
-		//);
-		$vn_c = 0;
-		while($vo_data->nextHit()) {
-			//foreach($va_sources as $vs_source_code => $va_source_info) {
-				
-			//}
-			
-			$vn_id = $vo_data->get('ca_entities.entity_id');
-			$va_nodes[$vn_id] = array(
-				'id' => $vn_id,
-				'focus' => 1,
-				'name' => $vo_data->get('ca_entities.preferred_labels'),
-				'media' => $vo_data->get('ca_entities.agentMedia', array('version' => 'icon', 'return' => 'url'))
-			);
-			$vn_source = $vn_c;
-			
-			$t_entity = new ca_entities($vn_id);
-			$qr_entities = $t_entity->getRelatedItemsAsSearchResult("ca_entities");
-			
-			while($qr_entities->nextHit()) {
-				$vn_id = $qr_entities->get('ca_entities.entity_id');
-				if (isset($va_nodes[$vn_id])) { continue; }
-				$vn_c++;
-				$va_nodes[$vn_id] = array(
-					'id' => $vn_id,
-					'focus' => 0,
-					'name' => $qr_entities->get('ca_entities.preferred_labels'),
-					'media' => $qr_entities->get('ca_entities.agentMedia', array('version' => 'icon', 'return' => 'url'))
-				);
-				$va_edges[$vn_id] = array(
-					'source' => $vn_source,
-					'target' => $vn_c,
-					'value' => 1
-				);
-			}
-			
-		}
-		
-		$va_nodes = array_values($va_nodes);
-		$va_edges = array_values($va_edges);
-		
-		$this->opn_num_items_rendered = sizeof($va_events);
+		$va_data = $this->_getVisualizationData($pa_viz_settings);
 		
 		$vs_buf = "
-	<style>
-		.link {
-		  stroke: #ccc;
-		}
-
-		.node text {
-		  pointer-events: none;
-		  font: 10px sans-serif;
-		}
-	</style>
 	<div id='caResultNetwork' style='width: {$vn_width}; height: {$vn_height}; border: 1px solid #aaa'></div>
 
-<script type='text/javascript'>
-		
-	var width = 690,
-    height = 500
-
-	var svg = d3.select('#caResultNetwork').append('svg')
-		.attr('width', '100%')
-		.attr('height', '450');
-
-	var force = d3.layout.force()
-		.gravity(.06)
-		.distance(180)
-		.charge(-250)
-		.size([width, height]);
-
-	var json = {
-		'nodes':".json_encode($va_nodes).",
-		'links':".json_encode($va_edges)."
-	};
-	  force
-		  .nodes(json.nodes)
-		  .links(json.links)
-		  .start();
-
-	  var link = svg.selectAll('.link')
-		  .data(json.links)
-		.enter().append('line')
-		  .attr('class', 'link');
-
-	  var node = svg.selectAll('.node')
-		  .data(json.nodes)
-		.enter().append('g')
-		  .attr('class', 'node')
-		  .call(force.drag);
-
-	  node.append('circle')
-		  .attr('x', -8)
-		  .attr('y', -8)
-		  .attr('r', 4)
-		  .attr('color', '0000cc')
-		  .attr('width', function(d) { return (d.focus == 1) ? 32 : 16; } )
-		  .attr('height', function(d) { return (d.focus == 1) ? 32 : 16; });
-
-	  node.append('image')
-		  .attr('xlink:href', function(d) { return d.media; })
-		  .attr('x', -8)
-		  .attr('y', -8)
-		  .attr('width', function(d) { return (d.focus == 1) ? 32 : 16; } )
-		  .attr('height', function(d) { return (d.focus == 1) ? 32 : 16; });
-
-	  node.append('text')
-		  .attr('dx', 8)
-		  .attr('dy', '-4')
-		  .text(function(d) { return d.name });
-
-	  force.on('tick', function() {
-		link.attr('x1', function(d) { return d.source.x; })
-			.attr('y1', function(d) { return d.source.y; })
-			.attr('x2', function(d) { return d.target.x; })
-			.attr('y2', function(d) { return d.target.y; });
-
-		node.attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; });
-	  });
-</script>	
+	<script type='text/javascript'>
+		var networkVisualization = caUI.initNetworkVisualization({
+			container: 'caResultNetwork',
+			dataURL: '".caNavUrl($po_request, '', 'Visualization', "Network/{$vs_table}", array('viz' => 'network', 'ids' => ''))."',
+			".(($ps_node_link_url) ? "nodeLinkURL: '{$ps_node_link_url}'," : '')."
+			initialData: ".json_encode($va_data).",
+			linkKey: 'relationship_type_code',
+			".((isset($pa_options['linkColorDefault']) && $pa_options['linkColorDefault']) ? "linkColorDefault: '".$pa_options['linkColorDefault']."'," : '')."
+			".((isset($pa_options['linkWeightDefault']) && $pa_options['linkWeightDefault']) ? "linkWeightDefault: '".$pa_options['linkWeightDefault']."'," : '')."
+			linkColors: ".json_encode((isset($pa_options['linkColors']) && is_array($pa_options['linkColors'])) ? $pa_options['linkColors'] : array()).",
+			linkWeights: ".json_encode((isset($pa_options['linkWeights']) && is_array($pa_options['linkWeights'])) ? $pa_options['linkWeights'] : array())."
+		});
+	</script>	
 ";
 		
 		return $vs_buf;
+	}
+	# ------------------------------------------------
+	/**
+	 * Return data for use with visualization. This is typically used for loading via AJAX of data for visualization.
+	 * 
+	 * @param array $pa_viz_settings Array of visualization settings taken from visualization.conf
+	 */
+	public function getDataForVisualization($pa_viz_settings, $pa_options=null) {
+		return $this->_getVisualizationData($pa_viz_settings);
+	}
+	# ------------------------------------------------
+	/**
+	 * 
+	 */
+	public function getJSONForVisualization($pa_viz_settings, $pa_options=null) {
+		return json_encode($this->getDataForVisualization($pa_viz_settings, $pa_options));
 	}
 	# ------------------------------------------------
 	/**

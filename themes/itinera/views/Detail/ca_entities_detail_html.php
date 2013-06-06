@@ -199,13 +199,23 @@ if (!$this->request->isAjax()) {
 		<div id="resultBox">
 <?php
 }
-	require_once(__CA_LIB_DIR__."/ca/Search/TourStopSearch.php");
+
+//
+// Add network visualization
+// 
 	$o_viz = new Visualizer('ca_entities');
-	
-	
-	
 	$o_viz->addData($t_entity);
-	print $o_viz->render('network');
+	print $o_viz->render('network', 'HTML', array(
+		'request' => $this->request, 
+		'nodeLinkURL' => caNavUrl($this->request, 'Detail', 'Entity', 'Show', array('entity_id' => '')),
+		'linkColorDefault' => '#cccccc',
+		'linkWeightDefault' => '2px',
+		'linkColors' => array('employee' => '#331122', 'member' => '#000033'),	// hex colors without leading "#"
+		'linkWeights' => array('employee' => '5px', 'member' => '10px')
+	));
+// -------
+	
+	
 	
 	// set parameters for paging controls view
 	$this->setVar('other_paging_parameters', array(
