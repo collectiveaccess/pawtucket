@@ -145,6 +145,15 @@ function caEscapeForXML($ps_text) {
 	return str_replace("\"", "&quot;", $ps_text);
 }
 # ----------------------------------------
+function caUnescapeFromXML($ps_text) {
+	$ps_text = str_replace("&amp;", "&", $ps_text);
+	$ps_text = str_replace("&lt;", "<",  $ps_text);
+	$ps_text = str_replace("&gt;", ">", $ps_text);
+	$ps_text = str_replace("&apos;", "'", $ps_text);
+	
+	return str_replace("&quot;", "\"", $ps_text);
+}
+# ----------------------------------------
 function caMakeProperUTF8ForXML($ps_text){
 	// remove/convert invalid bytes
 	$ps_text = mb_convert_encoding($ps_text, 'UTF-8', 'UTF-8');

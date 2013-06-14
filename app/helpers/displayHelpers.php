@@ -1725,6 +1725,7 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 		
 		$vs_delimiter = (isset($pa_options['delimiter'])) ? $pa_options['delimiter'] : '; ';
 		
+
 		$va_tags = array();
 		if (preg_match_all("!\^([A-Za-z0-9_\.]+[^ \t\r\n\"\'<>\(\)\{\}\/,;\[\]]*)!", $ps_template, $va_matches)) {
 			$va_tags = $va_matches[1];
@@ -1805,6 +1806,7 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 			$va_defined_tag_list[$vn_i] = array();
 			
 			$va_tag_opts = array();
+			
 			foreach($va_tags as $vs_tag) {
 				$va_tmp = explode('.', $vs_tag);
 				$vs_last_element = $va_tmp[sizeof($va_tmp)-1];
@@ -1837,6 +1839,7 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 				if (!isset($va_relationship_values[$vs_pk_val])) { $va_relationship_values[$vs_pk_val] = array(0 => null); }
 				
 				foreach($va_relationship_values[$vs_pk_val] as $vn_relation_id => $va_relationship_value_array) {
+
 					$vb_is_related = false;
 					$va_related_ids = array();
 					$va_val = null;
@@ -1858,6 +1861,7 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 								} else {
 									$vs_get_spec = $vs_tag;
 								}
+
 								
 								$va_spec_bits = explode(".", $vs_get_spec);
 								if ((sizeof($va_spec_bits) == 1) && ($o_dm->getTableNum($va_spec_bits[0]))) { 
@@ -1884,6 +1888,7 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 								}
 								
 								$vs_get_spec = "{$ps_tablename}.".join(".", $va_tmp);
+
 								$va_val_tmp = $qr_res->get($vs_get_spec, array_merge($pa_options, array('returnAsArray' => true)));
 								
 								$va_val = array();
@@ -2061,6 +2066,7 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 			} 
 			
 			$va_pt_vals = array();
+
 			foreach($va_tag_vals as $x => $va_values_by_tag) {
 				//
 				// Need to sort tags by length descending (longest first)
@@ -2664,7 +2670,7 @@ $ca_relationship_lookup_parse_cache = array();
 											
 					}
 					
-					$vs_content = str_replace($va_l['directive'], $vs_link_text, $vs_content);
+					$vs_content = str_replace(caUnescapeFromXML($va_l['directive']), $vs_link_text, $vs_content);
 				}
 				$va_links[] = $vs_content;
 			} else {
