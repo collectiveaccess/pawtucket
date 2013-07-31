@@ -25,13 +25,11 @@
  *
  * ----------------------------------------------------------------------
  */
-	require_once(__CA_LIB_DIR__."/ca/ImportExport/DataExporter.php");
  	require_once(__CA_APP_DIR__.'/helpers/accessHelpers.php');
 	require_once(__CA_LIB_DIR__."/core/Datamodel.php");
  	require_once(__CA_LIB_DIR__.'/ca/ResultContext.php');
  	require_once(__CA_LIB_DIR__.'/core/GeographicMap.php');
 	require_once(__CA_MODELS_DIR__."/ca_bundle_displays.php");
-	require_once(__CA_MODELS_DIR__."/ca_bundle_mappings.php");
 	require_once(__CA_MODELS_DIR__."/ca_relationship_types.php");
 	require_once(__CA_MODELS_DIR__."/ca_lists.php");
  	
@@ -105,7 +103,7 @@
  		 * In general you should always have the table wide views defined. Then you can define type-specific views for your
  		 * application on an as-needed basis.
  		 */
- 		public function Show() {
+ 		public function Show($pa_options=null) {
  			JavascriptLoadManager::register('viz');
  			JavascriptLoadManager::register("ca", "panel");
  			JavascriptLoadManager::register("jit");
@@ -177,13 +175,21 @@
 				}
 				
 				// look for 'authority' facet for current detail table type so we can limit the object browse to the currently displayed item
-				$vs_limit_facet_name = null;
-				foreach($this->opo_browse->getInfoForFacets() as $vs_facet_name => $va_facet_info) {
-					if (($va_facet_info['type'] === 'authority') && ($va_facet_info['table'] === $this->ops_tablename)) {
-						$vs_limit_facet_name = $vs_facet_name;
-						break;
-					}
-				}
+				//$vs_limit_facet_name = null;
+				//foreach($this->opo_browse->getInfoForFacets() as $vs_facet_name => $va_facet_info) {
+				//	if (($va_facet_info['type'] === 'authority') && ($va_facet_info['table'] === $this->ops_tablename)) {
+				//		$vs_limit_facet_name = $vs_facet_name;
+				//		break;
+				//	}
+				//}
+				$this->opo_browse->addFacetConfiguration($vs_limit_facet_name = '_detail_browse_'.$this->ops_tablename, array(
+					'type' => 'authority', 'table' => $this->ops_tablename, 'relationship_table' => 'ca_objects_x_entities',
+					'restrict_to_types' => array(), 'restrict_to_relationship_types' => array(),
+					'label_singular' => 'Detail browse by '.$this->ops_tablename, 
+					'label_plural' => 'Detail browse by '.$this->ops_tablename,
+					'group_mode' => 'none',
+					'indefinite_article' => 'a'
+				));
 				
 				if ($vs_limit_facet_name) {
 					if (($va_configured_type_restrictions = $this->request->config->getList($this->ops_tablename.'_detail_browse_type_restrictions')) && is_array($va_configured_type_restrictions)) {
@@ -216,6 +222,7 @@
 					} else {
 						$vn_num_pages = 0;
 					}
+					
 					$this->view->setVar('browse_results', $qr_hits);
 					$this->view->setVar('num_pages', (int)$vn_num_pages);
 					$this->view->setVar('items_per_page', (int)$vn_items_per_page);
@@ -343,11 +350,15 @@
  			//
  			// Render view
  			//
- 			if ($this->getView()->viewExists($this->ops_tablename.'_'.$t_item->getTypeCode().'_detail_html.php')) {
- 				$this->render($this->ops_tablename.'_'.$t_item->getTypeCode().'_detail_html.php');
+ 			if(isset($pa_options['view']) && $pa_options['view']) {
+ 				$this->render($pa_options['view']);
  			} else {
- 				$this->render($this->ops_tablename.'_detail_html.php');
- 			}
+				if ($this->getView()->viewExists($this->ops_tablename.'_'.$t_item->getTypeCode().'_detail_html.php')) {
+					$this->render($this->ops_tablename.'_'.$t_item->getTypeCode().'_detail_html.php');
+				} else {
+					$this->render($this->ops_tablename.'_detail_html.php');
+				}
+			}
  		}
  		# -------------------------------------------------------
  		# Tagging and commenting
@@ -512,12 +523,12 @@
  			}
 			$ps_mapping = $this->request->getParameter('mapping', pString);
 			
-			$t_mapping = new ca_bundle_mappings();
-			if(!$t_mapping->load(array('mapping_code' => $ps_mapping))) {
-				$this->notification->addNotification(_t("Mapping does not exist"), "message");
- 				$this->response->setRedirect(caNavUrl($this->request, "", "", "", ""));
- 				return;
-			}
+			// $t_mapping = new ca_bundle_mappings();
+// 			if(!$t_mapping->load(array('mapping_code' => $ps_mapping))) {
+// 				$this->notification->addNotification(_t("Mapping does not exist"), "message");
+//  				$this->response->setRedirect(caNavUrl($this->request, "", "", "", ""));
+//  				return;
+// 			}
 			if(!$t_mapping->get('access')) {
 				$this->notification->addNotification(_t("Export format cannot be used"), "message");
  				$this->response->setRedirect(caNavUrl($this->request, "", "", "", ""));
@@ -525,14 +536,60 @@
 			}
 			$vn_mapping_id = $t_mapping->getPrimaryKey();
 			
-			$o_export = new DataExporter();
-			$this->view->setVar('export_mimetype', $o_export->exportMimetype($vn_mapping_id));
-			$this->view->setVar('export_data', $o_export->export($vn_mapping_id, $t_item, null, array('returnOutput' => true, 'returnAsString' => true)));
-			$this->view->setVar('export_filename', preg_replace('![\W]+!', '_', substr($t_item->getLabelForDisplay(), 0, 40).'_'.$o_export->exportTarget($vn_mapping_id)).'.'.$o_export->exportFileExtension($vn_mapping_id));
+			//$o_export = new DataExporter();
+			//$this->view->setVar('export_mimetype', $o_export->exportMimetype($vn_mapping_id));
+			//$this->view->setVar('export_data', $o_export->export($vn_mapping_id, $t_item, null, array('returnOutput' => true, 'returnAsString' => true)));
+			//$this->view->setVar('export_filename', preg_replace('![\W]+!', '_', substr($t_item->getLabelForDisplay(), 0, 40).'_'.$o_export->exportTarget($vn_mapping_id)).'.'.$o_export->exportFileExtension($vn_mapping_id));
 			
 			$this->render('export_xml.php');
 		}
  		# -------------------------------------------------------
+		# Download Summary
+		# -------------------------------------------------------
+		/**
+		 * Download Summary of displayed item
+		 */
+		public function downloadSummary() {
+			if(!$t_item = $this->opo_datamodel->getInstanceByTableName($this->ops_tablename, true)) {
+ 				die("Invalid table name ".$this->ops_tablename." for detail");		// shouldn't happen
+ 			}
+			if(!($vn_item_id = $this->request->getParameter($t_item->primaryKey(), pInteger))){
+  				$this->notification->addNotification(_t("Invalid ID"), "message");
+ 				$this->response->setRedirect(caNavUrl($this->request, "", "", "", ""));
+ 				return;
+ 			}
+ 			if(!$t_item->load($vn_item_id)){
+  				$this->notification->addNotification(_t("ID does not exist"), "message");
+ 				$this->response->setRedirect(caNavUrl($this->request, "", "", "", ""));
+ 				return;
+ 			}
+			
+			$this->view->setVar('t_item', $t_item);
+ 			if($this->request->config->get("dont_enforce_access_settings")){
+ 				$va_access_values = array();
+ 			}else{
+ 				$va_access_values = caGetUserAccessValues($this->request);
+ 			}
+ 			$this->view->setVar('access_values', $va_access_values);
+ 			
+ 			$vs_output_filename = $t_item->getLabelForDisplay();
+			$vs_output_filename = mb_substr($vs_output_filename, 0, 30);
+
+			require_once(__CA_LIB_DIR__.'/core/Parsers/dompdf/dompdf_config.inc.php');
+			$vs_output_file_name = mb_substr(preg_replace("/[^A-Za-z0-9\-]+/", '_', $vs_output_filename), 0, 40);
+			header("Content-Disposition: attachment; filename=".$vs_output_file_name.".pdf");
+			header("Content-type: application/pdf");
+			$vs_content = $this->render('downloadTemplates/'.$this->ops_tablename.'_pdf_html.php');
+			$o_pdf = new DOMPDF();
+			// Page sizes: 'letter', 'legal', 'A4'
+			// Orientation:  'portrait' or 'landscape'
+			$o_pdf->set_paper("letter", "portrait");
+			$o_pdf->load_html($vs_content, 'utf-8');
+			$o_pdf->render();
+			$o_pdf->stream($vs_output_file_name.".pdf");
+			return;	
+		}
+		# -------------------------------------------------------
  		/**
  		  *
  		  */

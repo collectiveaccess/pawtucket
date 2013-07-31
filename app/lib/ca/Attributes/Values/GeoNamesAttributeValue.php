@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2008-2012 Whirl-i-Gig
+ * Copyright 2008-2013 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -77,6 +77,14 @@
 		'label' => _t('Can be used for sorting'),
 		'description' => _t('Check this option if this attribute value can be used for sorting of search results. (The default is not to be.)')
 	),
+	'disableMap' => array(
+		'formatType' => FT_NUMBER,
+		'displayType' => DT_CHECKBOXES,
+		'default' => 0,
+		'width' => 1, 'height' => 1,
+		'label' => _t('Disable map'),
+		'description' => _t('Check this option if you want to disable location map display.')
+	),
 	'canBeEmpty' => array(
 		'formatType' => FT_NUMBER,
 		'displayType' => DT_CHECKBOXES,
@@ -135,6 +143,11 @@ class GeoNamesAttributeValue extends AttributeValue implements IAttributeValue {
  		$this->ops_uri_value =  $pa_value_array['value_longtext2'];
  	}
  	# ------------------------------------------------------------------
+ 	/**
+ 	 * @param array $pa_options Options are:
+ 	 *		forDuplication = returns full text + Geonames URL suitable for setting a duplicate attribute. Used in BaseModelWithAttributes::copyAttributesTo()
+ 	 * @return string GeoNames value
+ 	 */
 	public function getDisplayValue($pa_options=null) {
 		if(isset($pa_options['coordinates']) && $pa_options['coordinates']) {
 			if (preg_match("!\[([^\]]+)!", $this->ops_text_value, $va_matches)) {
@@ -148,7 +161,12 @@ class GeoNamesAttributeValue extends AttributeValue implements IAttributeValue {
 				return array('latitude' => null, 'longitude' => null, 'path' => null, 'label' => $this->ops_text_value);
 			}
 		}
-		return $this->ops_text_value;
+		
+		if(isset($pa_options['forDuplication']) && $pa_options['forDuplication']) {
+			return $this->ops_text_value.'|'.$this->ops_uri_value;
+		}
+
+		return $this->ops_text_value.' [id:'.$this->ops_uri_value.']';
 	}
 	# ------------------------------------------------------------------
 	public function getTextValue(){
@@ -159,13 +177,15 @@ class GeoNamesAttributeValue extends AttributeValue implements IAttributeValue {
 		return $this->ops_uri_value;
 	}
 	# ------------------------------------------------------------------
+	/**
+	 *
+	 */
 	public function parseValue($ps_value, $pa_element_info) {
  		$ps_value = trim(preg_replace("![\t\n\r]+!", ' ', $ps_value));
 		$vo_conf = Configuration::load();
 		$vs_user = trim($vo_conf->get("geonames_user"));
 
 		$va_settings = $this->getSettingValuesFromElementArray($pa_element_info, array('canBeEmpty'));
-
 		if (!$ps_value) {
  			if(!$va_settings["canBeEmpty"]){
 				$this->postError(1970, _t('Entry was blank.'), 'GeoNamesAttributeValue->parseValue()');
@@ -173,11 +193,12 @@ class GeoNamesAttributeValue extends AttributeValue implements IAttributeValue {
 			}
 			return array();
  		} else {
-			$va_tmp = explode('|', $ps_value);
-
-			$vs_text = $va_tmp[0];
-			$vs_id = $va_tmp[1];
-			
+ 			$vs_text = $ps_value;
+ 			$vs_id = null;
+			if (preg_match("! \[id:([0-9]+)\]$!", $vs_text, $va_matches)) {
+				$vs_id = $va_matches[1];
+				$vs_text = preg_replace("! \[id:[0-9]+\]$!", "", $ps_value);
+			}
 			if (!$vs_id) {
 				if(!$va_settings["canBeEmpty"]){
 					$this->postError(1970, _t('Entry was blank.'), 'GeoNamesAttributeValue->parseValue()');
@@ -185,11 +206,10 @@ class GeoNamesAttributeValue extends AttributeValue implements IAttributeValue {
 				}
 				return array();
 			}
-			$vs_url = "http://api.geonames.org/get?geonameId={$vs_id}&style=full&username={$vs_user}";
 
 			return array(
 				'value_longtext1' => $vs_text,
-				'value_longtext2' => $vs_url,
+				'value_longtext2' => $vs_id,
 			);
 		}
 	}
@@ -206,7 +226,7 @@ class GeoNamesAttributeValue extends AttributeValue implements IAttributeValue {
 		}
  		$o_config = Configuration::load();
 
- 		$va_settings = $this->getSettingValuesFromElementArray($pa_element_info, array('fieldWidth', 'fieldHeight'));
+ 		$va_settings = $this->getSettingValuesFromElementArray($pa_element_info, array('fieldWidth', 'fieldHeight', 'disableMap'));
 
 		JavascriptLoadManager::register('maps');
 
@@ -231,59 +251,65 @@ class GeoNamesAttributeValue extends AttributeValue implements IAttributeValue {
 			);
 
 		if ($pa_options['po_request']) {
-			$vs_url = caNavUrl($pa_options['po_request'], 'lookup', 'GeoNames', 'Get');
+			$vs_url = caNavUrl($pa_options['po_request'], 'lookup', 'GeoNames', 'Get', array('max' => 100));
 		}
 
 		$vs_element .= '</div>';
 		$vs_element .= "
 			<script type='text/javascript'>
 				jQuery(document).ready(function() {
-					jQuery('#geonames_".$pa_element_info['element_id']."_autocomplete{n}').autocomplete('".$vs_url."', { max: 50, minChars: 3, matchSubset: 1, matchContains: 1, delay: 800});
-					jQuery('#geonames_".$pa_element_info['element_id']."_autocomplete{n}').result(function(event, data, formatted) {
-							jQuery('#{fieldNamePrefix}".$pa_element_info['element_id']."_{n}').val(data[0] + '|' + data[1]);
+					jQuery('#geonames_".$pa_element_info['element_id']."_autocomplete{n}').autocomplete(
+						{ 
+							source: '{$vs_url}',
+							minLength: 3, delay: 800,
+							select: function(event, ui) {
+								jQuery('#{fieldNamePrefix}".$pa_element_info['element_id']."_{n}').val(ui.item.label + ' [id:' + ui.item.id + ']');
+							}
 						}
-					);
+					).click(function() { this.select(); });
 				});
 			</script>
 		";
 
-		$vs_element .= "
-			<div id='map_".$pa_element_info['element_id']."{n}' style='width:700px; height:160px;'>
+		if(!$va_settings["disableMap"]){
+			$vs_element .= "
+				<div id='map_".$pa_element_info['element_id']."{n}' style='width:700px; height:160px;'>
 
-			</div>
-			<script type='text/javascript'>
-				if ('{n}'.substring(0,3) == 'new') {
-					jQuery('#map_".$pa_element_info['element_id']."{n}').hide();
-				} else {
-					jQuery(document).ready(function() {
-		";
-		
-		$vs_element .= "
-				var re = /\[([\d\.\-,; ]+)\]/;
-				var r = re.exec('{".$pa_element_info['element_id']."}');
-				var latlong = (r) ? r[1] : null;
+				</div>
+				<script type='text/javascript'>
+					if ('{n}'.substring(0,3) == 'new') {
+						jQuery('#map_".$pa_element_info['element_id']."{n}').hide();
+					} else {
+						jQuery(document).ready(function() {
+			";
 
-				if (latlong) {
-					// map vars are global
-					map_".$pa_element_info['element_id']."{n} = new google.maps.Map(document.getElementById('map_".$pa_element_info['element_id']."{n}'), {
-						disableDefaultUI: false,
-						mapTypeId: google.maps.MapTypeId.SATELLITE
-					});
-				
-					var tmp = latlong.split(',');
-					var pt = new google.maps.LatLng(tmp[0], tmp[1]);
-					map_".$pa_element_info['element_id']."{n}.setCenter(pt);
-					map_".$pa_element_info['element_id']."{n}.setZoom(15);		// todo: make this a user preference of some sort
-					var marker = new google.maps.Marker({
-						position: pt,
-						map: map_".$pa_element_info['element_id']."{n}
-					});
-				}";
-		
-		$vs_element .= "
-					});
-				}
-			</script>";
+			$vs_element .= "
+					var re = /\[([\d\.\-,; ]+)\]/;
+					var r = re.exec('{".$pa_element_info['element_id']."}');
+					var latlong = (r) ? r[1] : null;
+
+					if (latlong) {
+						// map vars are global
+						map_".$pa_element_info['element_id']."{n} = new google.maps.Map(document.getElementById('map_".$pa_element_info['element_id']."{n}'), {
+							disableDefaultUI: false,
+							mapTypeId: google.maps.MapTypeId.SATELLITE
+						});
+
+						var tmp = latlong.split(',');
+						var pt = new google.maps.LatLng(tmp[0], tmp[1]);
+						map_".$pa_element_info['element_id']."{n}.setCenter(pt);
+						map_".$pa_element_info['element_id']."{n}.setZoom(15);		// todo: make this a user preference of some sort
+						var marker = new google.maps.Marker({
+							position: pt,
+							map: map_".$pa_element_info['element_id']."{n}
+						});
+					}";
+
+			$vs_element .= "
+						});
+					}
+				</script>";
+		}
 
  		return $vs_element;
  	}

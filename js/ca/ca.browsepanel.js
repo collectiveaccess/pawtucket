@@ -41,6 +41,7 @@ var caUI = caUI || {};
 			facetSelectID: "browseFacetSelect",
 			
 			useExpose: !((jQuery.browser.msie) && (jQuery.browser.version == 7.0)),
+			useStaticDiv: false,									/* set if you want to use a visible <div> for the browse panel rather than a show/hide overlay <div> */
 			
 			isChanging: false,
 			browseID: null,
@@ -56,34 +57,42 @@ var caUI = caUI || {};
 		// --------------------------------------------------------------------------------
 		// Define methods
 		// --------------------------------------------------------------------------------
-		that.showBrowsePanel = function(facet, modifyMode, modifyID, grouping, clear, target) {
+		that.showBrowsePanel = function(facet, modifyMode, modifyID, grouping, clear, target, options) {
 			if (that.singleFacetValues[facet]) {
 				document.location = that.addCriteriaUrl + "/facet/" + facet + "/id/" + that.singleFacetValues[facet];
 				return true;
 			}
 			that.isChanging = true;
 			if (!facet) { return; }
-			jQuery("#" + that.panelID).fadeIn(that.panelTransitionSpeed, function() { that.isChanging = false; });
 			
-			if (that.useExpose) { 
-				jQuery("#" + that.panelID).expose({api: true, color: that.exposeBackgroundColor, opacity: that.exposeBackgroundOpacity, zIndex: 99999}).load(); 
+			var panelContentID = (options && options.panelContentID) ? options.panelContentID : that.panelContentID;
+			
+			if (!that.useStaticDiv) {
+				jQuery("#" + that.panelID).fadeIn(that.panelTransitionSpeed, function() { that.isChanging = false; });
+			
+				if (that.useExpose) { 
+					jQuery("#" + that.panelID).expose({api: true, color: that.exposeBackgroundColor, opacity: that.exposeBackgroundOpacity, zIndex: 99999}).load(); 
+				}
 			}
 			if (!modifyID) { modifyID = ''; }
 			
 			var options = { facet: facet, modify: (modifyMode ? 1 : ''), id: modifyID, grouping: grouping, clear: clear ? 1 : 0 };
 			if (that.browseID) { options['browse_id'] = that.browseID; }
 			if (target) { options['target'] = target; }
-			jQuery("#" + that.panelContentID).load(that.facetUrl, options);
+			jQuery("#" + panelContentID).load(that.facetUrl, options);
 		}
 		
 		that.hideBrowsePanel = function() {
 			that.isChanging = true;
-			jQuery("#" + that.panelID).fadeOut(that.panelTransitionSpeed, function() { that.isChanging = false; });
 			
-			if (that.useExpose) {
-				jQuery.mask.close();
+			if (!that.useStaticDiv) {
+				jQuery("#" + that.panelID).fadeOut(that.panelTransitionSpeed, function() { that.isChanging = false; });
+			
+				if (that.useExpose) {
+					jQuery.mask.close();
+				}
 			}
-			jQuery("#" + that.panelContentID).empty();
+			jQuery("#" + panelContentID).empty();
 		}
 		
 		that.browsePanelIsVisible = function() {

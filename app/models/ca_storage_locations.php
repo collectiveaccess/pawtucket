@@ -255,6 +255,10 @@ class ca_storage_locations extends BundlableLabelableBaseModelWithAttributes imp
 	protected $ID_NUMBERING_ID_FIELD = 'idno';				// name of field containing user-defined identifier
 	protected $ID_NUMBERING_SORT_FIELD = 'idno_sort';		// name of field containing version of identifier for sorting (is normalized with padding to sort numbers properly)
 	
+	# ------------------------------------------------------
+	# ACL
+	# ------------------------------------------------------
+	protected $SUPPORTS_ACL = true;
 	
 	# ------------------------------------------------------
 	# $FIELDS contains information about each field in the table. The order in which the fields
@@ -301,15 +305,15 @@ class ca_storage_locations extends BundlableLabelableBaseModelWithAttributes imp
 	 * Return array containing information about all storage location hierarchies, including their root_id's
 	 */
 	 public function getHierarchyList($pb_dummy=false) {
-		
 		$vn_root_id = $this->getHierarchyRootID();
 		$t_root = new ca_storage_locations($vn_root_id);
 		$qr_children = $t_root->getHierarchyChildrenAsQuery();
 		$va_preferred_labels = $t_root->getPreferredLabels(null, false);
 		
 		return array(array(
-			'location_id' => $t_root->getPrimaryKey(),
-			'name' => 'Root',
+			'location_id' => $vn_id = $t_root->getPrimaryKey(),
+			'item_id' => $vn_id,
+			'name' => _t('Storage locations'),
 			'children' => $qr_children->numRows(),
 			'has_children' => $qr_children->numRows() ? true : false
 		));
@@ -327,32 +331,44 @@ class ca_storage_locations extends BundlableLabelableBaseModelWithAttributes imp
 	/**
 	 *
 	 */
-	public function getLocationIDsByName($ps_name, $pn_parent_id=null) {
+	public function getLocationIDsByName($ps_name, $pn_parent_id=null, $pn_type_id=null) {
 		$o_db = $this->getDb();
 		
-		if ($pn_parent_id) {
-			$qr_res = $o_db->query("
-				SELECT DISTINCT casl.location_id
-				FROM ca_storage_locations casl
-				INNER JOIN ca_storage_location_labels AS casll ON casll.location_id = casl.location_id
-				WHERE
-					casll.name = ? AND casl.parent_id = ?
-			", (string)$ps_name, (int)$pn_parent_id);
-		} else {
-			$qr_res = $o_db->query("
-				SELECT DISTINCT casl.location_id
-				FROM ca_storage_locations casl
-				INNER JOIN ca_storage_location_labels AS casll ON casll.location_id = casl.location_id
-				WHERE
-					casll.name = ?
-			", (string)$ps_name);
-
+		$va_params = array((string)$ps_name);
+		
+		$vs_type_sql = '';
+		if ($pn_type_id) {
+			if(sizeof($va_type_ids = caMakeTypeIDList('ca_storage_locations', array($pn_type_id)))) {
+				$vs_type_sql = " AND casl.type_id IN (?)";
+				$va_params[] = $va_type_ids;
+			}
 		}
+		
+		if ($pn_parent_id) {
+			$vs_parent_sql = " AND casl.parent_id = ?";
+			$va_params[] = (int)$pn_parent_id;
+		} 
+		
+		$qr_res = $o_db->query("
+			SELECT DISTINCT casl.location_id
+			FROM ca_storage_locations casl
+			INNER JOIN ca_storage_location_labels AS casll ON casll.location_id = casl.location_id
+			WHERE
+				casll.name = ? {$vs_type_sql} {$vs_parent_sql} AND casl.deleted = 0
+		", $va_params);
+		
 		$va_location_ids = array();
 		while($qr_res->nextRow()) {
 			$va_location_ids[] = $qr_res->get('location_id');
 		}
 		return $va_location_ids;
+	}
+	# ------------------------------------------------------
+	/**
+	 *
+	 */
+	public function getIDsByLabel($pa_label_values, $pn_parent_id=null, $pn_type_id=null) {
+		return $this->getLocationIDsByName($pa_label_values['name'], $pn_parent_id, $pn_type_id);
 	}
 	# ------------------------------------------------------
 }
