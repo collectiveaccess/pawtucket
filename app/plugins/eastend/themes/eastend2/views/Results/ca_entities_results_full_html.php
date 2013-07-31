@@ -81,7 +81,7 @@ if($vo_result) {
 		}
 		print "<ul>";
 		foreach($va_results_by_letter["entities"] as $k => $vs_entity_result){
-			print "<li>".$vs_entity_result."</li>";
+			print "<li class='artistEntry'>".$vs_entity_result."</li>";
 			$vn_i++;
 			$vn_i_total++;
 		}

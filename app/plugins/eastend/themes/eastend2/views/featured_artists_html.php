@@ -6,8 +6,16 @@
 		foreach($va_featured_artists as $vn_entity_id => $va_featured_artist){
 			print "<div class='ab_feature".(($va_featured_artist["vaga_class"] ? " ".$va_featured_artist["vaga_class"] : ""))."'>";
 			print "<div class='ab_feature_img'>".caNavLink($this->request, $va_featured_artist["image"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $vn_entity_id))."</div>";
-			print "<p><span class='caption caps'>".caNavLink($this->request, $va_featured_artist["name"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $vn_entity_id))." ".$va_featured_artist["lifespan"]."</span><br />";
-			print "<span class='captionSmall'>".$va_featured_artist["indexing_notes"]."</span>";
+			$vs_lifespan = "";
+			if(strstr($va_featured_artist["lifespan"], "after")){
+				$vs_lifespan = str_replace("after", "born", $va_featured_artist["lifespan"]);
+			}else{
+				$vs_lifespan  = $va_featured_artist["lifespan"];
+			}
+			print "<p><span class='caption caps'>".caNavLink($this->request, $va_featured_artist["name"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $vn_entity_id))." ".$vs_lifespan."</span><br />";
+			if($va_featured_artist["indexing_notes"]){
+				print "<span class='captionSmall'>".$va_featured_artist["indexing_notes"]."</span>";
+			}
 			if($va_featured_artist["caption"]){
 				print "<br/><br/><span class='captionSmall obl'>";
 				if($va_featured_artist["vaga_class"]){

@@ -70,3 +70,15 @@
 	font-size:14px;
 	font-weight:bold;
 }
+
+#filterByName {
+	color:#000000;
+	width:70px;
+}
+
+.filterByNameContainerFixed{
+	position:fixed;
+	bottom:0px;
+	background-color:#f7f7f7;
+	padding-top:5px;
+}
