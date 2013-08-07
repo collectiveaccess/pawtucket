@@ -4,7 +4,7 @@
 /* CSS Document */
 
 /* turquoise: #71cde4 */
-body {font-family:"Avenir LT W01 35 Light", helvetica, arial; color:#757575;background-color:#f7f7f7; padding:8px 0px 0px 0px; font-size:12px;}
+body {font-family:"Avenir LT W01 35 Light", helvetica, arial; color:#757575; background-color:#f7f7f7; padding:8px 0px 0px 0px; font-size:12px;}
 a:link, a:visited{color:#757575; text-decoration:none;} 
 a:hover {color:#71cde4;}
 
@@ -27,9 +27,11 @@ h2 {margin:0; padding:0;}
 /*global styles for layout */
 
 #topnav{height:45px; font-size:12px; }
-#topnav .leftnav a:link, #topnav a:visited{color:#71cde4; text-decoration:none; display:block; background-image:url(../graphics/eastend/backarrow.gif); background-repeat:no-repeat; padding-left:15px; background-position:left center; }
-.leftnav {float:left; width:230px;}
-.rightnav {float:left; padding-left:490px;width:220px;text-align:right; margin-right:10px;}
+#topnav .leftnav {color:#DEDEDE;}
+#topnav .leftnav a:link, #topnav a:visited{color:#71cde4; text-decoration:none; background-image:url(../graphics/eastend/backarrow.gif); background-repeat:no-repeat; padding-left:15px; padding-right:5px; background-position:left center; }
+.leftnav {float:left; width:330px;}
+#topnav .leftnav a.loginOut{background-image:none; padding-left:5px; padding-right:5px;}
+.rightnav {float:left; padding-left:390px;width:220px;text-align:right; margin-right:10px;}
 .rightnav img{padding-right:2px;}
 .rightnav .social {padding-top:1px;float:left;}
 .rightnav input{display:inline; width:115px;}
@@ -88,14 +90,16 @@ h2 {margin:0; padding:0;}
 .ad_thumbs img{padding-bottom:10px;}
 .ad_thumbs .col {width:185px; float:left; text-align:right;}
 .ad_thumbs .col div{position:relative;}
+.ad_slideshowLink{float:right; padding:2px;opacity:.8;}
+.ad_slideshowLink:hover{opacity:1.0;}
 
 .ad_gmap {width:355px; float:right;}
 
-.ad_col{width:120px; height: 225px; position: relative; padding-left:0px; margin-right:40px; float:left; font-size:11px;}
+.ad_col{width:100px; height: 225px; position: relative; padding-left:0px; margin-right:20px; float:left; font-size:11px;}
 .ad_col ul{list-style-type:none;margin:0; padding:0 0 15px 0;}
 .ad_col ul li{list-style-type:none; padding:0 0 8px 0; margin:0;}
 .ad_col img{padding:5px 0;}
-.ad_col a:link, .ab_col a:visited, .ab_feature a:link, .ab_feature a:visited{text-decoration:none; color:#757575;}
+.ad_col a:link, .ab_col a:visited, .ab_feature a:link, .ab_feature a:visited{color:#757575;}
 .ad_col a:hover, .ab_feature a:hover{color:#71cde4;}
 
 #ad_comments_list{
@@ -112,6 +116,10 @@ h2 {margin:0; padding:0;}
 .ad_comments_form_bg, .ad_comments_list_bg {
 	background-color:#FFFFFF;
 	padding:17px 20px 20px 20px;
+}
+.creator{
+	font-size:14px;
+	line-height:140%;
 }
 
 # --- entity comments
@@ -197,6 +205,7 @@ h2 {margin:0; padding:0;}
 }
 
 
+
 /* artwork detail styles */
 #art_content {float:left; width: 828px;}
 #art_title {clear:both; margin-bottom:15px;color:#545454; width:585px; font-size:13px;border-bottom:1px solid #e3e3e3; padding-right:247px;}
@@ -231,6 +240,14 @@ div.ex_related_list{width:238px; height:145px; position:relative; margin:0px 0px
 
 #chron_info ul li a:link, .ab_col a:visited{text-decoration:none; color:#757575;}
 #chron_info ul li a:hover{color:#71cde4;}
+
+/* related list links */
+.art_related_list a:link, .art_related_list a:visited, .ad_col a:link, .ad_col a:visited, .ex_related_list a:link, .ex_related_list a:visited{
+	border-bottom: 1px solid #cecece;
+}
+.art_related_list a:hover, .ad_col a:hover, .ex_related_list a:hover{
+	border-bottom: 1px solid #71cde4;
+}
 
 /* hp content */
 #hpTextContainer {
@@ -303,6 +320,15 @@ span.videoIconRelatedGrid{
 	background-position:center center;
 	z-index: 10;
 }
+span.ad_imgPlaceholderDetail{
+	position:absolute;
+	background-color:#EDEDED;
+	color:#999;
+	font-size:12px;
+	text-align:center;
+	z-index: 10;
+}
+
 .videoIconResults{
 	background-image:url(../graphics/eastend/videoPlay.png);
 	background-repeat:no-repeat;
@@ -318,4 +344,16 @@ span.videoIconRelatedGrid{
 	background-position:center center;
 	position:absolute;
 	z-index: 10;
+}
+
+/* Participate */
+#participateRightCol{
+	float:right;
+	width:580px;
+	padding-left:20px;
+}
+.participateImg{
+	text-align:center;
+	padding-bottom:5px;
+	width:580px;
 }

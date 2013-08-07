@@ -47,7 +47,7 @@
 		$vn_col = 1;
 		while($qr_hits->nextHit()){
 			$vn_object_id = $qr_hits->get('object_id');
-			if(($vn_object_id != $vn_exclude_object_id) && ($qr_hits->get("ca_objects.object_status") != 348)){
+			if($vn_object_id != $vn_exclude_object_id){
 				$vs_caption = join("; ", $qr_hits->getDisplayLabels());
 				$vs_vaga_class = "";
 				if($qr_hits->get("object_status") == 349){
@@ -60,8 +60,10 @@
 				if(caGetMediaClass($va_media_info_orig["MIMETYPE"]) == "video"){
 					$vs_icon = "<span class='videoIconRelatedGrid' style='width:".$va_media_info_grid["WIDTH"]."px; height:".$va_media_info_grid["HEIGHT"]."px;'><!-- empty --></span>";
 				}
-				${"va_col".$vn_col}[] = "<span style='position:relative;'>".caNavLink($this->request, $vs_icon.$qr_hits->getMediaTag('ca_object_representations.media', 'relatedGrid', array('checkAccess' => $va_access_values)), $vs_vaga_class, 'Detail', 'Object', 'Show', array('object_id' => $qr_hits->get('ca_objects.object_id')), array("id" => "searchThumbnail".$qr_hits->get('ca_objects.object_id')))."</span>";
-					
+				if($qr_hits->get("ca_objects.object_status") == 348){
+					$vs_icon = "<span class='ad_imgPlaceholderDetail' style='width:".$va_media_info_grid["WIDTH"]."px; height:".$va_media_info_grid["HEIGHT"]."px;'><span style='display:block; padding-top:".round(($va_media_info_grid["HEIGHT"] - 14)/2)."px;'>Image not available for view</span></span>";
+				}
+				${"va_col".$vn_col}[] = "<span style='position:relative;'>".caNavLink($this->request, $vs_icon.$qr_hits->getMediaTag('ca_object_representations.media', 'relatedGrid', array('checkAccess' => $va_access_values)), $vs_vaga_class, 'Detail', 'Object', 'Show', array('object_id' => $qr_hits->get('ca_objects.object_id')), array("id" => "searchThumbnail".$qr_hits->get('ca_objects.object_id')))."</span>";	
 				// set view vars for tooltip
 				//$this->setVar('tooltip_representation', $qr_hits->getMediaTag('ca_object_representations.media', 'small', array('checkAccess' => $va_access_values)));
 				//$this->setVar('tooltip_title', $vs_caption);
