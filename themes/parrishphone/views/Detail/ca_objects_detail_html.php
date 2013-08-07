@@ -75,7 +75,7 @@
 		
 
 ?>
-			<a href='#' class='zoomLink' onclick="$('#zoomImage').show();$('#objDetailImageContainer').show();"><?php print $t_rep->getMediaTag('media', 'small');?></a>
+			<a href='#' class='zoomLink' onclick="zoomImg()"><?php print $t_rep->getMediaTag('media', 'small');?></a>
 <?php			
 			# --- identifier
 			if($va_caption = $t_object->get('ca_objects.caption')){
@@ -85,16 +85,16 @@
 			</div><!-- end objDetailImageContainer -->
 <?php		
 		if ($zoom_tag_width >= $zoom_tag_height) {		
-			$imgStyle = "height:100%;";
+			$imgStyle = "width:100%;";
 		} else {
 			
-			$imgStyle = "width:100%;";
+			$imgStyle = "height:100%;";
 		}		
-			print "<div id='zoomImage' style='display:none; height:100%; width:100%; position:absolute; top:0; left:0; z-index:10000; overflow:auto;'>";
+			print "<div id='zoomImage' style='display:none; height:auto; width:100%; position:absolute; top:0; left:0; z-index:10000; overflow:auto;'>";
 ?>
 				<a href='#' class='zoomLink' onclick="$('#zoomImage').hide();">
 <?php				
-					print "<img src='".$t_rep->getMediaUrl('media', 'large')."' style={$imgStyle}>";
+					print "<img src='".$t_rep->getMediaUrl('media', 'large')."' id='largeImg'>";
 ?>	
 				</a>		
 			</div>
@@ -168,7 +168,7 @@
 			if($this->request->config->get('ca_objects_map_attribute') && $t_object->get($this->request->config->get('ca_objects_map_attribute'))){
 				$o_map = new GeographicMap(306, 200, 'map');
 				$o_map->mapFrom($t_object, $this->request->config->get('ca_objects_map_attribute'));
-				print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+				print "<div class='listItems' data-role='collapsible' data-inset='false'>";
 				print "<h2>"._t("Map")."</h2><!-- end collapseListHeading -->";
 				
 				print "<div id='detailMap'>".$o_map->render('HTML')."</div>";
@@ -179,7 +179,7 @@
 			$va_places = $t_object->get("ca_places", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			$va_collections = $t_object->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			if(sizeof($va_entities) || sizeof($va_occurrences) || sizeof($va_places) || sizeof($va_collections)){
-				print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+				print "<div class='listItems' data-role='collapsible' data-inset='false'>";
 				print "<h2>"._t("Related Information")."</h2><!-- end collapseListHeading -->";
 
 				# --- entities

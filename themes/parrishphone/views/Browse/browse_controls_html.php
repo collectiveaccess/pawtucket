@@ -74,7 +74,7 @@
 					$va_available_facets = $this->getVar('available_facets');
 					foreach($va_available_facets as $vs_facet_code => $va_facet_info) {
 						#print "<div class='item'><a href='#' onclick='caUIBrowsePanel.showBrowsePanel(\"{$vs_facet_code}\");'>".$va_facet_info['label_plural']."</a></div>\n";
-						print "<div class='item'><a href='#' onclick='jQuery(\"#browseList\").load(\"".caNavUrl($this->request, '', 'Browse', 'getFacet', array('facet' => $vs_facet_code))."\"); jQuery(\".browseTargetSelect\").hide(); return false;'>".$va_facet_info['label_plural']."</a></div>\n";
+						print "<div class='item'><a href='#' onclick='jQuery(\"#browseList\").load(\"".caNavUrl($this->request, '', 'Browse', 'getFacet', array('_ajax'=> 1, 'facet' => $vs_facet_code))."\"); jQuery(\".browseTargetSelect\").hide(); return false;'>".$va_facet_info['label_plural']."</a></div>\n";
 						#print "<div class='facetDescription'>".$va_facet_info["description"]."</div>";
 					}
 					print "</div><!-- end listItems -->";

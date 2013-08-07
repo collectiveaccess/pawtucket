@@ -3,7 +3,7 @@
 	$vn_itemc = 0;
 	if($qr_hits->numHits() > 0){
 
-			print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+			print "<div class='listItems' data-role='collapsible' data-inset='false'>";
 		if (!$this->request->isAjax()) {	
 			print "<h2>"._t("Related Objects")."</h2><!-- end collapseListHeading -->";
 		}

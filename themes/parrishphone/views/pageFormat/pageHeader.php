@@ -6,7 +6,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<?php print MetaTagManager::getHTML(); ?>
 	
-	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery.mobile-1.2.0/jquery.mobile-1.2.0.css" type="text/css" media="screen" />	
+	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery.mobile-1.3.1/jquery.mobile-1.3.1.min.css" type="text/css" media="screen" />	
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/iphone.css" rel="stylesheet" type="text/css" />
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/fonts.css" rel="stylesheet" type="text/css" />	
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/sets.css" rel="stylesheet" type="text/css" />	
@@ -18,21 +18,23 @@
 
 
 <?php 
+	JavascriptLoadManager::register("maps");
+
 	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
 ?>
 	<script>
 
 	$(document).on("mobileinit", function(){
   		$.mobile.defaultPageTransition = 'slide';
-  		$.mobile.ajaxEnabled = false;
+  		$.mobile.ajaxEnabled = true;
   		$.mobile.touchOverflowEnabled = true;
 	});
 	</script>
 	
     <script src="<?php print $this->request->getBaseUrlPath(); ?>/js/ca/markerclusterer.js" type="text/javascript"></script>
     <script src="<?php print $this->request->getBaseUrlPath(); ?>/js/ca/geolocationmarker.js" type="text/javascript"></script>
-    <script src="<?php print $this->request->getBaseUrlPath(); ?>/js/ca/infobox.js" type="text/javascript"></script>
-    <script src="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery.mobile-1.2.0/jquery.mobile-1.2.0.js" type="text/javascript"></script>
+    <!--<script src="<?php print $this->request->getBaseUrlPath(); ?>/js/ca/infobox.js" type="text/javascript"></script>-->
+    <script src="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery.mobile-1.3.1/jquery.mobile-1.3.1.min.js" type="text/javascript"></script>
     
 	<meta name="viewport" id="_msafari_viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 	<meta name="apple-mobile-web-app-capable" content="yes" />
@@ -50,7 +52,7 @@
 		}
 	</script>
 </head>
-<body onload="setTimeout(function() { window.scrollTo(0, 1) }, 100);" class="portrait">
+<body onload="setTimeout(function() { window.scrollTo(0, 1) }, 100);" class="portrait" onorientationchange="updateOrientation();">
 		<div id="pageWidth" data-role="page">
 
 			<div id="header" data-role="header" data-position="fixed" data-fullscreen="true">

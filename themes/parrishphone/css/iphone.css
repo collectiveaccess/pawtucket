@@ -102,13 +102,13 @@ a{
 	color: #000000;
 }
 .ui-body-c .ui-link {
-	color: #757575 !important;
+	color: #444 !important;
 }
 .ui-body-c .ui-link:visited {
-	color: #757575 !important;
+	color: #444 !important;
 }
 a:visited {
-    color: #757575; /*{c-body-link-visited}*/;
+    color: #444; /*{c-body-link-visited}*/;
 }
 a:hover{
 	text-decoration:none;
@@ -170,7 +170,7 @@ a.caption:hover{
 }
 div.item{
 	clear:both;
-	padding:7px 20px 7px 7px;
+	padding:14px 20px 14px 7px;
 	border-bottom:1px solid #eee;
 	text-align:left;
 	background-image:url('../graphics/listArrow.png');
@@ -245,7 +245,7 @@ div.listHeading a{
 	font-size: 13px;
 }
 .listItems div.item:hover {
-	background-color:#f7fdff;
+	background-color:#eef6f9;
 }
 .ui-btn-active {
 	border: 1px solid 		#cccccc /*{global-active-border}*/;

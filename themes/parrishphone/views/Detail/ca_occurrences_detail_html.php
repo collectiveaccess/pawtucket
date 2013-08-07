@@ -88,7 +88,7 @@ if (!$this->request->isAjax()) {
 			$va_places = $t_occurrence->get("ca_places", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			$va_collections = $t_occurrence->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			if(sizeof($va_entities) || sizeof($va_occurrences) || sizeof($va_places) || sizeof($va_collections)){
-				print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+				print "<div class='listItems' data-role='collapsible' data-inset='false'>";
 				print "<h2>"._t("Related Information")."</h2><!-- end collapseListHeading -->";
 				# --- entities
 				if(sizeof($va_entities) > 0){	

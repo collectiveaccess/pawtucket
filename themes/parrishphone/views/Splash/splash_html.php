@@ -1,5 +1,5 @@
 		<div id="hpFeatured">
-			<?php print caNavLink($this->request, $this->getVar("featured_content_medium"), '', 'Detail', 'Object', 'Show', array('object_id' =>  $this->getVar("featured_content_id"))); ?>
+			<?php print caNavLink($this->request, $this->getVar("featured_content_mediummobile"), '', 'Detail', 'Object', 'Show', array('object_id' =>  $this->getVar("featured_content_id"))); ?>
 		</div>
 		<div id="featuredLabel">
 				<?php print _t("Above: Detail from")." ".$this->getVar("featured_content_label"); ?>
@@ -10,10 +10,9 @@
 	$o_result_context = new ResultContext($this->request, 'ca_objects', 'basic_search');
 	$vs_search = $o_result_context->getSearchExpression();
 ?>
-			<div class="item"><?php print caNavLink($this->request, _t("About Artists of the East End"), "", "", "About", "Index"); ?></div>
-			<div class="item"><?php print caNavLink($this->request, _t("View Historical Timeline"), "", "simpleGallery", "Show", "Index"); ?></div>
+			<div class="item"><?php print caNavLink($this->request, _t("About East End Stories"), "", "", "About", "Index"); ?></div>
 			<div class="item"><?php print caNavLink($this->request, _t("View Map of Locations"), "", "", "About", "map"); ?></div>
-			<div class="item"><?php print caNavLink($this->request, _t("Browse by Topic"), "", "", "Browse", "clearCriteria"); ?></div>			
+			<div class="item"><?php print caNavLink($this->request, _t("Browse the Database"), "", "", "Browse", "clearCriteria"); ?></div>			
 			<div class="item"><?php print "<a href='http://www.parrishart.org/visit' target='_blank'>Visit the Parrish Art Museum</a>"; ?></div>			
 			<!--<div class="item" id="searchLink"><a href="#" onclick='$("#searchLink").hide(); $("#hpSearch").slideDown(250); return false;'>Search</a></div>-->
 			<!--<div id="hpSearch"><form name="splash_search" action="<?php print caNavUrl($this->request, '', 'Search', 'Index'); ?>" method="get"><input type="text" name="search" value="<?php print ($vs_search) ? $vs_search : ''; ?>" autocomplete="off" size="20"/><a href="#" name="searchButtonSubmit" onclick="document.forms.splash_search.submit(); return false;"> <?php print _t("SEARCH"); ?></a></form></div>-->

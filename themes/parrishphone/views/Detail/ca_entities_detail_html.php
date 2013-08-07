@@ -116,7 +116,7 @@ if (!$this->request->isAjax()) {
 				#$o_map->mapFrom($t_entity, $this->request->config->get('ca_entities_map_attribute'));
 				$map_hits = $this->getVar('browse_results');
 				$o_map->mapFrom($map_hits, 'ca_places.georeference');
-				print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+				print "<div class='listItems' data-role='collapsible'  data-inset='false'>";
 				print "<h2>"._t("Map")."</h2><!-- end collapseListHeading -->";
 				print "<div id='detailMap'>".$o_map->render('HTML')."</div>";
 				print "</div><!-- end map -->";
@@ -126,7 +126,7 @@ if (!$this->request->isAjax()) {
 			$va_places = $t_entity->get("ca_places", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			$va_collections = $t_entity->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			if(sizeof($va_entities) || sizeof($va_occurrences) || sizeof($va_places) || sizeof($va_collections)){
-				print "<div class='listItems' data-role='collapsible' data-mini='true' data-inset='false'>";
+				print "<div class='listItems' data-role='collapsible' data-inset='false'>";
 				print "<h2>"._t("Related Information")."</h2><!-- end collapseListHeading -->";
 
 				# --- entities

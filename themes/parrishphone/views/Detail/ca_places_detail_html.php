@@ -93,8 +93,9 @@ if (!$this->request->isAjax()) {
 			$va_places = $t_place->get("ca_places", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			$va_collections = $t_place->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
 			if(sizeof($va_entities) || sizeof($va_occurrences) || sizeof($va_places) || sizeof($va_collections)){
-				print "<div class='collapseListHeading'><a href='#' onclick='$(\"#relatedAuthorities\").slideToggle(250); return false;'>"._t("Related Information")."</a></div><!-- end collapseListHeading -->";
-				print "<div id='relatedAuthorities' class='listItems' style='display:none;'>";
+				print "<div class='listItems' data-role='collapsible'  data-inset='false'>";
+
+				print "<h2>Related Information</h2>";
 				# --- entities
 				if(sizeof($va_entities) > 0){	
 					foreach($va_entities as $va_entity) {

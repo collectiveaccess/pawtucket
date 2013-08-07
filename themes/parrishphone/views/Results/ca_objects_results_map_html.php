@@ -32,7 +32,7 @@ $vo_result 				= $this->getVar('result');
 $vn_num_hits 			= $this->getVar('num_hits');
 
 if($vo_result && $this->request->config->get('ca_objects_map_attribute')){
-	$o_map = new GeographicMap(320, 210, 'map');
+	$o_map = new GeographicMap(320, 380, 'map');
 	$va_map_stats = $o_map->mapFrom($vo_result, $this->request->config->get('ca_objects_map_attribute'), array("contentView" => "Results/ca_objects_results_map_balloon_html.php", 'request' => $this->request));
 	// map_stats is an array with two keys: 'points' = number of unique markers; 'items' = number of results hits than were plotted at least once on the map
 	

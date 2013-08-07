@@ -116,15 +116,47 @@ $('div.ui-collapsible').live('expand', function(e){
 $(".zoomLink").bind("click", function(){
         $("[data-position='fixed']").fixedtoolbar('toggle');
 });
+function zoomImg() {
+	$('#zoomImage').show();
+    var maxwidth = $(window).width();
+    var maxheight = $(window).height();
+    var ratio = 0;
+	var e1 = document.getElementById("largeImg");
+	var imgw = $("#largeImg").width();
+	var imgh = $("#largeImg").height();
+	if (imgw > maxwidth) {
+		ratio = maxwidth / imgw;
+    	e1.style.width = maxwidth + "px";
+    	$('#largeImg').css("height", imgh * ratio);
+    	imgh = imgh * ratio;
+    	imgw = imgw * ratio;
+    	
+    } 
+	if (imgh > maxheight) {
+		ratio = maxheight / imgh;
+    	e1.style.height = maxheight + "px";
+    	$('#largeImg').css("width", imgw * ratio);
+    	imgw = imgw * ratio;
+    }     
+
+}
 $(window).bind('orientationchange', function (e) { 
     setTimeout(function () {
         // Get height of div
         var div   = $('#zoomImage'),
-            width = div.width();
-
+            width = $(window).width();
+			ratio = 1.4; // THIS IS A HACK - NEED TO GET ACTUAL RATIO
         // Set the height of the div
         div.css({ height: Math.ceil(width / ratio) });
     }, 500);
+});
+
+$("input").blur(function() {
+    $("[data-role=footer]").show();
+});
+
+$("input").focus(function() {
+    $("[data-role=footer]").css("bottom", "0");
 });
 
 </script>
