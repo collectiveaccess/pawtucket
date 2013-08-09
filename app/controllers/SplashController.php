@@ -165,7 +165,7 @@ if(!(bool)$this->request->config->get("splash_disable_highest_rated_objects")){
 				}
 				$this->view->setVar('random_objects', $va_random_items);
 				if(is_array($va_random_items) && (sizeof($va_random_items) > 0)){
-					$va_object_info = array_shift($va_random_items);
+					$va_object_info = reset($va_random_items);
 					$this->view->setVar('user_favorites_id', $va_object_info['object_id']);
 					
 					foreach($va_versions as $vs_version) {
@@ -187,16 +187,15 @@ if(!(bool)$this->request->config->get("splash_disable_recently_added_objects")){
 				$va_object_info['title'] = $va_labels[$vn_object_id];
 				$va_object_info['media'] = $va_media[$vn_object_id];
  				$va_recently_added_objects[$vn_object_id] = $va_object_info;
- 				
-				foreach($va_versions as $vs_version) {
-					$this->view->setVar('recently_added_'.$vs_version, $va_media[$va_object_info['object_id']]['tags'][$vs_version]);
-				}
 			}
 			$this->view->setVar('recently_added_objects', $va_recently_added_objects);
 			if(is_array($va_recently_added_objects) && (sizeof($va_recently_added_objects) > 0)){
-				$va_object_info = array_shift($va_recently_added_objects); 
+				$va_object_info = reset($va_recently_added_objects); 
 				$this->view->setVar('recently_added_id', $va_object_info['object_id']);
 				
+				foreach($va_versions as $vs_version) {
+					$this->view->setVar('recently_added_'.$vs_version, $va_media[$va_object_info['object_id']]['tags'][$vs_version]);
+				}
 			} 	
 } else {
 			$this->view->setVar('recently_added_objects', array());
@@ -215,7 +214,7 @@ if(!(bool)$this->request->config->get("splash_disable_most_viewed_objects")){
 			}
 			$this->view->setVar('most_viewed_objects', $va_most_viewed_objects);
 			if(is_array($va_most_viewed_objects) && (sizeof($va_most_viewed_objects) > 0)){
-				$va_object_info = array_shift($va_most_viewed_objects);
+				$va_object_info = reset($va_most_viewed_objects);
 				$this->view->setVar('most_viewed_id', $va_object_info['object_id']);
 				
 				foreach($va_versions as $vs_version) {
