@@ -37,7 +37,7 @@
  	require_once(__CA_MODELS_DIR__."/ca_editor_uis.php");
  	require_once(__CA_MODELS_DIR__."/ca_attribute_values.php");
  	require_once(__CA_MODELS_DIR__."/ca_metadata_elements.php");
- 	require_once(__CA_MODELS_DIR__."/ca_bundle_mappings.php");
+ 	#require_once(__CA_MODELS_DIR__."/ca_bundle_mappings.php");
  	require_once(__CA_MODELS_DIR__."/ca_bundle_displays.php");
  	require_once(__CA_LIB_DIR__."/core/Datamodel.php");
  	require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");

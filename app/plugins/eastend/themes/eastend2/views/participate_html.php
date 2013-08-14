@@ -12,6 +12,10 @@
 					print "<a href='http://www.vagarights.com' target='_blank'>";
 					$vn_vaga_disclaimer_output = 1;
 				}
+				print $va_info["title"];
+				if($va_info["title"] && $va_info["caption"]){
+					print "<br/>";
+				}
 				print $va_info["caption"];
 				if($va_info["vaga_class"]){
 					print "</a>";
@@ -49,6 +53,15 @@
 	</div>
 	<div>
 		Contact us at 631-283-2118 ext. 121, or email <a href="mailto:wingfieldc@parrishart.org">wingfieldc@parrishart.org</a> to become a contributor to this ongoing story.
+	</div>
+	<div>
+<?php
+	if($this->request->isLoggedIn()){
+		print "<b>".caNavLink($this->request, _t("Click here to submit your story."), "blueLink", "Contribute", "Form", "Edit")."</b>";
+	}else{
+		print "<b>".caNavLink($this->request, _t("Please login/register to share your story."), "blueLink", "", "LoginReg", "form")."</b>";
+	}
+?>
 	</div>
 </div>
 

@@ -85,6 +85,7 @@
 					}
 					$va_tmp["image"] = $va_image["tags"]["mediumlarge"];
 					$va_tmp["caption"] = $t_object->get("ca_objects.caption");
+					$va_tmp["title"] = $t_object->getLabelForDisplay();
 				}
 				$va_participate_images[$vn_participate_object_id] = $va_tmp;
 			}
