@@ -38,6 +38,9 @@
  		
  		# -------------------------------------------------------
  		public function __construct(&$po_request, &$po_response, $pa_view_paths=null) {
+ 			if(!$po_request->isLoggedIn() || !$po_request->user->canDoAction('can_share_via_email')) { 
+ 				die("Sharing not available");
+ 			}
  			JavascriptLoadManager::register('tokeninput');
  			
  			$this->ops_theme = __CA_THEME__;																	// get current theme
