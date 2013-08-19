@@ -371,6 +371,41 @@
 			
 			$this->render('ajax_object_lookup_json.php');
 		}
+		# -------------------------------------------------------
+ 		/**
+ 		 * 
+ 		 */ 
+ 		public function MediaReplicationControls() {
+ 			$pn_representation_id = $this->request->getParameter('representation_id', pInteger);
+ 			$t_rep = new ca_object_representations($pn_representation_id);
+ 			
+ 			$this->view->setVar('target_list', $t_rep->getAvailableMediaReplicationTargetsAsHTMLFormElement('target', 'media'));
+ 			$this->view->setVar('representation_id', $pn_representation_id);
+ 			$this->view->setVar('t_representation', $t_rep);
+ 			$this->view->setVar('t_primary_rep', $t_rep);
+ 			
+ 				//$t_rep->removeMediaReplication('media', 'youtube_channel1');
+ 		
+ 			$this->render('object_representation_media_replication_controls_html.php');
+ 		}
+ 		# -------------------------------------------------------
+ 		/**
+ 		 * 
+ 		 */ 
+ 		public function StartMediaReplication() {
+ 			$pn_representation_id = $this->request->getParameter('representation_id', pInteger);
+ 			$ps_target = $this->request->getParameter('target', pString);
+ 			$t_rep = new ca_object_representations($pn_representation_id);
+ 			
+ 			$this->view->setVar('target_list', $t_rep->getAvailableMediaReplicationTargetsAsHTMLFormElement('target', 'media'));
+ 			$this->view->setVar('representation_id', $pn_representation_id);
+ 			$this->view->setVar('t_representation', $t_rep);
+ 			$this->view->setVar('selected_target', $ps_target);
+ 			
+ 			$t_rep->replicateMedia('media', $ps_target);
+ 			
+ 			$this->MediaReplicationControls();
+ 		}
   		# -------------------------------------------------------
  	}
  ?>
