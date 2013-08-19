@@ -25,9 +25,10 @@
  *
  * ----------------------------------------------------------------------
  */	
+	$o_purifier = new HTMLPurifier();
 	$t_set = $this->getVar("t_set");
 	$va_items = $this->getVar("items");
-	$vs_title = $t_set->getLabelForDisplay();
+	$vs_title = $o_purifier->purify($t_set->getLabelForDisplay());
 	$vn_num_items = (int)sizeof($va_items);
 	
 	$vn_num_items_per_page = 6;
@@ -77,11 +78,11 @@
 			}
 			print "<td><table class='imageTable' cellpadding='0' cellspacing='0'><tr><td>";
 			if ($t_rep) {
-				print "<img src='".$t_rep->getMediaUrl("media", "medium")."' width='".$va_item["representation_width_thumbnail"]."' height='".$va_item["representation_height_thumbnail"]."' border='0'>";
+				print "<img src='".$o_purifier->purify($t_rep->getMediaUrl("media", "medium"))."' width='".$o_purifier->purify($va_item["representation_width_thumbnail"])."' height='".$o_purifier->purify($va_item["representation_height_thumbnail"])."' border='0'>";
 			}
 			print "</td></tr></table>";
 			#print "<td><table class='imageTable' cellpadding='0' cellspacing='0'><tr><td>".((file_exists(str_replace($this->request->config->get("site_host"), $this->request->config->get("ca_base_dir"), $va_item["representation_url_thumbnail"]))) ? $va_item["representation_tag_thumbnail"] : "")."</td></tr></table>";
-			print "<div class='imageCaption'>".$va_item["idno"]."<br/>".$t_object->get("ca_objects.altID")."<br/>".$t_object->get("ca_collections.preferred_labels", array("delimiter" => "; "))."</div></td>";
+			print "<div class='imageCaption'>".$o_purifier->purify($va_item["idno"])."<br/>".$o_purifier->purify($t_object->get("ca_objects.altID"))."<br/>".$o_purifier->purify($t_object->get("ca_collections.preferred_labels", array("delimiter" => "; ")))."</div></td>";
 			if($i == 4){
 				print "</tr>";
 				$i = 0;

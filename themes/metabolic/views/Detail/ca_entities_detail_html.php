@@ -91,12 +91,13 @@ if (!$this->request->isAjax()) {
 		<div id="pageNav">
 <?php
 			if (($this->getVar('is_in_result_list')) && ($vs_back_link = ResultContext::getResultsLinkForLastFind($this->request, 'ca_entities', _t("Back"), ''))) {
+				print "&lsaquo;&lsaquo; {$vs_back_link}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp";
 				if ($this->getVar('previous_id')) {
 					print caNavLink($this->request, "&lsaquo; "._t("Previous"), '', 'Detail', 'Entity', 'Show', array('entity_id' => $this->getVar('previous_id')), array('id' => 'previous'));
 				}else{
 					print "&lsaquo; "._t("Previous");
 				}
-				print "&nbsp;&nbsp;&nbsp;{$vs_back_link}&nbsp;&nbsp;&nbsp;";
+				print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 				if ($this->getVar('next_id') > 0) {
 					print caNavLink($this->request, _t("Next")." &rsaquo;", '', 'Detail', 'Entity', 'Show', array('entity_id' => $this->getVar('next_id')), array('id' => 'next'));
 				}else{

@@ -3296,3 +3296,29 @@ div.jGrowl div.jGrowl-closer {
 }
 
 /* end autocompleter styles */
+
+/* Replication control styles */
+div.caRepresentationMediaReplicationTargetList {
+	clear: both;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	-ms-border-radius: 10px;
+	-o-border-radius: 10px;
+	border-radius: 10px;
+	background-color: #ccc;
+	padding: 8px;
+	margin: 0px 0 10px 0;
+
+	width: 460px;
+}
+
+div.caRepresentationMediaReplicationLoadIcon {
+	float: right;
+	display: none;
+	background-color: #fff;
+	width: 16px;
+	height: 16px;
+	text-align: center;
+	padding: 2px;
+	margin-left: 8px;
+}

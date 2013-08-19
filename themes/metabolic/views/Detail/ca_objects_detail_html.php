@@ -31,6 +31,7 @@
 	
 	$va_access_values = 				$this->getVar('access_values');
 	$t_rep = 							$this->getVar('t_primary_rep');
+	$vn_representation_id = $t_rep->getPrimaryKey();
 	$vn_num_reps = 						$t_object->getRepresentationCount(array("return_with_access" => $va_access_values));
 	$vs_display_version =				$this->getVar('primary_rep_display_version');
 	$va_display_options =				$this->getVar('primary_rep_display_options');
@@ -42,12 +43,14 @@
 		<div id="pageNav">
 <?php
 			if (($this->getVar('is_in_result_list')) && ($vs_back_link = ResultContext::getResultsLinkForLastFind($this->request, 'ca_objects', _t("Back"), ''))) {
+				
+				print "&lsaquo;&lsaquo; {$vs_back_link}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp";
 				if ($this->getVar('previous_id')) {
 					print caNavLink($this->request, "&lsaquo; "._t("Previous"), '', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar('previous_id')), array('id' => 'previous'));
 				}else{
 					print "&lsaquo; "._t("Previous");
 				}
-				print "&nbsp;&nbsp;&nbsp;{$vs_back_link}&nbsp;&nbsp;&nbsp;";
+				print "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
 				if ($this->getVar('next_id') > 0) {
 					print caNavLink($this->request, _t("Next")." &rsaquo;", '', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar('next_id')), array('id' => 'next'));
 				}else{
@@ -510,10 +513,12 @@
 			<div id="objDetailImageNav" >
 				<div style="float:right;">
 <?php
-				if (($this->request->isLoggedIn()) && ($this->request->config->get('can_download_media') && $t_rep && $t_rep->getPrimaryKey())) {
-					print caNavLink($this->request, _t("+ Download Media"), '', 'Detail', 'Object', 'DownloadRepresentation', array('representation_id' => $t_rep->getPrimaryKey(), "object_id" => $vn_object_id, "download" => 1, "version" => original)); 
+				if ($this->request->isLoggedIn()) {
+					if ($this->request->user->canDoAction('can_download_media') && $t_rep && $t_rep->getPrimaryKey()) {
+						print caNavLink($this->request, _t("+ Download Media"), '', 'Detail', 'Object', 'DownloadRepresentation', array('representation_id' => $t_rep->getPrimaryKey(), "object_id" => $vn_object_id, "download" => 1, "version" => original)); 
+					}
 				} else {
-					print caNavLink($this->request, _t("+ Download Media"), '', '', 'LoginReg', 'form');
+					//print caNavLink($this->request, _t("+ Download Media"), '', '', 'LoginReg', 'form');
 				}
 				
 				if ($t_rep && $t_rep->getPrimaryKey()) {
@@ -522,8 +527,11 @@
 					}
 				}
 ?>
-				</div>			
+				</div>		
 			</div><!-- end objDetailImageNav -->
+<?php
+				print $this->render("object_representation_media_replication_controls_html.php");
+?>	
 <?php
 			if($vn_num_reps > 1) {
 				$thumb_rep = $t_object->getRepresentations(array('widethumbnail'));
@@ -635,8 +643,13 @@ if (!$this->request->config->get('dont_allow_comments')) {
 					print caNavLink($this->request, "<img src='".$this->request->getThemeUrlPath()."/graphics/icons/comment.png' border='0' title='Comment'>", "", "", "LoginReg", "form", array('site_last_page' => 'ObjectDetail', 'object_id' => $vn_object_id));
 				}
 			}
-			print caNavLink($this->request, "<img src='".$this->request->getThemeUrlPath()."/graphics/icons/email.png' border='0' title='Email this record'>", "", "Share", "Share", "objectForm", array('object_id' => $vn_object_id));
-			print "<a href='http://www.facebook.com/sharer.php?u=".urlencode($this->request->config->get("site_host").caNavUrl($this->request, "Detail", "Object", "Show", array("object_id" => $vn_object_id)))."&t=".urlencode($vs_title)."'><img src='".$this->request->getThemeUrlPath()."/graphics/icons/facebook.png' border='0' title='Share on Facebook'></a>";	
+			
+			if ($this->request->isLoggedIn() && $this->request->user->canDoAction('can_share_via_email')) {
+				print caNavLink($this->request, "<img src='".$this->request->getThemeUrlPath()."/graphics/icons/email.png' border='0' title='Email this record'>", "", "Share", "Share", "objectForm", array('object_id' => $vn_object_id));
+			}
+			if ($this->request->isLoggedIn() && $this->request->user->canDoAction('can_share_via_facebook')) {
+				print "<a href='http://www.facebook.com/sharer.php?u=".urlencode($this->request->config->get("site_host").caNavUrl($this->request, "Detail", "Object", "Show", array("object_id" => $vn_object_id)))."&t=".urlencode($vs_title)."'><img src='".$this->request->getThemeUrlPath()."/graphics/icons/facebook.png' border='0' title='Share on Facebook'></a>";	
+			}
 ?>
 			</div><!-- end bottomBar -->
 		</div><!-- end leftCol -->
