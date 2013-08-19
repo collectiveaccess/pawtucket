@@ -121,6 +121,7 @@ require_once(__CA_APP_DIR__."/helpers/utilityHelpers.php");
 require_once(__CA_APP_DIR__."/helpers/gisHelpers.php");
 require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 require_once(__CA_LIB_DIR__."/core/Parsers/htmlpurifier/HTMLPurifier.standalone.php");
+require_once(__CA_LIB_DIR__.'/ca/MediaReplicator.php');
 
 /**
  * Base class for all database table classes. Implements database insert/update/delete
@@ -1124,6 +1125,7 @@ class BaseModel extends BaseObject {
 								} else {
 									$va_timestamps = $o_tep->parseDatetime($vm_value);
 								}
+								
 								if (!$va_timestamps) {
 									$this->postError(1805, $o_tep->getParseErrorMessage(), 'BaseModel->set()');
 									return false;
@@ -1967,33 +1969,35 @@ class BaseModel extends BaseObject {
 						case (FT_HISTORIC_DATE):
 							$vs_fields .= "$vs_field,";
 							$v = isset($this->_FIELD_VALUES[$vs_field]) ? $this->_FIELD_VALUES[$vs_field] : null;
-							if ($v == '') {
+							if ((($v == '') || is_null($v)) && !$va_attr["IS_NULL"]) {
 								$this->postError(1805, _t("Date is undefined but field %1 does not support NULL values", $vs_field),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($v)) {
+							if (!is_numeric($v) && !(is_null($v) && $va_attr["IS_NULL"])) {
 								$this->postError(1100, _t("Date is invalid for %1", $vs_field),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							$vs_values .= $v.",";		# output as is
+							if (is_null($v)) { $v = 'null'; }
+							$vs_values .= "{$v},";		# output as is
 							break;
 						# -----------------------------
 						case (FT_TIME):
 							$vs_fields .= $vs_field.",";
 							$v = isset($this->_FIELD_VALUES[$vs_field]) ? $this->_FIELD_VALUES[$vs_field] : null;
-							if ($v == "") {
+							if ((($v == '') || is_null($v)) && !$va_attr["IS_NULL"]) {
 								$this->postError(1805, _t("Time is undefined but field %1 does not support NULL values", $vs_field),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($v)) {
+							if (!is_numeric($v) && !(is_null($v) && $va_attr["IS_NULL"])) {
 								$this->postError(1100, _t("Time is invalid for ", $vs_field),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							$vs_values .= $v.",";		# output as is
+							if (is_null($v)) { $v = 'null'; }
+							$vs_values .= "{$v},";		# output as is
 							break;
 						# -----------------------------
 						case (FT_TIMESTAMP):	# insert on stamp
@@ -2008,47 +2012,67 @@ class BaseModel extends BaseObject {
 							$start_field_name = $va_attr["START"];
 							$end_field_name = $va_attr["END"];
 
-							if (($this->_FIELD_VALUES[$start_field_name] == "") || ($this->_FIELD_VALUES[$end_field_name] == "")) {
+							if (
+								!$va_attr["IS_NULL"]
+								&&
+								((($$this->_FIELD_VALUES[$start_field_name] == '') || is_null($this->_FIELD_VALUES[$start_field_name]))
+								||
+								(($$this->_FIELD_VALUES[$end_field_name] == '') || is_null($this->_FIELD_VALUES[$end_field_name])))
+							) {
 								$this->postError(1805, _t("Daterange is undefined but field does not support NULL values"),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($this->_FIELD_VALUES[$start_field_name])) {
+							if (!is_numeric($this->_FIELD_VALUES[$start_field_name]) && !($va_attr["IS_NULL"] && is_null($this->_FIELD_VALUES[$start_field_name]))) {
 								$this->postError(1100, _t("Starting date is invalid"),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($this->_FIELD_VALUES[$end_field_name])) {
+							if (is_null($this->_FIELD_VALUES[$start_field_name])) { $vm_start_val = 'null'; } else { $vm_start_val = $this->_FIELD_VALUES[$start_field_name]; }
+							
+							if (!is_numeric($this->_FIELD_VALUES[$end_field_name]) && !($va_attr["IS_NULL"] && is_null($this->_FIELD_VALUES[$end_field_name]))) {
 								$this->postError(1100,_t("Ending date is invalid"),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							$vs_fields .= "$start_field_name, $end_field_name,";
-							$vs_values .= $this->_FIELD_VALUES[$start_field_name].", ".$this->_FIELD_VALUES[$end_field_name].",";
+							if (is_null($this->_FIELD_VALUES[$end_field_name])) { $vm_end_val = 'null'; } else { $end_field_name = $this->_FIELD_VALUES[$end_field_name]; }
+							
+							$vs_fields .= "{$start_field_name}, {$end_field_name},";
+							$vs_values .= "{$vm_start_val}, {$vm_end_val},";
 
 							break;
 						# -----------------------------
 						case (FT_TIMERANGE):
 							$start_field_name = $va_attr["START"];
 							$end_field_name = $va_attr["END"];
-
-							if (($this->_FIELD_VALUES[$start_field_name] == "") || ($this->_FIELD_VALUES[$end_field_name] == "")) {
+							
+							if (
+								!$va_attr["IS_NULL"]
+								&&
+								((($$this->_FIELD_VALUES[$start_field_name] == '') || is_null($this->_FIELD_VALUES[$start_field_name]))
+								||
+								(($$this->_FIELD_VALUES[$end_field_name] == '') || is_null($this->_FIELD_VALUES[$end_field_name])))
+							) {
 								$this->postError(1805,_t("Time range is undefined but field does not support NULL values"),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($this->_FIELD_VALUES[$start_field_name])) {
+							if (!is_numeric($this->_FIELD_VALUES[$start_field_name])&& !($va_attr["IS_NULL"] && is_null($this->_FIELD_VALUES[$start_field_name]))) {
 								$this->postError(1100,_t("Starting time is invalid"),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($this->_FIELD_VALUES[$end_field_name])) {
+							if (is_null($this->_FIELD_VALUES[$start_field_name])) { $vm_start_val = 'null'; } else { $vm_start_val = $this->_FIELD_VALUES[$start_field_name]; }
+							
+							if (!is_numeric($this->_FIELD_VALUES[$end_field_name])&& !($va_attr["IS_NULL"] && is_null($this->_FIELD_VALUES[$end_field_name]))) {
 								$this->postError(1100,_t("Ending time is invalid"),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							$vs_fields .= "$start_field_name, $end_field_name,";
-							$vs_values .= $this->_FIELD_VALUES[$start_field_name].", ".$this->_FIELD_VALUES[$end_field_name].",";
+							if (is_null($this->_FIELD_VALUES[$end_field_name])) { $vm_end_val = 'null'; } else { $end_field_name = $this->_FIELD_VALUES[$end_field_name]; }
+							
+							$vs_fields .= "{$start_field_name}, {$end_field_name},";
+							$vs_values .= "{$vm_start_val}, {$vm_end_val},";
 
 							break;
 						# -----------------------------
@@ -2125,6 +2149,7 @@ class BaseModel extends BaseObject {
 				$vs_sql = "INSERT INTO ".$this->TABLE." ($vs_fields) VALUES ($vs_values)";
 
 				if ($this->debug) echo $vs_sql;
+				
 				$o_db->query($vs_sql);
 				if ($o_db->numErrors() == 0) {
 					if ($this->getFieldInfo($vs_pk = $this->primaryKey(), "IDENTITY")) {
@@ -2519,32 +2544,36 @@ class BaseModel extends BaseObject {
 						case (FT_DATE):
 						case (FT_HISTORIC_DATE):
 							$vm_val = isset($this->_FIELD_VALUES[$vs_field]) ? $this->_FIELD_VALUES[$vs_field] : null;
-							if ($vm_val == "") {
+							if ((($vm_val == '') || is_null($vm_val)) && !$va_attr["IS_NULL"]) {
 								$this->postError(1805,_t("Date is undefined but field does not support NULL values"),"BaseModel->update()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($vm_val)) {
+							if (!is_numeric($vm_val) && !(is_null($vm_val) && $va_attr["IS_NULL"])) {
 								$this->postError(1100,_t("Date is invalid for %1", $vs_field),"BaseModel->update()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
+							if (is_null($vm_val)) { $vm_val = 'null'; }
+							
 							$vs_sql .= "{$vs_field} = {$vm_val},";		# output as is
 							$vn_fields_that_have_been_set++;
 							break;
 						# -----------------------------
 						case (FT_TIME):
 							$vm_val = isset($this->_FIELD_VALUES[$vs_field]) ? $this->_FIELD_VALUES[$vs_field] : null;
-							if ($vm_val == "") {
+							if ((($vm_val == '') || is_null($vm_val)) && !$va_attr["IS_NULL"]) {
 								$this->postError(1805, _t("Time is undefined but field does not support NULL values"),"BaseModel->update()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($vm_val)) {
+							if (!is_numeric($vm_val) && !(is_null($vm_val) && $va_attr["IS_NULL"])) {
 								$this->postError(1100, _t("Time is invalid for %1", $vs_field),"BaseModel->update()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
+							if (is_null($vm_val)) { $vm_val = 'null'; }
+							
 							$vs_sql .= "{$vs_field} = {$vm_val},";		# output as is
 							$vn_fields_that_have_been_set++;
 							break;
@@ -2558,48 +2587,68 @@ class BaseModel extends BaseObject {
 						# -----------------------------
 						case (FT_DATERANGE):
 						case (FT_HISTORIC_DATERANGE):
-							$vn_start_field_name = $va_attr["START"];
-							$vn_end_field_name = $va_attr["END"];
+							$start_field_name = $va_attr["START"];
+							$end_field_name = $va_attr["END"];
 
-							if (($this->_FIELD_VALUES[$vn_start_field_name] == "") || ($this->_FIELD_VALUES[$vn_end_field_name] == "")) {
+							if (
+								!$va_attr["IS_NULL"]
+								&&
+								((($$this->_FIELD_VALUES[$start_field_name] == '') || is_null($this->_FIELD_VALUES[$start_field_name]))
+								||
+								(($$this->_FIELD_VALUES[$end_field_name] == '') || is_null($this->_FIELD_VALUES[$end_field_name])))
+							) {
 								$this->postError(1805,_t("Daterange is undefined but field does not support NULL values"),"BaseModel->update()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($this->_FIELD_VALUES[$vn_start_field_name])) {
+							if (!is_numeric($this->_FIELD_VALUES[$start_field_name]) && !($va_attr["IS_NULL"] && is_null($this->_FIELD_VALUES[$start_field_name]))) {
 								$this->postError(1100,_t("Starting date is invalid"),"BaseModel->update()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($this->_FIELD_VALUES[$vn_end_field_name])) {
+							if (is_null($this->_FIELD_VALUES[$start_field_name])) { $vm_start_val = 'null'; } else { $vm_start_val = $this->_FIELD_VALUES[$start_field_name]; }
+							
+							if (!is_numeric($this->_FIELD_VALUES[$end_field_name]) && !($va_attr["IS_NULL"] && is_null($this->_FIELD_VALUES[$end_field_name]))) {
 								$this->postError(1100,_t("Ending date is invalid"),"BaseModel->update()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							$vs_sql .= "{$vn_start_field_name} = ".$this->_FIELD_VALUES[$vn_start_field_name].", {$vn_end_field_name} = ".$this->_FIELD_VALUES[$vn_end_field_name].",";
+							if (is_null($this->_FIELD_VALUES[$end_field_name])) { $vm_end_val = 'null'; } else { $vm_end_val = $this->_FIELD_VALUES[$end_field_name]; }
+							
+							$vs_sql .= "{$start_field_name} = {$vm_start_val}, {$end_field_name} = {$vm_end_val},";
 							$vn_fields_that_have_been_set++;
 							break;
 						# -----------------------------
 						case (FT_TIMERANGE):
-							$vn_start_field_name = $va_attr["START"];
-							$vn_end_field_name = $va_attr["END"];
+							$start_field_name = $va_attr["START"];
+							$end_field_name = $va_attr["END"];
 
-							if (($this->_FIELD_VALUES[$vn_start_field_name] == "") || ($this->_FIELD_VALUES[$vn_end_field_name] == "")) {
+							if (
+								!$va_attr["IS_NULL"]
+								&&
+								((($$this->_FIELD_VALUES[$start_field_name] == '') || is_null($this->_FIELD_VALUES[$start_field_name]))
+								||
+								(($$this->_FIELD_VALUES[$end_field_name] == '') || is_null($this->_FIELD_VALUES[$end_field_name])))
+							) {
 								$this->postError(1805,_t("Time range is undefined but field does not support NULL values"),"BaseModel->update()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($this->_FIELD_VALUES[$vn_start_field_name])) {
+							if (!is_numeric($this->_FIELD_VALUES[$start_field_name]) && !($va_attr["IS_NULL"] && is_null($this->_FIELD_VALUES[$start_field_name]))) {
 								$this->postError(1100,_t("Starting time is invalid"),"BaseModel->update()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (!is_numeric($this->_FIELD_VALUES[$vn_end_field_name])) {
+							if (is_null($this->_FIELD_VALUES[$start_field_name])) { $vm_start_val = 'null'; } else { $vm_start_val = $this->_FIELD_VALUES[$start_field_name]; }
+							
+							if (!is_numeric($this->_FIELD_VALUES[$end_field_name]) && !($va_attr["IS_NULL"] && is_null($this->_FIELD_VALUES[$end_field_name]))) {
 								$this->postError(1100,_t("Ending time is invalid"),"BaseModel->update()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							$vs_sql .= "{$vn_start_field_name} = ".$this->_FIELD_VALUES[$vn_start_field_name].", {$vn_end_field_name} = ".$this->_FIELD_VALUES[$vn_end_field_name].",";
+							if (is_null($this->_FIELD_VALUES[$end_field_name])) { $vm_end_val = 'null'; } else { $vm_end_val = $this->_FIELD_VALUES[$end_field_name]; }
+							
+							$vs_sql .= "{$start_field_name} = {$vm_start_val}, {$end_field_name} = {$vm_end_val},";
 							$vn_fields_that_have_been_set++;
 							break;
 						# -----------------------------
@@ -2616,7 +2665,7 @@ class BaseModel extends BaseObject {
 							break;
 						# -----------------------------
 						case (FT_MEDIA):
-							$va_limit_to_versions = (isset($pa_options['updateOnlyMediaVersions']) ? $pa_options['updateOnlyMediaVersions'] : null);
+							$va_limit_to_versions = caGetOption("updateOnlyMediaVersions", $pa_options, null);
 							if ($vs_media_sql = $this->_processMedia($vs_field, array('these_versions_only' => $va_limit_to_versions))) {
 								$vs_sql .= $vs_media_sql;
 								$vn_fields_that_have_been_set++;
@@ -4549,12 +4598,12 @@ class BaseModel extends BaseObject {
 	/**
 	 * Fetches hash directory
 	 * 
-	 * @access private
+	 * @access protected
 	 * @param string $basepath path
 	 * @param int $id identifier
 	 * @return string directory
 	 */
-	public function _getDirectoryHash ($basepath, $id) {
+	protected function _getDirectoryHash ($basepath, $id) {
 		$n = intval($id / 100);
 		$dirs = array();
 		$l = strlen($n);
@@ -4568,6 +4617,247 @@ class BaseModel extends BaseObject {
 		}
 
 		return join("/", $dirs);
+	}
+	# --------------------------------------------------------------------------------
+	# --- Media replication
+	# --------------------------------------------------------------------------------
+	/**
+	 * Returns a list of all media replication targets defined for the media loaded into the specified FT_MEDIA field $ps_field
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getMediaReplicationTargets($ps_field, $ps_version='original') {
+		$va_media_info = $this->getMediaInfo($ps_field, $ps_version);
+		if (!$va_media_info) { return null; }
+		
+		$va_volume_info = $this->_MEDIA_VOLUMES->getVolumeInformation($va_media_info['VOLUME']);
+		if(isset($va_volume_info['replication']) && is_array($va_volume_info['replication'])) {
+			return $va_volume_info['replication'];
+		}
+		return array();
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * Returns a list of media replication targets for the which the media loaded into the specified FT_MEDIA field $ps_field has not already been replicated
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getAvailableMediaReplicationTargets($ps_field, $ps_version='original') {
+		if (!($va_targets = $this->getMediaReplicationTargets($ps_field, $ps_version))) { return null; }
+	
+		$va_used_targets = array_keys($this->getUsedMediaReplicationTargets($ps_field, $ps_version));
+	
+		foreach($va_used_targets as $vs_used_target) {
+			unset($va_targets[$vs_used_target]);
+		}
+		return $va_targets;
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * Returns a list of media replication targets for the which the media loaded into the specified FT_MEDIA field $ps_field has not already been replicated
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getAvailableMediaReplicationTargetsAsHTMLFormElement($ps_name, $ps_field, $ps_version='original', $pa_attributes=null, $pa_options=null) {
+		if (!($va_targets = $this->getAvailableMediaReplicationTargets($ps_field, $ps_version))) { return null; }
+		if (sizeof($va_targets) == 0) { return ''; }
+		
+		$va_opts = array();
+		foreach($va_targets as $vs_target_code => $va_target_info) {
+			$va_opts[$va_target_info['name']] = $vs_target_code;
+		}
+		return caHTMLSelect($ps_name, $va_opts, $pa_attributes, $pa_options);
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * Returns a list of media replication targets for the which the media loaded into the specified FT_MEDIA field $ps_field has already been replicated
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getUsedMediaReplicationTargets($ps_field, $ps_version='original') {
+		if (!($va_targets = $this->getMediaReplicationTargets($ps_field, $ps_version))) { return null; }
+		
+		$va_media_info = $this->getMediaInfo($ps_field);
+		$va_used_targets = array();
+		if (is_array($va_media_info['REPLICATION_STATUS'])) {
+			foreach($va_media_info['REPLICATION_STATUS'] as $vs_used_target => $vn_target_status) {
+				if ($vn_target_status != __CA_MEDIA_REPLICATION_STATE_ERROR__) { $va_used_targets[] = $vs_used_target; }
+			}
+		}
+	
+		foreach($va_targets as $vs_target => $va_target_info) {
+			if (!in_array($vs_target, $va_used_targets)) { unset($va_targets[$vs_target]); }
+		}
+		return $va_targets;
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * 
+	 *
+	 * @param string $ps_field
+	 * @param string $ps_target
+	 * @return bool
+	 */
+	public function replicateMedia($ps_field, $ps_target) {
+		$va_targets = $this->getMediaReplicationTargets($ps_field, 'original');
+		$va_target_info = $va_targets[$ps_target];
+		
+		// TODO: generalize this metadata? Perhaps let the plugin deal with it?
+		$pa_data = array(
+			'title' => $va_target_info['options']['title'] ? caProcessTemplateForIDs($va_target_info['options']['title'], $this->tableNum(), array($this->getPrimaryKey()), array('requireLinkTags' => true)) : "",
+			'description' => $va_target_info['options']['description'] ? caProcessTemplateForIDs($va_target_info['options']['description'], $this->tableNum(), array($this->getPrimaryKey()), array('requireLinkTags' => true)) : "",
+			'tags' => $va_target_info['options']['tags'] ? caProcessTemplateForIDs($va_target_info['options']['tags'], $this->tableNum(), array($this->getPrimaryKey()), array('requireLinkTags' => true)) : "",
+			'category' => $va_target_info['options']['category']
+		);
+		
+		$vs_version = $pa_target_info['version'];
+		if (!in_array($vs_version, $this->getMediaVersions($ps_field))) {
+			$vs_version = 'original';
+		}
+	
+		$o_replicator = new MediaReplicator();
+		
+		if (false) {	// TODO: support queuing here
+			$va_media_info = $this->getMediaInfo($ps_field);
+			$va_media_info['REPLICATION_STATUS'] = __CA_MEDIA_REPLICATION_STATE_PENDING__;	// pending means it's queued
+			$vs_key = null;
+		} else {		
+			// Do replication right now, in-process
+			// (mark replication as started)
+				
+			$va_media_info = $this->getMediaInfo($ps_field);
+			$va_media_info['REPLICATION_STATUS'][$ps_target] = __CA_MEDIA_REPLICATION_STATE_UPLOADING__;
+			$va_media_info['REPLICATION_LOG'][$ps_target][] = array('STATUS' => __CA_MEDIA_REPLICATION_STATE_UPLOADING__, 'DATETIME' => time());
+			$va_media_info['REPLICATION_KEYS'][$ps_target] = null;
+			
+			$this->setMediaInfo($ps_field, $va_media_info);
+			$this->setMode(ACCESS_WRITE);
+			$this->update();
+			
+			if (!is_array($va_media_desc = $this->_FIELD_VALUES[$ps_field])) {
+				throw new Exception(_t("Could not record replication status: %1 has no media description data", $ps_field));
+			}
+			if ($vs_key = $o_replicator->replicateMedia($this->getMediaPath($ps_field, $vs_version), $va_target_info, $pa_data)) {
+				
+				$va_media_info['REPLICATION_STATUS'][$ps_target] = __CA_MEDIA_REPLICATION_STATE_PROCESSING__;
+				$va_media_info['REPLICATION_LOG'][$ps_target][] = array('STATUS' => __CA_MEDIA_REPLICATION_STATE_PROCESSING__, 'DATETIME' => time());
+				$va_media_info['REPLICATION_KEYS'][$ps_target] = $vs_key;
+				$this->setMediaInfo($ps_field, $va_media_info);
+				$this->update();
+				
+			} else {
+				$va_media_info['REPLICATION_STATUS'][$ps_target] = __CA_MEDIA_REPLICATION_STATE_ERROR__;
+				$va_media_info['REPLICATION_LOG'][$ps_target][] = array('STATUS' => __CA_MEDIA_REPLICATION_STATE_ERROR__, 'DATETIME' => time());
+				$va_media_info['REPLICATION_KEYS'][$ps_target] = null;
+				$this->setMediaInfo($ps_field, $va_media_info);
+				$this->update();
+			}
+		}
+		return $vs_key;
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * 
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getReplicatedMediaUrl($ps_field, $ps_target, $pa_options=null) {
+		$va_media_info = $this->getMediaInfo($ps_field); 
+		if (!isset($va_media_info['REPLICATION_STATUS'][$ps_target])) { return null; }
+		if ($va_media_info['REPLICATION_STATUS'][$ps_target] != __CA_MEDIA_REPLICATION_STATE_COMPLETE__) { return false; }
+		
+		$va_targets = $this->getMediaReplicationTargets($ps_field, 'original');
+		$va_target_info = $va_targets[$ps_target];
+		
+		if ($vs_replication_key = $va_media_info['REPLICATION_KEYS'][$ps_target]) {
+			$o_replicator = new MediaReplicator();
+			return $o_replicator->getUrl($vs_replication_key, $va_target_info, $pa_options);
+		}
+		return null;
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * 
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function removeMediaReplication($ps_field, $ps_target) {
+		
+	
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * 
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getReplicationStatus($ps_field, $ps_target) {
+		$va_media_info = $this->getMediaInfo($ps_field); 
+		if (!isset($va_media_info['REPLICATION_STATUS'][$ps_target])) { return null; }
+		
+		$va_targets = $this->getMediaReplicationTargets($ps_field, 'original');
+		$va_target_info = $va_targets[$ps_target];
+		
+		$vn_current_status = $va_media_info['REPLICATION_STATUS'][$ps_target];
+		
+		switch($vn_current_status) {
+			case __CA_MEDIA_REPLICATION_STATE_PENDING__:
+				$va_status_info = array(
+					'code' => __CA_MEDIA_REPLICATION_STATE_PENDING__,
+					'status' => _t('Replication pending')
+				);
+				break;
+			case __CA_MEDIA_REPLICATION_STATE_UPLOADING__:
+				$va_status_info = array(
+					'code' => __CA_MEDIA_REPLICATION_STATE_UPLOADING__,
+					'status' => _t('Uploading media')
+				);
+				break;
+			case __CA_MEDIA_REPLICATION_STATE_PROCESSING__:
+				$o_replicator = new MediaReplicator();
+				if (($vn_status = $o_replicator->getReplicationStatus($va_target_info, $va_media_info['REPLICATION_KEYS'][$ps_target])) != __CA_MEDIA_REPLICATION_STATE_PROCESSING__) {
+					// set to new status
+					
+					$va_media_info = $this->getMediaInfo($ps_field);
+					$va_media_info['REPLICATION_STATUS'][$ps_target] = $vn_status;
+					$va_media_info['REPLICATION_LOG'][$ps_target][] = array('STATUS' => $vn_status, 'DATETIME' => time());
+					$this->setMode(ACCESS_WRITE);
+					$this->setMediaInfo($ps_field, $va_media_info);
+					$this->update();
+					return $this->getReplicationStatus($ps_field, $ps_target);
+				}
+				$va_status_info = array(
+					'code' => __CA_MEDIA_REPLICATION_STATE_PROCESSING__,
+					'status' => _t('Media is being processed by replication target')
+				);
+				break;
+			case __CA_MEDIA_REPLICATION_STATE_COMPLETE__:
+				$va_status_info = array(
+					'code' => __CA_MEDIA_REPLICATION_STATE_COMPLETE__,
+					'status' => _t('Replication complete')
+				);
+				break;
+			case __CA_MEDIA_REPLICATION_STATE_ERROR__:
+				$va_status_info = array(
+					'code' => __CA_MEDIA_REPLICATION_STATE_ERROR__,
+					'status' => _t('Replication failed')
+				);
+				break;
+			default:
+				$va_status_info = array(
+					'code' => 0,
+					'status' => _t('Status unknown')
+				);
+				break;
+		}
+		return $va_status_info;
 	}
 	# --------------------------------------------------------------------------------
 	# --- Uploaded file handling
