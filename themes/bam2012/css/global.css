@@ -236,7 +236,7 @@ a.caption:hover{
 }
 #search{
 	float:right;
-	width:175px;
+	width:185px;
 	height:17px;
 	border-left:1px solid #000;
 	text-align:left;
@@ -265,15 +265,16 @@ a.caption:hover{
 #search input[type="text"] {
 	font-size:12px;
 	font-weight: normal;
-	padding: 2px 2px 2px 7px;
-	margin:0px 0px 0px 0px;
+	padding: 5px 2px 2px 7px;
+	margin:-4px 0px 0px 5px;
 	border: 0px;
-	width:66px;
+	width:80px;
 	height:12px;
 	outline-style:none;
 	outline-width:0px;
 	line-height:1em;
 	color:#828282;
+	background-color:#ddd; 
 }
 #search a{
 	float:right;
@@ -344,20 +345,20 @@ div.searchlight-results div.searchlight-selected {
 #tooltip {
 	position: absolute;
 	z-index: 3000;
-	border: 3px solid #eeeeee;
+	border: 0px solid #eeeeee;
 	background-color: #FFFFFF;
-	padding: 10px 10px 10px 10px;
+	padding: 50px;
 	/*opacity: 0.9;*/
 	text-align: center;
 }
 .tooltipImage { /* used in image rollovers in results and on detail pages */
-	padding: 10px;
+	padding: 5px 5px 0px 5px;
 	text-align: center;
 }
 
 .tooltipCaption { /* used in image rollovers in results and on detail pages */
 	margin-top: 10px;
-	width: 290px;
+	max-width: 290px;
 	text-align: left;
 	font-style:normal;
 	color:#666;
@@ -369,9 +370,27 @@ div.searchlight-results div.searchlight-selected {
 	text-align:center;
 	padding:10px;
 	font-size:12px;
-	width:300px;
+	max-width:300px;
 	color:#666;
 }
+#browse #tooltip {
+	position: absolute;
+	z-index: 3000;
+	background-color: transparent;
+	padding: 0px;
+	/*opacity: 0.9;*/
+	text-align: center;
+	border:0px;
+	background-image:none;
+}
+#browse .tooltipImage {
+	padding:0px;
+}
+#browse .tooltipFormat {
+	background-image:none;
+	border:0px;
+	background-color:#000;
+}	
 
 /* ------------------------------------- */
 /*  HOME PAGE */
@@ -385,10 +404,11 @@ div.searchlight-results div.searchlight-selected {
 	float:right;
 }
 #hpText{
-	padding:0px 50px 0px 0px;
+	padding:10px 50px 0px 0px;
 	line-height:1.7em;
-	font-size:21px;
+	font-size:16px;
 	color:#393940;
+	text-align:justify
 }
 #hpText div{
 	margin-bottom:0px;
@@ -413,7 +433,8 @@ div.searchlight-results div.searchlight-selected {
 }
 #featuredScrollCaption a{
 	text-decoration: none;
-	color: #686875;
+	color: #333;
+	font-size:14px;
 }
 .tooltipCaption {
 	padding: 5px;
@@ -469,16 +490,26 @@ div.searchlight-results div.searchlight-selected {
 	margin:0px;
 }
 .detailBodyProduction #productionTopArea #rightCol, .detailBodyEntity #entityTopArea #rightCol {
-	width:390px;
 	background-color:#FFFFFF;
 	padding: 15px 40px 15px 15px;
 	color: #404045;
 	font-size:13px;
 	text-transform:uppercase;
+	float:left;
+	max-width:969px;
+	width:390px;
+}
+.detailBodyEntity #entityTopArea #objDetailImage{
+	margin-bottom:0px;
+	text-align:center;
+	margin-top:0px;
+	width:450px;
+	float:right;
 }
 .detailBodyProduction #productionTopArea .rightColWide, .detailBodyEntity #entityTopArea .rightColWide {
-	width:969px !important;
+/*	width:969px !important; */
 	margin-left:-15px !important;
+	float:left;
 }
 .detailBodyProduction #productionTopArea #rightCol #productionDate{
 	margin-bottom:10px;
@@ -826,6 +857,9 @@ padding: 15px 0px 15px 15px;
 }
 #objDetailImage img{
 	border:4px solid #fff;
+}
+#objDetailImage #BookReaderContainer img{
+	border:0px;
 }
 #BookReaderContainer{
 	width: 550px;
@@ -1177,7 +1211,9 @@ td.advSearchElement{
 .searchSec .results a{
 	color:#fff;
 }
-
+#productionsSecondaryResults h1, #specialSecondaryResults h1 {
+	font-size:20px;
+}
 
 /* thumbnail view  - also used in details with thumbnail grid */
 .searchResultTd{
@@ -1207,6 +1243,7 @@ td.advSearchElement{
 .searchThumbCaption a:hover{
 	color: #999999;
 }
+
 
 /* full results */
 .searchFullImageContainer {
@@ -1276,7 +1313,7 @@ input.addItemToSetControlInThumbnails {
 	text-decoration:none;
 	text-transform:uppercase;
 	color:#fff;
-	font-size:11px;
+	font-size:14px;
 	
 }
 .searchView #showOptions, .searchView #showTools{
@@ -1473,12 +1510,14 @@ input.addItemToSetControlInThumbnails {
 #entityResults .resultBg, #collectionResults .resultBg, #occurrenceResults .resultBg, #placeResults .resultBg{
 	
 }
+#occurrenceResults div {
+	padding:5px 5px 0px 5px;
+}	
 #occurrenceResults div, #entityResults div {
-	border-bottom:1px solid #e2e2e2;
 	color:#fff;
 }
 #occurrenceResults .resultIcon {
-	width:72px;
+	width:110px;
 	min-height:12px;
 	background-color:#393940;
 	display:inline-block;
@@ -1487,6 +1526,12 @@ input.addItemToSetControlInThumbnails {
 #occurrenceResults .resultText {
 	border:0px;
 	display:inline-block;
+}
+.prodResult {
+	border-bottom: 1px solid #e2e2e2;
+	width:270px;
+	float:left;
+	margin-right:15px;
 }
 /* ------------------------------------- */
 /* login register */
@@ -2808,4 +2853,10 @@ div.jGrowl div.jGrowl-closer {
 #relatedCreator {
 	width:250px;
 	border-right:1px solid #fff;
+}
+.DV-paper {
+	min-height:625px;
+}
+.DV-thumbnails .DV-thumbnail .DV-thumbnail-shadow {
+	position:relative !important;
 }

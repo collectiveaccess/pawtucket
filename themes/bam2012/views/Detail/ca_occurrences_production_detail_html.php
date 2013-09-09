@@ -108,11 +108,11 @@ if (!$this->request->isAjax()) {
 						print "<div class='mdItem'><div class='mdItemHeading'>"._t('Premiere')."</div>{$va_premiere}</div><!-- end mdItemHeading -->";
 					}
 				}
-				if (($t_occurrence->get('ca_occurrences.pieces.piecesDate')) || ($t_occurrence->get('ca_occurrences.pieces.piecePremiere') != "119" )) {
-					if ($va_pieces = $t_occurrence->get('ca_occurrences.pieces', array('template' => '<div class="pieces">^piecesDate<ifdef code="piecesDate"><br/></ifdef>^pieceTitle<ifdef code="piecePremiere"><br/></ifdef>^piecePremiere</div>', 'convertCodesToDisplayText' => true))) {
-						print "<div class='mdItem'><div class='mdItemHeading'>"._t('Pieces')."</div>{$va_pieces}<div style='width:100%; clear:both;'></div></div><!-- end mdItemHeading -->";
-					}
-				}
+#				if (($t_occurrence->get('ca_occurrences.pieces.piecesDate')) || ($t_occurrence->get('ca_occurrences.pieces.piecePremiere') != "119" )) {
+#					if ($va_pieces = $t_occurrence->get('ca_occurrences.pieces', array('template' => '<div class="pieces">^piecesDate<ifdef code="piecesDate"><br/></ifdef>^pieceTitle<ifdef code="piecePremiere"><br/></ifdef>^piecePremiere</div>', 'convertCodesToDisplayText' => true))) {
+#						print "<div class='mdItem'><div class='mdItemHeading'>"._t('Pieces')."</div>{$va_pieces}<div style='width:100%; clear:both;'></div></div><!-- end mdItemHeading -->";
+#					}
+#				}
 				if ($t_occurrence->get('ca_occurrences.country_origin_list') != "745"){
 					if ($va_country_origin_list = $t_occurrence->get('ca_occurrences.country_origin_list', array('convertCodesToDisplayText' => true))) {
 						print "<div class='mdItem'><div class='mdItemHeading'>"._t('Country of Origin')."</div>{$va_country_origin_list}</div><!-- end mdItemHeading -->";
@@ -225,11 +225,11 @@ if (!$this->request->isAjax()) {
 // 					print "<br/><span class='capsText'>".$vs_type."</span></div>";
 // 				}
 // 			}
-			if(sizeof($va_entities) > 0){
-				foreach($va_entities as $va_entity){
-					print "<div class='relatedItem'>".caNavLink($this->request, $va_entity["label"], '', '', 'Search', 'Index', array('search' => "{$va_entity['label']}"))."<br/><span class='capsText'>".$va_entity['relationship_typename']."</span></div>";
-				}
-			}
+#			if(sizeof($va_entities) > 0){
+#				foreach($va_entities as $va_entity){
+#					print "<div class='relatedItem'>".caNavLink($this->request, $va_entity["label"], '', '', 'Search', 'Index', array('search' => "{$va_entity['label']}"))."<br/><span class='capsText'>".$va_entity['relationship_typename']."</span></div>";
+#				}
+#			} 
 ?>
 			</td><!-- end relatedArtist -->
 <?php
@@ -261,17 +261,18 @@ if (!$this->request->isAjax()) {
 		}else{
 			$vn_showRelatedFiller = 1;
 		}
+	
 		# --- collections
-		$va_collections = $t_occurrence->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
-		if(sizeof($va_collections) > 0){
-			print "<td id='relatedCollections'><h2>"._t("Related Collection").((sizeof($va_collections) > 1) ? "s" : "")."</h2>";
-			foreach($va_collections as $va_collection_info){
-				print "<div class='relatedItem'><span class='capsText'>".(($this->request->config->get('allow_detail_for_ca_collections')) ? caNavLink($this->request, $va_collection_info['label'], '', 'Detail', 'Collection', 'Show', array('collection_id' => $va_collection_info['collection_id'])) : $va_collection_info['label'])."</span></div>";
-			}
-			print "</td><!-- end relatedCollections -->";
-		}else{
+#		$va_collections = $t_occurrence->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
+#		if(sizeof($va_collections) > 0){
+#			print "<td id='relatedCollections'><h2>"._t("Related Collection").((sizeof($va_collections) > 1) ? "s" : "")."</h2>";
+#			foreach($va_collections as $va_collection_info){
+#				print "<div class='relatedItem'><span class='capsText'>".(($this->request->config->get('allow_detail_for_ca_collections')) ? caNavLink($this->request, $va_collection_info['label'], '', 'Detail', 'Collection', 'Show', array('collection_id' => $va_collection_info['collection_id'])) : $va_collection_info['label'])."</span></div>";
+#			}
+#			print "</td><!-- end relatedCollections -->";
+#		}else{
 			$vn_showRelatedFiller = 1;
-		}
+#		}
 		
 		if($vn_showRelatedFiller){
 			print "<td class='H2Filler'><div class='H2Filler'><!-- empty --></div></td>";

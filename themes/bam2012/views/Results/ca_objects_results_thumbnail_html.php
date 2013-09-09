@@ -42,12 +42,12 @@ if($vo_result) {
 		$t_list = new ca_lists();
 		while(($vn_item_count < $vn_items_per_page) && ($vo_result->nextHit())) {
 			$vn_object_id = $vo_result->get('object_id');
-			$va_labels = $vo_result->getDisplayLabels();
+			$vs_caption = $vo_result->get('ca_objects.preferred_labels');
 			
-			$vs_caption = "";
-			foreach($va_labels as $vs_label){
-				$vs_caption .= $vs_label;
-			}
+#			$vs_caption = "";
+#			foreach($va_labels as $vs_label){
+#				$vs_caption .= $vs_label;
+#			}
 			# --- get the height of the image so can calculate padding needed to center vertically
 			$va_media_info = $vo_result->getMediaInfo('ca_object_representations.media', 'thumbnail', null, array('checkAccess' => $va_access_values));
 			$vn_padding_top = 0;

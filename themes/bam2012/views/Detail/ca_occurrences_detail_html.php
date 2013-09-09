@@ -214,11 +214,11 @@ if (!$this->request->isAjax()) {
 // 					print "<br/><span class='capsText'>".$vs_type."</span></div>";
 // 				}
 // 			}
-			if(sizeof($va_entities) > 0){
-				foreach($va_entities as $va_entity){
-					print "<div class='relatedItem'>".(($this->request->config->get('allow_detail_for_ca_entities')) ? caNavLink($this->request, $va_entity["label"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $va_entity["entity_id"])) : $va_entity["label"])."<br/><span class='capsText'>".$va_entity['relationship_typename']."</span></div>";
-				}
-			}
+#			if(sizeof($va_entities) > 0){
+#				foreach($va_entities as $va_entity){
+#					print "<div class='relatedItem'>".(($this->request->config->get('allow_detail_for_ca_entities')) ? caNavLink($this->request, $va_entity["label"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $va_entity["entity_id"])) : $va_entity["label"])."<br/><span class='capsText'>".$va_entity['relationship_typename']."</span></div>";
+#				}
+#			}
 ?>
 			</td><!-- end relatedArtist -->
 <?php

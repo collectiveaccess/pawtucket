@@ -56,19 +56,41 @@ if($vo_result) {
 		}
 		$t_object = new ca_objects($object_id);
 		
-		$va_object_media = $t_object->getMediaTag('ca_object_representations.media', 'icon');
+		$va_object_media = $t_object->getMediaTag('ca_object_representations.media', 'widepreview');
 		
 		
 		
 		$va_labels = $vo_result->getDisplayLabels($this->request);
-		print "<div".(($vs_class) ? " class='$vs_class'" : "").">";
-#		print caNavLink($this->request, "<div class='resultIcon'>".$va_object_media."</div>", '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
-		print "<div class='resultText'> ".caNavLink($this->request, $vo_result->get('ca_occurrences.preferred_labels'), '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
-		if($vs_dates){
-			print "<br/> ".$vs_dates;
-		}
-		print "</div></div>\n";
+		print "<div class='prodResult searchThumbnail{$vn_occurrence_id}'>";
+#		if ($va_object_media){
+#			print caNavLink($this->request, "<div class='resultIcon'>".$va_object_media."</div>", '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
+#			print "<div class='resultText' style='width:140px;'> ".caNavLink($this->request, $vo_result->get('ca_occurrences.preferred_labels'), '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
+#			if($vs_dates){
+#				print "<br/> ".$vs_dates;
+#			}
+#			print "</div>";
+#		} else {
+			print "<div style='height:75px; width:10px; display:inline-block;'></div>";
+			print "<div class='resultText' style='width:230px;'> ".caNavLink($this->request, $vo_result->get('ca_occurrences.preferred_labels'), '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
+			if($vs_dates){
+				print "<br/> ".$vs_dates;
+			}
+			print "</div>";
+			
+			if ($va_object_media){
+				// set view vars for tooltip
+				$this->setVar('tooltip_representation', $va_object_media);
+				TooltipManager::add(
+					".searchThumbnail{$vn_occurrence_id}", $this->render('Results/ca_objects_result_tooltip_html.php')
+				);
+			}
+#		}
+		print "</div>\n";
 		$vn_i++;
+		if ($vn_i == 3){
+			print "<div style='width:100%; clear:both'></div>";
+			$vn_i = 0;
+		}
 		
 	}
 	print "</div>\n";

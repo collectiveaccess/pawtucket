@@ -55,6 +55,8 @@
 	</div>
 	<div class="sectionBox">
 <?php
+		print $this->render('Results/ca_objects_search_primary_results.php');
+
 		if ((!$vs_view) || ($vo_result->numHits() == 0) || (!in_array($vs_view, array_keys($this->getVar('result_views'))))) {
 			print $this->render('Results/ca_objects_search_no_results_html.php');
 		}else{

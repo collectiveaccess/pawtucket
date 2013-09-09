@@ -90,13 +90,23 @@ if (!$this->request->isAjax()) {
 			}						
 			if ($va_aff = $t_entity->get('ca_entities.bamAffiliation.affiliation_text')) {
 				print "<div class='mdItemLong'><div class='mdItemHeading'>"._t("BAM Affiliation")."</div> ".$va_aff." (".$t_entity->get('ca_entities.bamAffiliation.affiliation_source').")</div><!-- end unit -->";				
-			}			
+			}				
 
 ?>
-	</div><!-- end leftCol -->
-	
+	</div><!-- end rightCol -->
+<?php	
+		$va_primary_rep = $t_entity->get("ca_objects.object_id", array("returnAsArray" => 1, "restrictToRelationshipTypes" => array("primary_rep")));
+		$va_object_id = $va_primary_rep['0'];
+		$t_object = new ca_objects($va_object_id);
+		
+		if ($va_primary_rep) {
+			print "<div id='objDetailImage'>";
+			print $t_object->getMediaTag('ca_object_representations.media', 'mediumlarge', array('checkAccess' => $va_access_values));
+			print "</div>";
+		}
+?>	
 			<div style="clear:both;"><!-- empty --></div>
-	</div><!-- end productionTopArea -->
+	</div><!-- end entityTopArea -->
 	
 <?php	
 	if($qr_hits->numHits()){
@@ -177,16 +187,16 @@ if (!$this->request->isAjax()) {
 			$vn_showRelatedFiller = 1;
 		}
 		# --- collections
-		$va_collections = $t_entity->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
-		if(sizeof($va_collections) > 0){
-			print "<td id='relatedCollections'><h2>"._t("Related Collection").((sizeof($va_collections) > 1) ? "s" : "")."</h2>";
-			foreach($va_collections as $va_collection_info){
-				print "<div class='relatedItem'>".(($this->request->config->get('allow_detail_for_ca_collections')) ? caNavLink($this->request, $va_collection_info['label'], '', 'Detail', 'Collection', 'Show', array('collection_id' => $va_collection_info['collection_id'])) : $va_collection_info['label'])."</div>";
-			}
-			print "</td><!-- end relatedCollections -->";
-		}else{
+#		$va_collections = $t_entity->get("ca_collections", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
+#		if(sizeof($va_collections) > 0){
+#			print "<td id='relatedCollections'><h2>"._t("Related Collection").((sizeof($va_collections) > 1) ? "s" : "")."</h2>";
+#			foreach($va_collections as $va_collection_info){
+#				print "<div class='relatedItem'>".(($this->request->config->get('allow_detail_for_ca_collections')) ? caNavLink($this->request, $va_collection_info['label'], '', 'Detail', 'Collection', 'Show', array('collection_id' => $va_collection_info['collection_id'])) : $va_collection_info['label'])."</div>";
+#			}
+#			print "</td><!-- end relatedCollections -->";
+#		}else{
 			$vn_showRelatedFiller = 1;
-		}
+#		}
 		
 		if($vn_showRelatedFiller){
 			print "<td class='H2Filler'><div class='H2Filler'><!-- empty --></div></td>";

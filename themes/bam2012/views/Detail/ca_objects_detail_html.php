@@ -431,7 +431,11 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 		$va_depicts = array();
 		$va_depicts = $t_object->get("ca_entities", array("returnAsArray" => 1, "restrictToRelationshipTypes" => array("depicts", "described", "sort" => "ca_entities.surname")));
 		if(sizeof($va_depicts) > 0){
-			print "<td id='relatedDepicts'><h2>"._t("Depicts")."</h2>";
+			if ($this->getVar('typename') == "Promotional") {
+				print "<td id='relatedDepicts'><h2>"._t("Describes")."</h2>";
+			} else {
+				print "<td id='relatedDepicts'><h2>"._t("Depicts")."</h2>";
+			}
 			foreach($va_depicts as $va_depict){
 				print "<div class='relatedItem'>".caNavLink($this->request, $va_depict["displayname"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $va_depict['entity_id']))."</div>";
 			}
