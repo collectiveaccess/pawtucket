@@ -330,9 +330,28 @@
 				}
 				if ($this->request->config->get('do_secondary_search_for_ca_occurrences')) {
 					$o_search = new OccurrenceSearch();
+					$o_search->setTypeRestrictions(array("work"));
 					$qr_res = $o_search->search($ps_search, array('no_cache' => true, 'checkAccess' => $va_access_values));
 					$this->view->setVar('secondary_search_ca_occurrences', $qr_res);
 					$this->_setResultContextForSecondarySearch('ca_occurrences', $ps_search, $qr_res);
+				
+				//
+				// Do productions search
+				// 
+					$o_search = new OccurrenceSearch();
+					$o_search->setTypeRestrictions(array("production"));
+					
+					$qr_res = $o_search->search($ps_search, array('no_cache' => true, 'checkAccess' => $va_access_values));
+					$this->view->setVar('secondary_search_ca_productions', $qr_res);
+					$this->_setResultContextForSecondarySearch('ca_occurrences', $ps_search, $qr_res);
+					
+					$o_search = new OccurrenceSearch();
+					$o_search->setTypeRestrictions(array("special_event"));
+					
+					$qr_res = $o_search->search($ps_search, array('no_cache' => true, 'checkAccess' => $va_access_values));
+					$this->view->setVar('secondary_search_ca_special_events', $qr_res);
+					$this->_setResultContextForSecondarySearch('ca_occurrences', $ps_search, $qr_res);
+				
 				}
 				if ($this->request->config->get('do_secondary_search_for_ca_collections')) {
 					$o_search = new CollectionSearch();
@@ -368,8 +387,19 @@
 					break;
 				case 'ca_occurrences':
 					$o_search = new OccurrenceSearch();
+					$o_search->setTypeRestrictions(array("work"));
 					$qr_res = $o_search->search($ps_search, array('checkAccess' => $va_access_values));
 					break;
+				case 'ca_productions':
+					$o_search = new OccurrenceSearch();
+					$o_search->setTypeRestrictions(array("production"));
+					$qr_res = $o_search->search($ps_search, array('checkAccess' => $va_access_values));
+					break;	
+				case 'ca_special_events':
+					$o_search = new OccurrenceSearch();
+					$o_search->setTypeRestrictions(array("special_event"));
+					$qr_res = $o_search->search($ps_search, array('checkAccess' => $va_access_values));
+					break;										
 				case 'ca_collections':
 					$o_search = new CollectionSearch();
 					$qr_res = $o_search->search($ps_search, array('checkAccess' => $va_access_values));
@@ -435,7 +465,7 @@
 			}
 			
 			if ($this->request->config->get('quicksearch_return_ca_entities')) {
- 				$va_data['ca_entities'][_t('Entities')] = caExtractValuesByUserLocale(SearchEngine::quickSearch($vs_search, 'ca_entities', 20, array('limit' => 3, 'checkAccess' => $va_access_values)));
+ 				$va_data['ca_entities'][_t('People')] = caExtractValuesByUserLocale(SearchEngine::quickSearch($vs_search, 'ca_entities', 20, array('limit' => 3, 'checkAccess' => $va_access_values)));
  			}
  			
  			if ($this->request->config->get('quicksearch_return_ca_places')) {
