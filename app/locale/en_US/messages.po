@@ -24,7 +24,7 @@ msgstr ""
 #: app/controllers/AccountController.php:112
 #: app/controllers/AccountController.php:152
 msgid "Invalid order_id"
-msgstr ""
+msgstr "Invalid order_id"
 
 #: app/controllers/AccountController.php:104
 msgid "This order is not yet available for viewing"
