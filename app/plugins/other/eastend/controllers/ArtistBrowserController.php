@@ -112,7 +112,7 @@
 
 
 			$this->opo_result_context = new ResultContext($po_request, $this->ops_tablename, $this->ops_find_type);
-			#$this->opo_result_context->setAsLastFind();
+			$this->opo_result_context->setAsLastFind();
 			
 			$this->opo_browse = new EntityBrowse();
 			
@@ -166,7 +166,8 @@
  			
  			// Remove any browse criteria previously set
 			$this->opo_browse->removeAllCriteria();
-			
+			$this->opo_browse->addCriteria('_search', 'ca_entities.source_id:'.$this->aoee_featured_source.' or ca_entities.source_id:'.$this->aoee_source.' or ca_entities.source_id:'.$this->aoee_priority_source);
+				
  			parent::Index(true);
  			
 			$this->render('artist_browser_html.php');
@@ -201,6 +202,8 @@
  			// Remove any browse criteria previously set
 			$this->opo_browse->removeAllCriteria();
 			$this->opo_browse->addCriteria('_search', 'ca_entities.source_id:'.$this->aoee_featured_source.' or ca_entities.source_id:'.$this->aoee_source.' or ca_entities.source_id:'.$this->aoee_priority_source);
+			$this->opo_browse->execute();
+			
 			if (!is_array($pa_options)) { $pa_options = array(); }
  			if ($ps_view = preg_replace('![^A-Za-z0-9_]+!', '', $this->request->getParameter('view', pString))) {
  				$vs_relative_path = 'Browse/ajax_browse_facet_'.$ps_view.'_html.php';
@@ -266,14 +269,44 @@
 		 * Overrides base controller!
 		 */
  		public function clearAndAddCriteria() {
+ 			$o_cache = caGetCacheObject('ca_artists_browser');
+ 			
  			$this->getDefaults();
  			$this->opo_browse->removeAllCriteria();
  			$ps_facet_name = $this->request->getParameter('facet', pString);
- 			$this->opo_browse->addCriteria('_search', 'ca_entities.source_id:'.$this->aoee_featured_source.' or ca_entities.source_id:'.$this->aoee_source.' or ca_entities.source_id:'.$this->aoee_priority_source);
- 			$this->opo_browse->addCriteria($ps_facet_name, array($this->request->getParameter('id', pString)));
+ 			$vs_id = $this->request->getParameter('id', pString);
+ 			$vs_md5_key = md5($ps_facet_name.'/'.$vs_id);
  			
- 			$this->view->setVar('result_views', array('full'));
- 			parent::Index();
+ 			if (($vs_content = $o_cache->load($vs_md5_key)) !== false) {
+ 				$this->response->addContent($vs_content);
+ 				$va_entity_ids =  $o_cache->load($vs_md5_key.'_id_list');
+				$this->opo_result_context->setResultList($va_entity_ids);
+				$this->opo_result_context->saveContext();
+ 			} else {
+ 			
+				$this->opo_browse->addCriteria('_search', 'ca_entities.source_id:'.$this->aoee_featured_source.' or ca_entities.source_id:'.$this->aoee_source.' or ca_entities.source_id:'.$this->aoee_priority_source);
+				if ($ps_facet_name) {
+					$this->opo_browse->addCriteria($ps_facet_name, array($vs_id));
+				}
+				$this->view->setVar('result_views', array('full'));
+				parent::Index(true);
+				$vs_content = $this->render('Browse/browse_controls_html.php');
+				
+				$vo_result = $this->view->getVar('result');
+				$vo_result->seek(0);
+				$va_entity_ids = array();
+				while($vo_result->nextHit()) {
+					$va_entity_ids[] = $vo_result->get('ca_entities.entity_id');
+				}
+				$vo_result->seek(0);
+				$this->opo_result_context->setResultList($va_entity_ids);
+				$this->opo_result_context->saveContext();
+				
+				$o_cache->save($vs_content);
+				
+				$o_cache->load($vs_md5_key.'_id_list');
+				$o_cache->save($va_entity_ids);
+			}
  		}
 		# -------------------------------------------------------
  	}

@@ -93,7 +93,7 @@
 				<script type="text/javascript">
 					// Initialize the plugin
 					$(document).ready(function () {
-						$("div.#ex_description").smoothDivScroll({
+						$("#ex_description").smoothDivScroll({
 							visibleHotSpotBackgrounds: "always",
 							hotSpotScrollingInterval: 45
 						});
@@ -151,7 +151,7 @@
 				$va_place_info = array_pop($va_places);
 				$t_place = new ca_places($va_place_info['place_id']);
 				$o_map = new GeographicMap(238, $vn_map_height, 'map');
-				$o_map->mapFrom($t_place, "ca_places.georeference");
+				$o_map->mapFrom($t_place, "ca_places.georeference", array("request" => $this->request, "checkAccess" => $va_access_values, 'contentTemplate' => "^ca_places.preferred_labels.name"));
 				print "<div class='captionSmall'>".$o_map->render('HTML');
 				print (($this->request->config->get('allow_detail_for_ca_places')) ? caNavLink($this->request, $va_place_info['label'], '', 'Detail', 'Place', 'Show', array('place_id' => $va_place_info['place_id'])) : $va_place_info['label'])."</div>";
 			}

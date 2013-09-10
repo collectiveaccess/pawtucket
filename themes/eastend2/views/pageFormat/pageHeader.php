@@ -39,7 +39,18 @@
 <body>
 <div id="container">
 	<div id="topnav">
-		<div class="leftnav"><a href="http://www.parrishart.org" />Back to Parrish Art Museum Site</a></div>
+		<div class="leftnav"><a href="http://www.parrishart.org" />Back to Parrish Art Museum Site</a>
+<?php
+			if (!$this->request->config->get('dont_allow_registration_and_login')) {
+				if($this->request->isLoggedIn()){
+					print " | ".caNavLink($this->request, _t("Logout"), "loginOut", "", "LoginReg", "Logout");
+					print caNavLink($this->request, _t("Lightbox"), "loginOut", "", "Sets", "Index");
+				}else{
+					print " | ".caNavLink($this->request, _t("Login"), "loginOut", "", "LoginReg", "form");
+				}
+			}
+?>
+			</div>
 			<div class="rightnav">
 				<div class="social"><a href="http://www.facebook.com/pages/Parrish-Art-Museum/33655647667?ref=ts"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/eastend/fbookicon.gif" title="facebook" width="21" height="20" alt="facebook" /></a><a href="http://twitter.com/parrishart"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/eastend/twittericon.gif" title="twitter" width="21" height="20" alt="twitter" /></a><a href="http://vimeo.com/parrishartmuseum"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/eastend/vimeoicon.gif" title="vimeo" width="21" height="20" alt="vimeo" /></a><a href="http://www.flickr.com/photos/parrishart/sets/"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/eastend/flickricon.gif" title="flickr" width="21" height="20" alt="flickr" /></a></div>
 				<form name="header_search" action="<?php print caNavUrl($this->request, '', 'Search', 'Index'); ?>" method="get">
@@ -54,17 +65,9 @@
 		<ul>
 			<li><?php print caNavLink($this->request, _t("Chronology"), "", "eastend", "Chronology", "Index"); ?></li>
 			<li><?php print caNavLink($this->request, _t("Artists"), "", "eastend", "ArtistBrowser", "Index"); ?></li>
+			<li><?php print caNavLink($this->request, _t("Participate"), "", "eastend", "Participate", "Index"); ?></li>
+			<li><?php print caNavLink($this->request, _t("About"), "", "", "About", "Index"); ?></li>
 			<!--<li><a href="#">Map</a></li>-->
-<?php
-			if (!$this->request->config->get('dont_allow_registration_and_login')) {
-				if($this->request->isLoggedIn()){
-					print "<li>".caNavLink($this->request, _t("Lightbox"), "", "", "Sets", "Index")."</li>";
-					print "<li>".caNavLink($this->request, _t("Logout"), "", "", "LoginReg", "Logout")."</li>";
-				}else{
-					print "<li>".caNavLink($this->request, _t("Login"), "", "", "LoginReg", "form")."</li>";
-				}
-			}
-?>
 		</ul>
 	</div><!--end header-->
 

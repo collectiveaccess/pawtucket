@@ -64,7 +64,6 @@
 				print "<div class='chronoLists' style='height:".$vn_col_height."px;'><div><ul>";
 				while($q_occurrences->nextHit()){
 					print "<li>";
-					#print "<a href='#' onclick='jQuery(\"#chron_thumb\").load(\"".caNavUrl($this->request, 'eastend', 'Chronology', 'RefineSearch', array('period' => $pn_period, 'occurrence_id' => $q_occurrences->get("occurrence_id")))."\"); return false;'>".join(", ", $q_occurrences->getDisplayLabels())."</a>";
 					print caNavLink($this->request, join(", ", $q_occurrences->getDisplayLabels()), "", "Detail", "Occurrence", "Show", array("occurrence_id" => $q_occurrences->get("occurrence_id")));
 					print "</li>";
 				}
@@ -81,10 +80,7 @@
 					if (!in_array($vn_item_id, $va_list_items_with_objects)) {
 						print join(", ", $q_styles_schools->getDisplayLabels());
 					} else {
-						//print "<a href='#' onclick='jQuery(\"#chron_thumb\").load(\"".caNavUrl($this->request, 'eastend', 'Chronology', 'RefineSearch', array('period' => $pn_period, 'item_id' => $vn_item_id))."\"); return false;'>".join(", ", $q_styles_schools->getDisplayLabels())."</a>";
 						print "<a href='#' onclick='jQuery(\"#chron_thumbScroll\").smoothDivScroll(\"getAjaxContent\", \"".caNavUrl($this->request, 'eastend', 'Chronology', 'RefineSearch', array('period' => $pn_period, 'item_id' => $vn_item_id))."\",\"replace\"); return false;'>".join(", ", $q_styles_schools->getDisplayLabels())."</a>";
-						
-						#print join(", ", $q_styles_schools->getDisplayLabels());
 					}
 					print "</li>";
 				}
@@ -100,13 +96,7 @@
 					if (!in_array($vn_entity_id, $va_entities_with_objects)) {
 						print join(", ", $q_entities->getDisplayLabels());
 					} else {
-						//print "<a href='#' onclick='jQuery(\"#chron_thumb\").load(\"".caNavUrl($this->request, 'eastend', 'Chronology', 'RefineSearch', array('period' => $pn_period, 'entity_id' => $vn_entity_id))."\", function() { $(\"div#chron_thumbScroll\").smoothDivScroll({ visibleHotSpotBackgrounds: \"always\" }); }); return false;'>".join(", ", $q_entities->getDisplayLabels())."</a>";
-						
-						print "<a href='#' onclick='jQuery(\"#chron_thumbScroll\").smoothDivScroll(\"getAjaxContent\", \"".caNavUrl($this->request, 'eastend', 'Chronology', 'RefineSearch', array('period' => $pn_period, 'entity_id' => $vn_entity_id))."\",\"replace\"); return false;'>".join(", ", $q_entities->getDisplayLabels())."</a>";
-						
-						
-						#print "<a href='#' onclick='jQuery(\"#chron_thumb\").load(\"".caNavUrl($this->request, 'eastend', 'Chronology', 'RefineSearch', array('period' => $pn_period, 'entity_id' => $q_entities->get("entity_id")))."\", function() { $(\"div.chron_thumbScroll".$q_entities->get("entity_id")."\").smoothDivScroll({ visibleHotSpotBackgrounds: \"always\" }); alert(\"what?\"); }); return false;'>".join(", ", $q_entities->getDisplayLabels())."</a>";
-						#print "<a href='#' onclick='jQuery(\"#chron_thumb\").load(\"".caNavUrl($this->request, 'eastend', 'Chronology', 'RefineSearch', array('period' => $pn_period, 'entity_id' => $q_entities->get("entity_id")))."\"); return false;'>".join(", ", $q_entities->getDisplayLabels())."</a>";						
+						print "<a href='#' onclick='jQuery(\"#chron_thumbScroll\").smoothDivScroll(\"getAjaxContent\", \"".caNavUrl($this->request, 'eastend', 'Chronology', 'RefineSearch', array('period' => $pn_period, 'entity_id' => $vn_entity_id))."\",\"replace\"); return false;'>".join(", ", $q_entities->getDisplayLabels())."</a>";					
 					}
 					print "</li>";
 				}
@@ -117,7 +107,7 @@
 	</div><!--end chron_content-->	
 	<script type="text/javascript">
 		// Initialize the plugin
-		$(document).ready(function () {
+		jQuery(document).ready(function () {
 			$("div.chronoLists").smoothDivScroll({
 				visibleHotSpotBackgrounds: "always",
 				hotSpotScrollingInterval: 45
