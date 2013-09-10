@@ -3235,13 +3235,21 @@ if (!$va_facet_info['show_all_when_first_facet'] || ($this->numCriteria() > 0)) 
 						
 						// Expand facet to include ancestors
 						if (!isset($va_facet_info['dont_expand_hierarchically']) || !$va_facet_info['dont_expand_hierarchically']) {
+							$va_hier_wheres = array();
+							if (is_array($va_restrict_to_types) && (sizeof($va_restrict_to_types) > 0)) {
+								$va_hier_wheres[] = "p.type_id IN (".join(',', $va_restrict_to_types).")";
+							}
+							if (is_array($va_exclude_types) && (sizeof($va_exclude_types) > 0)) {
+								$va_hier_wheres[] = "p.type_id NOT IN (".join(',', $va_exclude_types).")";
+							}
 							while(sizeof($va_ids = array_keys($va_facet_parents))) {
 								$vs_sql = "
 									SELECT p.".$t_rel_item->primaryKey().", p.{$vs_hier_parent_id_fld}".(($vs_hier_id_fld = $t_rel_item->getProperty('HIERARCHY_ID_FLD')) ? ", p.{$vs_hier_id_fld}" : "")."
 									FROM ".$t_rel_item->tableName()." p
 									WHERE
 										(p.".$t_rel_item->primaryKey()." IN (?)) AND (p.{$vs_hier_parent_id_fld} IS NOT NULL)
-								";
+								".(sizeof($va_hier_wheres) ? " AND ".join(" AND ", $va_hier_wheres) : "");
+							
 								$qr_res = $this->opo_db->query($vs_sql, array($va_ids));
 								
 								$va_facet_parents = array();

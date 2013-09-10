@@ -431,7 +431,7 @@ $vs_tag = "
 	  * 
 	  * @param array $pa_attributes
 	  * @param array $pa_options Optional array of options. Supported options are:
-	  *			dontConvertAttributeQuotesToEntities = if true, attribute values are not passed through htmlspecialchars(); if you set this be sure to only use single quotes in your attribute values or escape all double quotes since double quotes are used to enclose tem
+	  *			dontConvertAttributeQuotesToEntities = if true, attribute values are not passed through htmlspecialchars(); if you set this be sure to only use single quotes in your attribute values or escape all double quotes since double quotes are used to enclose the item
 	  */
 	function _caHTMLMakeAttributeString($pa_attributes, $pa_options=null) {
 		$va_attr_settings = array();
