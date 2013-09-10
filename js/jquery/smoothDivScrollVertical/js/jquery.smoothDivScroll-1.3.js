@@ -944,6 +944,7 @@
 						el.data("scrollableArea").html(filteredContent);
 						break;
 				}
+						console.log("got " + manipulationMethod + "/" + el.data("startingPosition"));
 
 				// Recalculate the total height of the elements inside the scrollable area
 				// if it's not the initial AJAX content load. If so, it's taken care of
@@ -952,6 +953,7 @@
 					self.recalculateScrollableArea();
 				} else {
 					el.data("initialAjaxContentLoaded", true);
+					self.recalculateScrollableArea();
 				}
 
 				// Determine which hotspots to show
