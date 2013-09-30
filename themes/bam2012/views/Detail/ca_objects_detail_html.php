@@ -421,7 +421,7 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 		if(sizeof($va_production) > 0){
 			print "<td id='relatedProduction'><h2>"._t("Production").((sizeof($va_production) > 1) ? "s" : "")."</h2>";
 			foreach($va_production as $va_prod){
-				print "<div class='relatedItem'>".caNavLink($this->request, $va_prod['name'], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $va_prod['occurrence_id']))."</div>";
+				print "<div class='relatedItem'>".caNavLink($this->request, $va_prod['name'].' ('.$va_prod["idno"].')', '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $va_prod['occurrence_id']))."</div>";
 			}
 			print "</td><!-- end relatedGenres -->";
 		}else{

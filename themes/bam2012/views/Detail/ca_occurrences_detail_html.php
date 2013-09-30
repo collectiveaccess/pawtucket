@@ -190,7 +190,7 @@ if (!$this->request->isAjax()) {
 		}
 		# --- entities
 		$va_principal_artists = $t_occurrence->get("ca_entities", array("returnAsArray" => 1, 'checkAccess' => $va_access_values, 'restrictToRelationshipTypes' => array('principal_artist'), 'sort' => array('ca_entities.surname')));
-		$va_entities = $t_occurrence->get("ca_entities", array("returnAsArray" => 1, 'checkAccess' => $va_access_values, "exclude_relationship_types" => array('principal_artist'), 'sort' => array('ca_entities.surname')));
+		#$va_entities = $t_occurrence->get("ca_entities", array("returnAsArray" => 1, 'checkAccess' => $va_access_values, "exclude_relationship_types" => array('principal_artist'), 'sort' => array('ca_entities.surname')));
 		if((sizeof($va_entities) > 0) || (sizeof($va_principal_artists) > 0)){	
 ?>
 			<td id="relatedArtists"><h2><?php print _t("Related Artist").((sizeof($va_entities) > 1) ? "s" : ""); ?></h2>
@@ -198,7 +198,7 @@ if (!$this->request->isAjax()) {
 			if((sizeof($va_principal_artists) > 0)){
 				print "<div class='relatedItem'>";
 				foreach($va_principal_artists as $va_principal_artist) {
-					print (($this->request->config->get('allow_detail_for_ca_entities')) ? caNavLink($this->request, $va_principal_artist["label"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $va_principal_artist["entity_id"])) : $va_principal_artist["label"])."<br/>";
+					print caNavLink($this->request, $va_principal_artist["label"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $va_principal_artist["entity_id"]))."<br/>";
 				}
 				print "<span class='capsText'>".$va_principal_artist['relationship_typename']."</span></div>";
 			}
@@ -243,7 +243,7 @@ if (!$this->request->isAjax()) {
 				foreach($va_production_list as $vn_rel_production_id => $va_info) {
 					#print "<div class='relatedItem'>".(($this->request->config->get('allow_detail_for_ca_occurrences')) ? caNavLink($this->request, $va_info["label"], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_rel_occurrence_id)) : $va_info["label"])."</div>";
 					# --- no links to works detail?????
-					print "<div class='relatedItem'>".caNavLink($this->request, $va_info["label"], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $va_info['occurrence_id']))."</div>";
+					print "<div class='relatedItem'>".caNavLink($this->request, $va_info["label"].' ('.$va_info["idno"].')', '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $va_info['occurrence_id']))."</div>";
 				}
 				print "</td><!-- end relatedWorks -->";
 			}

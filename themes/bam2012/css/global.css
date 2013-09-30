@@ -547,10 +547,11 @@ div.searchlight-results div.searchlight-selected {
 }
 .detailBodyProduction #productionTopArea #leftCol {
 	width:545px;
-	padding: 10px 0px 15px 0px;
+	padding: 0px 0px 15px 0px;
 	color: #FFFFFF;
 	font-size:13px;	
-	text-align:left;
+	text-align:center;
+	float:left;
 }
 .detailBodyProduction #productionTopArea #leftCol img {
 	margin-bottom:15px;

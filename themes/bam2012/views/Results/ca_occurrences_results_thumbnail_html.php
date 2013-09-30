@@ -38,10 +38,12 @@ if($vo_result) {
 	$va_tooltips = array();
 	$t_list = new ca_lists();
 	$vn_i = 0;
+	$vn_ii = 0;
 	while(($vn_i < $vn_items_per_page) && ($vo_result->nextHit())) {
 		$vs_dates = $vo_result->get('ca_occurrences.productionDate');
 		$vs_class = "";
 		$vn_item_count++;
+		$vn_i++;
 		if($vn_item_count == 2){
 			$vs_class = "resultBg";
 			$vn_item_count = 0;
@@ -86,8 +88,8 @@ if($vo_result) {
 			}
 #		}
 		print "</div>\n";
-		$vn_i++;
-		if ($vn_i == 3){
+		$vn_ii++;
+		if ($vn_ii == 3){
 			print "<div style='width:100%; clear:both'></div>";
 			$vn_i = 0;
 		}

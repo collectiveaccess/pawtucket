@@ -154,7 +154,7 @@ if (!$this->request->isAjax()) {
 				foreach($va_production_list as $vn_rel_production_id => $va_info) {
 					#print "<div class='relatedItem'>".(($this->request->config->get('allow_detail_for_ca_occurrences')) ? caNavLink($this->request, $va_info["label"], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_rel_occurrence_id)) : $va_info["label"])."</div>";
 					# --- no links to works detail?????
-					print "<div class='relatedItem'>".caNavLink($this->request, $va_info["label"], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $va_info['occurrence_id']))."<br/><span class='capsText'>".$va_info['relationship_typename']."</span></div>";
+					print "<div class='relatedItem'>".caNavLink($this->request, $va_info["label"].' ('.$va_info["idno"].')', '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $va_info['occurrence_id']))."<br/><span class='capsText'>".$va_info['relationship_typename']."</span></div>";
 				}
 				print "</td><!-- end relatedWorks -->";
 			}

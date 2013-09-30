@@ -62,7 +62,7 @@
 					$vn_c = 0;
 					$vb_link_to_occurrence_detail = (int)$this->request->config->get('allow_detail_for_ca_occurrences') ? true : false;
 					while($qr_occurrences->nextHit()) {
-						$vs_name = $qr_occurrences->get('ca_occurrences.preferred_labels');
+						$vs_name = $qr_occurrences->get('ca_occurrences.preferred_labels')." (".$qr_occurrences->get('ca_occurrences.idno').")";
 						
 						if ($vb_link_to_occurrence_detail) {
 							print caNavLink($this->request, $vs_name, '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $qr_occurrences->get("occurrence_id")));

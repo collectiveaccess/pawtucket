@@ -63,9 +63,12 @@
 		<div id="hpBrowse">
 <?php
 			print caNavLink($this->request, _t("Browse the Collection"), "", "", "Search", "Index", array("search" => "*"))."<br/>";
-			print caNavLink($this->request, _t("Browse for Objects"), "", "", "Browse", "clearCriteria", array("target" => "ca_objects"))."<br/>";
-			print caNavLink($this->request, _t("Browse for Productions"), "", "", "Browse", "clearCriteria", array("target" => "ca_occurrences"))."<br/>";
-			print caNavLink($this->request, _t("Browse for People"), "", "", "Browse", "clearCriteria", array("target" => "ca_entities"));
+#			print caNavLink($this->request, _t("Browse for Objects"), "", "", "Browse", "clearCriteria", array("target" => "ca_objects"))."<br/>";
+			print '<a href="' .caNavUrl($this->request, '', 'Browse', 'modifyCriteria', array("target" => "ca_objects")). '/facet/access_facet/id/1/mod_id/0" class="thumb-link">Browse for Objects</a><br/>';
+#			print caNavLink($this->request, _t("Browse for Productions"), "", "", "Browse", "clearCriteria", array("target" => "ca_occurrences"))."<br/>";
+			print '<a href="' .caNavUrl($this->request, '', 'Browse', 'modifyCriteria', array("target" => "ca_occurrences")). '/facet/access_facet/id/1/mod_id/0" class="thumb-link">Browse for Productions</a><br/>';
+#			print caNavLink($this->request, _t("Browse for People"), "", "", "Browse", "clearCriteria", array("target" => "ca_entities"));
+			print '<a href="' .caNavUrl($this->request, '', 'Browse', 'modifyCriteria', array("target" => "ca_entities")). '/facet/access_facet/id/1/mod_id/0" class="thumb-link">Browse for Entities</a><br/>';
 
 ?>
 		</div><!-- end hpBrowse-->
