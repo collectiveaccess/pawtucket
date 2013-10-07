@@ -33,6 +33,7 @@
 	$vs_content_mode 		= $this->getVar('content_mode');
 	$vs_title 				= $this->getVar('title');
 	$vs_download_version 	= $this->getVar('download_version');
+	$vb_is_searchable 		= (bool)$this->getVar('is_searchable');
 	
 	header("Content-type: application/json");
 	print json_encode(array(
@@ -49,7 +50,7 @@
 			),
 			'pageList' => $va_pages,
 			'downloadUrl' => in_array($vs_content_mode, array('multiple_representations', 'hierarchy_of_representations')) ? caNavUrl($this->request, 'Detail', 'Object', 'DownloadMedia', array('object_id' => $pn_object_id, 'representation_id' => $pn_representation_id, 'download' => 1, 'version' => $vs_download_version)): caNavUrl($this->request, 'Detail', 'Object', 'DownloadRepresentation', array('object_id' => $pn_object_id, 'representation_id' => $pn_representation_id, 'download' => 1, 'version' => $vs_download_version)),
-			'search' => caNavUrl($this->request,  'Detail', 'Object', 'SearchWithinMedia', array('object_id' => $pn_object_id, 'representation_id' => $pn_representation_id))."/q/{query}"
+			'search' => $vb_is_searchable ? caNavUrl($this->request,  'Detail', 'Object', 'SearchWithinMedia', array('object_id' => $pn_object_id, 'representation_id' => $pn_representation_id))."/q/{query}" : null
 		)
 	));
 ?>
