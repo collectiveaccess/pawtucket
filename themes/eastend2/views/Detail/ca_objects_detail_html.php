@@ -148,7 +148,11 @@
 	// 				}
 	// 			}
 				if($t_creator->get("lifespans_date")){
-					$vs_lifespan = $t_creator->get("lifespans_date");
+					if(strstr($t_creator->get("lifespans_date"), "after")){
+						$vs_lifespan = str_replace("after", "born", $t_creator->get("lifespans_date"));
+					}else{
+						$vs_lifespan = $t_creator->get("lifespans_date");
+					}
 				}
 				print "<span class='creator listhead caps'>".$vs_creator;
 				if($vs_lifespan){

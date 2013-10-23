@@ -6,11 +6,11 @@
 	</div>
 	<div>
 		<H2>Call for Participation</H2>
-		Become a participant in documenting the legacy of artists on the East End. The Parrish is currently soliciting contributions of oral histories, photographs, audio, home movies, and print ephemera related to artists who have lived or worked in the region.  Contact us at 631-283-2118 ext. 121, or email <a href="mailto:wingfieldc@parrishart.org">wingfieldc@parrishart.org</a> to become a contributor to this ongoing story.
+		<b><?php print caNavLink($this->request, _t("Become a participant in documenting the legacy of artists on the East End"), "", "eastend", "Participate", "Index"); ?></b>. The Parrish is currently soliciting contributions of oral histories, photographs, audio, home movies, and print ephemera related to artists who have lived or worked in the region.  Contact us at 631-283-2118 ext. 121, or email <a href="mailto:wingfieldc@parrishart.org">wingfieldc@parrishart.org</a> to become a contributor to this ongoing story.  To learn more about participating and contribute materials online, <b><?php print caNavLink($this->request, _t("click here"), "", "eastend", "Participate", "Index"); ?></b>.
 	</div>
 	<div>
 		<H2>Companion Programs</H2>
-		<i>East End Stories on Screen</i>, a semiannual live-narrated film series composed of excerpts from rarely seen archival films and videotapes, brings East End Stories to life through moving images with live commentary by the series curator and special guests. Films range from artists’ interviews to studio visits, documentaries, film art, and amateur and small gauge movies.  Particpants and contributors include Bob Colacello, Joel David, Helen Harrison, Genie Henderson, Andy Lampert, Mike Solomon, Penny Wright, Larry Rivers Foundation, LTV, Inc., Metropolitan Museum of Art, Pollock Krasner House and Study Center, and Warhol Museum.
+		<i>East End Stories on Screen</i>, a semiannual live-narrated film series composed of excerpts from rarely seen archival films and videotapes, brings East End Stories to life through moving images with live commentary by the series curator and special guests. Films range from artists’ interviews to studio visits, documentaries, film art, and amateur and small gauge movies.  Participants and contributors include Bob Colacello, Joel David, Helen Harrison, Genie Henderson, Andy Lampert, Mike Solomon, Penny Wright, Larry Rivers Foundation, LTV, Inc., Metropolitan Museum of Art, Pollock Krasner House and Study Center, and Warhol Museum.
 	</div>
 	<div>
 		<H2>Funders</H2>

@@ -37,13 +37,18 @@
 <h1>Participate</h1>
 <div class="textContent">
 	<div>
-		East End Stories illustrates the dynamic history of artists who have lived and worked on the East End of Long Island since the 1820s. The site includes biographical information, art historical narratives, photographs, maps, and much more. 
+		East End Stories illustrates the dynamic history of artists who have lived and worked on the East End of Long Island since the 1820s. The site includes biographical information, art historical narratives, photographs, maps, and much more.
 	</div>
 	<div>
-		YOU can become a part of the story!  The Parrish is currently soliciting contributions of oral histories, photographs, audio, video, home movies, and print ephemera related to artists who have lived or worked in the region.
+		YOU can become a part of the story! The Parrish is currently soliciting contributions of oral histories, photographs, audio, video, home movies, and print ephemera related to artists who have lived or worked in the region.
 	</div>
 	<div>
-		ARTISTS: Submit photographs or a video tour of your East End studio. Submit biographical information, links, memories, and information about yourself or other artists.
+<?php
+	print "<b>".caNavLink($this->request, _t("Click here to see user contributed content"), "", "", "Search", "Index", array("search" => "ca_objects.source_id:".$this->getVar("user_contributed_source_id")." or ca_objects.source_id:".$this->getVar("user_contributed_other_source_id")))."</b>";
+?>
+	</div>
+	<div>
+		DATABASE ARTISTS: Submit photographs or a video tour of your East End studio. Submit biographical information, links, memories, and information about yourself or other artists.
 	</div>
 	<div>
 		ARTISTS' ESTATES and FAMILIES: Submit photographs, home movies, and biographical information.
@@ -52,16 +57,16 @@
 		COMMUNITY MEMBERS: Submit memories and anecdotes about artists in your community.
 	</div>
 	<div>
-		Contact us at 631-283-2118 ext. 121, or email <a href="mailto:wingfieldc@parrishart.org">wingfieldc@parrishart.org</a> to become a contributor to this ongoing story.
-	</div>
-	<div>
 <?php
 	if($this->request->isLoggedIn()){
-		print "<b>".caNavLink($this->request, _t("Click here to submit your story."), "blueLink", "Contribute", "Form", "Edit")."</b>";
+		print "<b>".caNavLink($this->request, _t("Click here to submit your story."), "", "Contribute", "Form", "Edit")."</b>";
 	}else{
-		print "<b>".caNavLink($this->request, _t("Please login/register to share your story."), "blueLink", "", "LoginReg", "form")."</b>";
+		print "<b>".caNavLink($this->request, _t("Please login/register to share your story and upload media."), "", "", "LoginReg", "form")."</b>";
 	}
 ?>
+	</div>
+	<div>
+		East End Stories reflects the Parrish Art Museum’s ongoing research on the art and artists of the East End of Long Island.  Site content is updated regularly.  Artists may submit a resume to be considered for inclusion.  Contact us at 631-283-2118 ext. 121, or email <a href="mailto:wingfieldc@parrishart.org">wingfieldc@parrishart.org</a> for more information.
 	</div>
 </div>
 
