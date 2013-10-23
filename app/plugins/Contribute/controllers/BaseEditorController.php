@@ -247,6 +247,25 @@
  						$this->notification->addNotification($this->opa_ui_info['post_submission_notification_message'], __NOTIFICATION_TYPE_INFO__);
  					}
  				}
+ 				# --- check if email notification should be sent to administrator
+ 				if($this->opo_plugin_config->get('admin_email_notification') && $this->opo_plugin_config->get('admin_email_notification_address')){
+					$vs_app_name = __CA_APP_DISPLAY_NAME__;
+					$vs_app_url = __CA_SITE_HOSTNAME__;
+					$vs_record_name = $t_subject->getLabelForDisplay();
+					# -- generate mail text from template - get both html and text versions
+					ob_start();
+					require(__CA_APP_DIR__."/plugins/Contribute/themes/".$this->ops_theme."/views/mailTemplates/contribute_admin_notification_email_text.tpl");
+					$vs_mail_message_text = ob_get_contents();
+					ob_end_clean();
+					ob_start();
+					require(__CA_APP_DIR__."/plugins/Contribute/themes/".$this->ops_theme."/views/mailTemplates/contribute_admin_notification_email_html.tpl");
+					$vs_mail_message_html = ob_get_contents();
+					ob_end_clean();
+									
+					if(!caSendmail($this->opo_plugin_config->get('admin_email_notification_address'), $this->opo_plugin_config->get('admin_email_notification_address'), _t($vs_app_name." Contribute notification"), $vs_mail_message_text, $vs_mail_message_html)){
+						$this->notification->addNotification(_t("Admin notification email was not sent"), "message");
+					}
+				}
  				switch($this->opa_ui_info['post_submission_destination']) {
  					case 'url':
  						$vs_url = caNavUrl($this->request, $this->opa_ui_info['post_submission_destination_url']['module'], $this->opa_ui_info['post_submission_destination_url']['controller'], $this->opa_ui_info['post_submission_destination_url']['action']);
