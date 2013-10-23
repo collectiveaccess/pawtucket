@@ -635,9 +635,9 @@ div.searchlight-results div.searchlight-selected {
 	height: 500px;
 }
 /* force the z-index of the bookreader to be lower than the caMediaPanel when embedded in the page */
-#detailBody #BookReaderContainer div{
+/* #detailBody #BookReaderContainer div{
 	z-index:100;
-}
+}*/
 #objDetailToolbar {
 	margin: 15px 0px 15px 0px;
 	text-align:right;

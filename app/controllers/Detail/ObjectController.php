@@ -31,6 +31,7 @@
  	require_once(__CA_MODELS_DIR__."/ca_relationship_types.php");
  	require_once(__CA_MODELS_DIR__."/ca_object_representations.php");
  	require_once(__CA_LIB_DIR__."/ca/Search/ObjectSearch.php");
+ 	require_once(__CA_LIB_DIR__."/ca/MediaContentLocationIndexer.php");
  	require_once(__CA_LIB_DIR__.'/pawtucket/BaseDetailController.php');
  	require_once(__CA_APP_DIR__.'/helpers/accessHelpers.php');
  	require_once(__CA_APP_DIR__.'/helpers/mediaPluginHelpers.php');
@@ -124,6 +125,8 @@
  			$va_section_cache = $this->request->session->getVar('caDocumentViewerSectionCache');
  			$this->view->setVar('pages', $va_pages);
  			$this->view->setVar('sections', $va_section_cache[$pn_object_id.'/'.$pn_representation_id]);
+ 			
+ 			$this->view->setVar('is_searchable', MediaContentLocationIndexer::hasIndexing('ca_object_representations', $pn_representation_id));
  			
  			$this->render('object_representation_page_list_json.php');
  		}
@@ -371,6 +374,23 @@
 			
 			$this->render('ajax_object_lookup_json.php');
 		}
+		# -------------------------------------------------------
+ 		/**
+ 		 * 
+ 		 */ 
+ 		# -------------------------------------------------------
+ 		/**
+ 		 * 
+ 		 */ 
+ 		public function SearchWithinMedia() {
+ 			$pn_representation_id = $this->request->getParameter('representation_id', pInteger);
+ 			$ps_q = $this->request->getParameter('q', pString);
+ 			
+ 			$va_results = MediaContentLocationIndexer::SearchWithinMedia($ps_q, 'ca_object_representations', $pn_representation_id, 'media');
+ 			$this->view->setVar('results', $va_results);
+ 			
+ 			$this->render('object_representation_within_media_search_results_json.php');
+ 		}
   		# -------------------------------------------------------
  	}
  ?>
