@@ -27,7 +27,7 @@
  */
  
  	require_once(__CA_LIB_DIR__."/ca/BaseBrowseController.php");
-	require_once(__CA_LIB_DIR__."/ca/Browse/EntityBrowse.php");
+	require_once(__CA_LIB_DIR__."/ca/Browse/ObjectBrowse.php");
 	require_once(__CA_MODELS_DIR__."/ca_sets.php");
 	require_once(__CA_MODELS_DIR__."/ca_objects.php");
 	require_once(__CA_MODELS_DIR__."/ca_places.php");
@@ -37,7 +37,7 @@
  		 /** 
  		 * Name of table for which this browse returns items
  		 */
- 		 protected $ops_tablename = 'ca_entities';
+ 		 protected $ops_tablename = 'ca_objects';
  		 
  		/** 
  		 * Number of items per results page
@@ -69,7 +69,7 @@
  		protected $opa_sorts;
  		
  		
- 		protected $ops_find_type = 'artist_browser';
+ 		protected $ops_find_type = 'map';
  		
  		protected $opo_plugin_config;			// plugin config file
  		protected $opo_result_context;			// current result context
@@ -93,17 +93,8 @@
                 $this->response->setRedirect(caNavUrl($this->request, "", "LoginReg", "form"));
             }
             
-			$po_request->session->setVar('pawtucket2_browse_target', "ca_entities");
+			$po_request->session->setVar('pawtucket2_browse_target', "ca_objects");
 			
-			//
- 			// Minimal view list (all targets have a "full" results view)
- 			//
- 			$this->opa_views = array(
-				'full' => _t('List')
-			);
-			$this->opa_views_options = array(
-				'full' => array("description" => _t("View results in a list"), "icon" => "icon_list.gif")
-			);
  			if($this->request->config->get("dont_enforce_access_settings")){
  				$this->opa_access_values = array();
  			}else{
@@ -115,52 +106,7 @@
 			$this->opo_result_context = new ResultContext($po_request, $this->ops_tablename, $this->ops_find_type);
 			$this->opo_result_context->setAsLastFind();
 			
-			$this->opo_browse = new EntityBrowse();
-			
-			// get configured result views, if specified
-			if ($va_result_views_for_ca_entities = $po_request->config->getAssoc('result_views_for_ca_entities')) {
-				$this->opa_views = $va_result_views_for_ca_entities;
-			}
-			// get configured result views options, if specified
-			if ($va_result_views_options_for_ca_entities = $po_request->config->getAssoc('result_views_options_for_ca_entities')) {
-				$this->opa_views_options = $va_result_views_options_for_ca_entities;
-			}
-			// get configured result sort options, if specified
-			if ($va_sort_options_for_ca_entities = $po_request->config->getAssoc('result_sort_options_for_ca_entities')) {
-				$this->opa_sorts = $va_sort_options_for_ca_entities;
-			}else{
-				$this->opa_sorts = array(
-					'ca_entity_labels.displayname' => _t('Name'),
-					'ca_entities.type_id' => _t('Type'),
-					'ca_entities.idno_sort' => _t('Idno')
-				);
-			}
-			
-			$va_sources = array();
-			$t_list_item = new ca_lists();
-			$vn_aoee_source = $t_list_item->getItemIDFromList("entity_sources", "aoee");
-			$va_sources[] = $vn_aoee_source;
-			$this->aoee_source = $vn_aoee_source;
-			$this->view->setVar('aoee_source', $vn_aoee_source);
-			
-			$vn_aoee_featured_source = $t_list_item->getItemIDFromList("entity_sources", "featured");
-			$va_sources[] = $vn_aoee_featured_source;
-			$this->aoee_featured_source = $vn_aoee_featured_source;
-			$this->view->setVar('aoee_featured_source', $vn_aoee_featured_source);
-			
-			$vn_aoee_priority_source = $t_list_item->getItemIDFromList("entity_sources", "priority");
-			$va_sources[] = $vn_aoee_priority_source;
-			$this->aoee_priority_source = $vn_aoee_priority_source;
-			$this->view->setVar('aoee_priority_source', $vn_aoee_priority_source);
-			
-			$this->aoee_sourcea = $va_sources;
-			$this->view->setVar('aoee_sources', $va_sources);
-			
-			$this->opo_browse->addResultFilter("ca_entities.source_id", "IN", join(',', $va_sources));
-			
-			$vn_on_view_yes_id = $t_list_item->getItemIDFromList("yes_no", "yes");
-			$this->view->setVar('on_view_yes_id', $vn_on_view_yes_id);
-			
+			$this->opo_browse = new ObjectBrowse($x=$this->opo_result_context->getSearchExpression());
 			$this->view->setvar("browse_place_ids", $this->opo_plugin_config->get('artist_browser_place_ids'));
 						
  		}
@@ -171,9 +117,11 @@
  			$this->getDefaults();
  			
  			// Remove any browse criteria previously set
-			$this->opo_browse->removeAllCriteria();
-			$this->opo_browse->addCriteria('_search', 'ca_entities.source_id:'.$this->aoee_featured_source.' or ca_entities.source_id:'.$this->aoee_source.' or ca_entities.source_id:'.$this->aoee_priority_source);
-				
+			//$this->opo_browse->removeAllCriteria();
+			if (!$this->opo_browse->numCriteria()) {
+				$this->opo_browse->addCriteria('has_georefs', '1');
+			}
+			$this->opo_browse->setFacetGroup("map");
  			parent::Index(true);
  			
 			$this->render('map_html.php');
@@ -206,13 +154,14 @@
  		 */
  		public function getFacet($pa_options=null) {
  			// Remove any browse criteria previously set
+			$this->opo_browse->setFacetGroup("map");
 			$this->opo_browse->removeAllCriteria();
-			$this->opo_browse->addCriteria('_search', 'ca_entities.source_id:'.$this->aoee_featured_source.' or ca_entities.source_id:'.$this->aoee_source.' or ca_entities.source_id:'.$this->aoee_priority_source);
+			$this->opo_browse->addCriteria('has_georefs', '1');
 			$this->opo_browse->execute();
 			
 			if (!is_array($pa_options)) { $pa_options = array(); }
  			if ($ps_view = preg_replace('![^A-Za-z0-9_]+!', '', $this->request->getParameter('view', pString))) {
- 				$vs_relative_path = 'Browse/ajax_browse_facet_'.$ps_view.'_html.php';
+ 				$vs_relative_path = 'Browse/ajax_browse_facet_object_map_html.php';
  				
  				if (file_exists($this->request->getAppConfig()->get('application_plugins').'/eastend/themes/eastend2/views/'.$vs_relative_path)) {
  					$pa_options['view'] = $vs_relative_path; 
@@ -228,6 +177,7 @@
  			$o_cache = caGetCacheObject('ca_map_browser');
  			
  			$this->getDefaults();
+			$this->opo_browse->setFacetGroup("map");
  			$this->opo_browse->removeAllCriteria();
  			$ps_facet_name = $this->request->getParameter('facet', pString);
  			$vs_id = $this->request->getParameter('id', pString);
@@ -236,36 +186,51 @@
  			$o_cache->load($vs_md5_key);
  			if (false) { //($vs_content = $o_cache->load($vs_md5_key)) !== false) {
  				$this->response->addContent($vs_content);
- 				$va_entity_ids =  $o_cache->load($vs_md5_key.'_id_list');
-				$this->opo_result_context->setResultList($va_entity_ids);
+ 				$va_object_ids =  $o_cache->load($vs_md5_key.'_id_list');
+				$this->opo_result_context->setResultList($va_object_ids);
 				$this->opo_result_context->saveContext();
  			} else {
-				$this->opo_browse->addCriteria('_search', 'ca_entities.source_id:'.$this->aoee_featured_source.' or ca_entities.source_id:'.$this->aoee_source.' or ca_entities.source_id:'.$this->aoee_priority_source);
+				$this->opo_browse->addCriteria('has_georefs', '1');
 				if ($ps_facet_name) {
 					$this->opo_browse->addCriteria($ps_facet_name, array($vs_id));
 				}
 				
 				parent::Index(array('dontRenderView' => 1));
 				
+				$this->opo_result_context->setSearchExpression($this->opo_browse->getBrowseID());
+
 				$this->view->setVar('current_view', 'map');
 				$this->view->setVar('result_views', array('map' => 1));
 				
 				$vo_result = $this->view->getVar('result');
 				$vo_result->seek(0);
-				$vs_content = $this->render('Browse/browse_controls_html.php');
+				$vs_content = $this->render('Browse/map_controls_html.php');
 				$vo_result->seek(0);
-				$va_entity_ids = array();
+				$va_object_ids = array();
 				while($vo_result->nextHit()) {
-					$va_entity_ids[] = $vo_result->get('ca_entities.entity_id');
+					$va_object_ids[] = $vo_result->get('ca_objects.object_id');
 				}
-				$this->opo_result_context->setResultList($va_entity_ids);
+				$this->opo_result_context->setResultList($va_object_ids);
 				$this->opo_result_context->saveContext();
 				#$o_cache->load($vs_md5_key);
 				$o_cache->save($vs_content);
 				
 				$o_cache->load($vs_md5_key.'_id_list');
-				$o_cache->save($va_entity_ids);
+				$o_cache->save($va_object_ids);
 			}
+ 		}
+ 		# -------------------------------------------------------
+		/**
+		 * 
+		 */
+ 		public function getPinContent() {
+ 			$pa_ids = explode(";", $this->request->getParameter('id', pString));
+ 			
+ 			$this->view->setVar('ids', $pa_ids);
+ 			
+ 			$this->view->setVar('result', caMakeSearchResult("ca_objects", $pa_ids));
+ 			
+ 			$this->render("map_balloon_html.php");
  		}
 		# -------------------------------------------------------
  	}
