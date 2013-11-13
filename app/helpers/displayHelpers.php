@@ -37,6 +37,7 @@
 require_once(__CA_LIB_DIR__.'/core/Datamodel.php');
 require_once(__CA_LIB_DIR__.'/core/Configuration.php');
 require_once(__CA_LIB_DIR__.'/core/Parsers/TimeExpressionParser.php');
+require_once(__CA_LIB_DIR__.'/core/Parsers/ExpressionParser.php');
 require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 	
 	# ------------------------------------------------------------------------------------------------
@@ -1802,7 +1803,7 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 		if(!isset($pa_options['requireLinkTags'])) { $pa_options['requireLinkTags'] = true; }
 		
 		$va_primary_ids = caGetOption("primaryIDs", $pa_options, null);
-		
+
 		$o_dm = Datamodel::load();
 		$ps_tablename = is_numeric($pm_tablename_or_num) ? $o_dm->getTableName($pm_tablename_or_num) : $pm_tablename_or_num;
 		
@@ -1872,6 +1873,7 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 		$o_dom->loadHTML('<?xml encoding="utf-8">'.$ps_template);
 		libxml_clear_errors();
 		
+		$o_if = $o_dom->getElementsByTagName("if");						// if 
 		$o_ifdefs = $o_dom->getElementsByTagName("ifdef");				// if defined
 		$o_ifnotdefs = $o_dom->getElementsByTagName("ifnotdef");		// if not defined
 		$o_mores = $o_dom->getElementsByTagName("more");				// more tags – content suppressed if there are no defined values following the tag pair
@@ -1880,6 +1882,29 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 		$o_options = $o_dom->getElementsByTagName("options");
 		
 		
+		$va_if = array();
+		foreach($o_if as $o_if) {
+			if (!$o_if) { continue; }
+			
+			$vs_html = $o_dom->saveXML($o_if);
+			$vs_content = preg_replace("!^<[^\>]+>!", "", $vs_html);
+			$vs_content = preg_replace("!<[^\>]+>$!", "", $vs_content);
+			
+			//
+			// Hack to get around DomDocument trimming leading spaces off of parsed HTML
+			// We try here to detect the trimming and shunt those spaces back where they belong. Seems to work :-)
+			//
+			if (preg_match("!([ ]+){$vs_content}!", $ps_template, $va_match_spaces)) {
+				$vs_html = preg_replace("!{$vs_content}!", $va_match_spaces[1].$vs_content, $vs_html);
+				$vs_content = $va_match_spaces[1].$vs_content;
+			}
+			
+			$va_if[] = array('directive' => $vs_html, 'content' => $vs_content, 'rule' => $vs_rule = (string)$o_if->getAttribute('rule'));
+			
+			//$vs_code = preg_replace("!%(.*)$!", '', $vs_code);
+			//if (!in_array($vs_code, $va_tags)) { $va_tags[] = $vs_code; }
+		}
+		//print_r($va_if);
 		
 		$va_ifdefs = array();
 		foreach($o_ifdefs as $o_ifdef) {
@@ -1964,9 +1989,46 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 					||
 					((sizeof($va_relative_to_tmp) >= 1) && ($va_relative_to_tmp[0] == $ps_tablename) && ($va_relative_to_tmp[1] != 'related'))
 				) {
-					$va_relative_ids = $pa_row_ids;
+					
+					switch(strtolower($va_relative_to_tmp[1])) {
+						case 'hierarchy':
+							$va_relative_ids = $qr_res->get($t_instance->tableName().".hierarchy.".$t_instance->primaryKey(), array('returnAsArray' => true));
+							$va_relative_ids = array_values($va_relative_ids);
+							break;
+						case 'parent':
+							$va_relative_ids = $qr_res->get($t_instance->tableName().".parent.".$t_instance->primaryKey(), array('returnAsArray' => true));
+							$va_relative_ids = array_values($va_relative_ids);
+							break;
+						case 'children':
+							$va_relative_ids = $qr_res->get($t_instance->tableName().".children.".$t_instance->primaryKey(), array('returnAsArray' => true));
+							$va_relative_ids = array_values($va_relative_ids);
+							break;
+						default:
+							$va_relative_ids = $pa_row_ids;
+							break;
+					}
 				} else { 
-					$va_relative_ids = $qr_res->get($t_instance->tableName().".".$t_instance->primaryKey(), array('returnAsArray' => true));
+					switch(strtolower($va_relative_to_tmp[1])) {
+						case 'hierarchy':
+							$va_relative_ids = $qr_res->get($t_instance->tableName().".hierarchy.".$t_instance->primaryKey(), array('returnAsArray' => true));
+							$va_relative_ids = array_values($va_relative_ids);
+							break;
+						case 'parent':
+							$va_relative_ids = $qr_res->get($t_instance->tableName().".parent.".$t_instance->primaryKey(), array('returnAsArray' => true));
+							$va_relative_ids = array_values($va_relative_ids);
+							break;
+						case 'children':
+							$va_relative_ids = $qr_res->get($t_instance->tableName().".children.".$t_instance->primaryKey(), array('returnAsArray' => true));
+							$va_relative_ids = array_values($va_relative_ids);
+							break;
+						case 'related':
+							$va_relative_ids = $qr_res->get($t_instance->tableName().".related.".$t_instance->primaryKey(), array('returnAsArray' => true));
+							$va_relative_ids = array_values($va_relative_ids);
+							break;
+						default:
+							$va_relative_ids = $qr_res->get($t_instance->tableName().".".$t_instance->primaryKey(), array('returnAsArray' => true));
+							break;
+					}
 				}
 				$vs_tmpl_val = caProcessTemplateForIDs($va_unit['content'], $va_relative_to_tmp[0], $va_relative_ids, array_merge($pa_options, array('delimiter' => $vs_unit_delimiter, 'resolveLinksUsing' => null)));
 				
@@ -2068,21 +2130,21 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 								}
 								
 								if ($va_spec_bits[1] != '_hierarchyName') {
-									$va_val = $qr_res->get($vs_get_spec, array_merge($pa_options, $va_additional_options));
+									$va_val = $qr_res->get($vs_get_spec, array_merge($pa_options, $va_additional_options, array("returnAllLocales" => true)));
 								} else {
 									$va_val = array();
 								}
-								
 								if(is_array($va_primary_ids) && isset($va_primary_ids[$va_spec_bits[0]]) && is_array($va_primary_ids[$va_spec_bits[0]])) {
-									$t_rel = $o_dm->getInstanceByTableName($va_spec_bits[0], true);
-									$va_val_ids = $qr_res->get($va_spec_bits[0].".".$t_rel->primaryKey(), array("returnAsArray" => true));
 									foreach($va_primary_ids[$va_spec_bits[0]] as $vn_primary_id) {
-										if (($vn_index = array_search($vn_primary_id, $va_val_ids)) !== false) {
-											unset($va_val[$vn_index]);
-										}
+										unset($va_val[$vn_primary_id]);
 									}
 								}
-								
+								$va_val = caExtractValuesByUserLocale($va_val);
+								$va_val_tmp = array();
+								foreach($va_val as $vn_d => $va_vals) {
+									$va_val_tmp += $va_vals;
+								}
+								$va_val = $va_val_tmp;
 								
 								$va_val_proc = array();
 								
@@ -2094,13 +2156,17 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 										break;
 									case 'hierarchy':
 										if ($vs_hierarchy_name) { array_unshift($va_val[0], $vs_hierarchy_name); }
-										foreach($va_val as $vn_x => $va_hier) {
-											$va_val_proc[] = join(caGetOption("delimiter", $va_tag_opts, "; "), $va_hier);
+										if (is_array($va_val)) {
+											foreach($va_val as $vn_x => $va_hier) {
+												$va_val_proc[] = join(caGetOption("delimiter", $va_tag_opts, "; "), $va_hier);
+											}
 										}
 										break;
 									case 'parent':
-										foreach($va_val as $vn_x => $va_label) {
-											$va_val_proc[] = $va_label['name'];
+										if (is_array($va_val)) {
+											foreach($va_val as $vn_x => $va_label) {
+												$va_val_proc[] = $va_label['name'];
+											}
 										}
 										break;
 									default:
@@ -2203,7 +2269,7 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 					if (is_array($va_val)) {
 						if (sizeof($va_val) > 0) {
 							foreach($va_val as $vn_j => $vs_val) {
-								if (!in_array($vs_val, $va_tag_val_list[$vn_i][$vn_j][$vs_tag])) {
+								if (!is_array($va_tag_val_list[$vn_i][$vn_j][$vs_tag]) || !in_array($vs_val, $va_tag_val_list[$vn_i][$vn_j][$vs_tag])) {
 									$va_tag_val_list[$vn_i][$vn_j][$vs_tag][] = $vs_val;
 									if ((is_array($vs_val) && (sizeof($vs_val))) || (strlen($vs_val) > 0)) {
 										$va_defined_tag_list[$vn_i][$vn_j][$vs_tag] = true;
@@ -2228,6 +2294,15 @@ require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 				$va_pt_vals = array();
 			
 				$vs_template = $va_proc_templates[$vn_i];
+				
+				// Process <if>
+				foreach($va_if as  $va_def_con) { 
+					if (ExpressionParser::evaluate($va_def_con['rule'], $va_tags)) {
+						$vs_template = str_replace($va_def_con['directive'], $va_def_con['content'], $vs_template);
+					} else {
+						$vs_template = str_replace($va_def_con['directive'], '', $vs_template);
+					}
+				}
 				
 				// Process <ifdef> (IF DEFined)
 				foreach($va_ifdefs as $vs_code => $va_def_con) { 
@@ -2766,7 +2841,7 @@ $ca_relationship_lookup_parse_cache = array();
 		}
 		
 			
-		if (isset($pa_options['relatedItems']) && is_array($pa_options['relatedItems'])) {
+		if (isset($pa_options['relatedItems']) && is_array($pa_options['relatedItems']) && sizeof($pa_options['relatedItems'])) {
 			$va_tmp = array();
 			foreach ($pa_options['relatedItems'] as $vn_relation_id => $va_relation) {
 				$va_items[$va_relation[$vs_rel_pk]]['relation_id'] = $va_relation['relation_id'];
