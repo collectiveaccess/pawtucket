@@ -55,6 +55,7 @@
 		#print $this->render('Search/search_controls_html.php');
 		print "<div class='sectionBox'>";
 		$vs_view = $this->getVar('current_view');
+		print "<br>";
 		if(in_array($vs_view, array_keys($this->getVar('result_views')))){
 			print $this->render('Results/'.$vs_browse_target.'_results_'.$vs_view.'_html.php');
 		}

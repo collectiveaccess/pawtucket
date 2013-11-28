@@ -58,7 +58,11 @@
  				$this->ops_theme = 'default';
  			}
  			
- 			$this->opo_plugin_config = Configuration::load($po_request->getAppConfig()->get('application_plugins').'/Contribute/conf/contribute.conf');
+ 			if(file_exists($po_request->getAppConfig()->get('application_plugins').'/Contribute/themes/'.$this->ops_theme.'/conf/contribute.conf')) {		// check if there is a config file in the theme first
+ 				$this->opo_plugin_config = Configuration::load($po_request->getAppConfig()->get('application_plugins').'/Contribute/themes/'.$this->ops_theme.'/conf/contribute.conf');
+ 			}else{
+ 				$this->opo_plugin_config = Configuration::load($po_request->getAppConfig()->get('application_plugins').'/Contribute/conf/contribute.conf');
+ 			}
  			if (!(bool)$this->opo_plugin_config->get('enabled')) { die(_t('Contribute plugin is not enabled')); }
  			
 			if ($this->ops_search_class) { require_once(__CA_LIB_DIR__."/ca/Search/".$this->ops_search_class.".php"); }

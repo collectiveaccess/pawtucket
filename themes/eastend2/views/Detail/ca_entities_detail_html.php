@@ -109,16 +109,6 @@ if (!$this->request->isAjax()) {
 		if($t_entity->get("fields_mediums")){
 			print "<span class='caption'>".$t_entity->get("fields_mediums", array("convertCodesToDisplayText" => true, "delimiter" => ", "))."</span><!-- end caption --><br />";
 		}
-		if($va_external_links = $t_entity->get("ca_entities.external_link.link_url", array("returnAsArray" => 1))){
-			foreach($va_external_links as $va_external_link){
-				$vs_link_text = "";
-				$vs_link_text = $va_external_link["link_text"];
-				if(!$vs_link_text){
-					$vs_link_text = $va_external_link["link_url"];
-				}
-				print "<span class='caption'><a href='".$va_external_link["link_url"]."' target='_blank'>".$vs_link_text."</a></span><br/>";
-			}
-		}
 ?>
 	</div><!--end ad_portrait -->
 
@@ -159,25 +149,50 @@ if (!$this->request->isAjax()) {
 
 	<div class="clear padded"></div>
 <?php
-
+	
+	$va_external_links = $t_entity->get("ca_entities.external_link.link_url", array("returnAsArray" => 1));
 	# --- coorporations
 	$va_corps = $t_entity->get("ca_entities", array("restrictToTypes" => array("corporation"), "returnAsArray" => 1, 'checkAccess' => $va_access_values));
 	# --- occurrences
 	$va_occurrences = $t_entity->get("ca_occurrences", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
-	if((sizeof($va_occurrences) > 0) || (sizeof($va_corps) > 0)){	
+	if((sizeof($va_occurrences) > 0) || (sizeof($va_corps) > 0) || sizeof($va_external_links)){
 ?>
 		<div class="ad_col"><div>
+<?php
+		if(sizeof($va_external_links)){
+?>
+			<span class="listhead caps"><?php print _t("External Resources"); ?></span>
+			<ul>
+<?php
+			foreach($va_external_links as $va_external_link){
+				$vs_link_text = "";
+				$vs_link_text = $va_external_link["link_text"];
+				if(!$vs_link_text){
+					$vs_link_text = $va_external_link["link_url"];
+				}
+				print "<span class='caption'><a href='".$va_external_link["link_url"]."' target='_blank'>".$vs_link_text."</a></span><br/>";
+			}
+?>
+			</ul>
+<?php
+		}
+		if((sizeof($va_occurrences) > 0) || (sizeof($va_corps) > 0)){
+?>
 			<span class="listhead caps"><?php print _t("Organizations and Events"); ?></span>
 			<ul>
 <?php
-		foreach($va_corps as $va_corp) {
-			print "<li>".(($this->request->config->get('allow_detail_for_ca_entities')) ? caNavLink($this->request, $va_corp["label"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $va_corp["entity_id"])) : $va_corp["label"])."<br/>(".$va_corp['relationship_typename'].")</li>";		
-		}
-		foreach($va_occurrences as $va_occurrence) {
-			print "<li>".(($this->request->config->get('allow_detail_for_ca_occurrences')) ? caNavLink($this->request, $va_occurrence["label"], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $va_occurrence["occurrence_id"])) : $va_occurrence["label"])."<br/>(".$va_occurrence['relationship_typename'].")</li>";		
-		}
+			foreach($va_corps as $va_corp) {
+				print "<li>".(($this->request->config->get('allow_detail_for_ca_entities')) ? caNavLink($this->request, $va_corp["label"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $va_corp["entity_id"])) : $va_corp["label"])."<br/>(".$va_corp['relationship_typename'].")</li>";		
+			}
+			foreach($va_occurrences as $va_occurrence) {
+				print "<li>".(($this->request->config->get('allow_detail_for_ca_occurrences')) ? caNavLink($this->request, $va_occurrence["label"], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $va_occurrence["occurrence_id"])) : $va_occurrence["label"])."<br/>(".$va_occurrence['relationship_typename'].")</li>";		
+			}
 ?>
 			</ul>
+		
+<?php
+		}
+?>
 		</div></div><!--end ad_col 1 -->
 <?php
 	}
@@ -229,12 +244,16 @@ if (!$this->request->isAjax()) {
 	if(sizeof($va_places) > 0){
 		$vs_places_for_display = "";
 		foreach($va_places as $va_place) {
+			$vs_effective_date = $va_place["effective_date"];
+			if(strstr($vs_effective_date, "after")){
+				$vs_effective_date = str_replace("after", "since", $vs_effective_date);
+			}
 			# --- if this is a street address, load parent so can show town instead
 			if(is_numeric(substr($va_place["label"], 0, 1))){
 				$t_related_place->load($va_place["place_id"]);
-				$vs_places_for_display .= "<li>".$t_related_place->get('ca_places.parent.preferred_labels.name')."<br/>(".$va_place['relationship_typename'].(($va_place["effective_date"]) ? ", ".$va_place["effective_date"] : "").")</li>";		
+				$vs_places_for_display .= "<li>".$t_related_place->get('ca_places.parent.preferred_labels.name')."<br/>(".$va_place['relationship_typename'].(($vs_effective_date) ? ", ".$vs_effective_date : "").")</li>";		
 			}else{
-				$vs_places_for_display .= "<li>".(($this->request->config->get('allow_detail_for_ca_places')) ? caNavLink($this->request, $va_place["label"], '', 'Detail', 'Place', 'Show', array('place_id' => $va_place["place_id"])) : $va_place["label"])."<br/>(".$va_place['relationship_typename'].(($va_place["effective_date"]) ? ", ".$va_place["effective_date"] : "").")</li>";		
+				$vs_places_for_display .= "<li>".(($this->request->config->get('allow_detail_for_ca_places')) ? caNavLink($this->request, $va_place["label"], '', 'Detail', 'Place', 'Show', array('place_id' => $va_place["place_id"])) : $va_place["label"])."<br/>(".$va_place['relationship_typename'].(($vs_effective_date) ? ", ".$vs_effective_date : "").")</li>";		
 			}
 		}
 		if($vs_places_for_display){

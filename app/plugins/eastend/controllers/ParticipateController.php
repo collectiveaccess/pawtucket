@@ -57,6 +57,9 @@
                 $this->response->setRedirect(caNavUrl($this->request, "", "LoginReg", "form"));
             }
             JavascriptLoadManager::register('cycle');
+           	$t_list = new ca_lists();
+			$this->view->setVar("user_contributed_source_id", $t_list->getItemIDFromList('object_sources', 'user_contributed'));
+			$this->view->setVar("user_contributed_other_source_id", $t_list->getItemIDFromList('object_sources', 'user_contributed_other'));
  		}
  		# -------------------------------------------------------
  		public function Index() {
@@ -85,6 +88,7 @@
 					}
 					$va_tmp["image"] = $va_image["tags"]["mediumlarge"];
 					$va_tmp["caption"] = $t_object->get("ca_objects.caption");
+					$va_tmp["title"] = $t_object->getLabelForDisplay();
 				}
 				$va_participate_images[$vn_participate_object_id] = $va_tmp;
 			}

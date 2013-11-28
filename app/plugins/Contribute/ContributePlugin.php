@@ -33,8 +33,12 @@
 		# -------------------------------------------------------
 		public function __construct($ps_plugin_path) {
 			$this->description = _t('Enabled users to create CollectiveAccess records from within Pawtucket');
-			
-			$this->opo_config = Configuration::load($ps_plugin_path.'/conf/contribute.conf');
+ 			$this->ops_theme = __CA_THEME__;																		// get current theme
+ 			if(file_exists($ps_plugin_path.'/themes/'.$this->ops_theme.'/conf/contribute.conf')) {		// check if there is a config file in the theme first
+ 				$this->opo_config = Configuration::load($ps_plugin_path.'/themes/'.$this->ops_theme.'/conf/contribute.conf');
+ 			}else{
+ 				$this->opo_config = Configuration::load($ps_plugin_path.'/conf/contribute.conf');
+ 			}
 			parent::__construct();
 		}
 		# -------------------------------------------------------

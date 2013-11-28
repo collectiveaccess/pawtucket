@@ -129,8 +129,9 @@
  			}else{
  				$this->ops_date_range = $vn_year;
  			}
- 			JavascriptLoadManager::register('maps'); 			
+ 			JavascriptLoadManager::register('maps');
  			
+ 			$this->opn_user_contributed_source_id  = $t_list->getItemIDFromList('object_sources', 'user_contributed');
 		}
  		# -------------------------------------------------------
  		function Index() {
@@ -217,7 +218,7 @@
 // 			$va_period_data["places"] = $qr_places;
 			
 			$o_obj_search = new ObjectSearch();
-			$qr_objects = $o_obj_search->search("ca_objects.creation_date:\"".$vn_y."\" AND (ca_object.object_status:349 OR ca_object.object_status:347 OR ca_object.object_status:193)", array("sort" => "ca_objects.creation_date", "sort_direction" => "desc", "no_cache" => !$this->opb_cache_searches, "checkAccess" => $this->opa_access_values));
+			$qr_objects = $o_obj_search->search("ca_objects.creation_date:\"".$vn_y."\" AND NOT ca_objects.source_id:".$this->opn_user_contributed_source_id." AND (ca_object.object_status:349 OR ca_object.object_status:347 OR ca_object.object_status:193)", array("sort" => "ca_objects.creation_date", "sort_direction" => "desc", "no_cache" => !$this->opb_cache_searches, "checkAccess" => $this->opa_access_values));
 			$va_period_data["objects"] = $qr_objects;
 			
 			$va_object_ids = array();
@@ -266,7 +267,7 @@
  			$vn_y = $this->ops_date_range;
 			$va_period_data = array();
 			$o_obj_search_refine = new ObjectSearch();
-			$qr_objects_refine = $o_obj_search_refine->search("ca_objects.creation_date:\"".$vn_y."\" AND (ca_object.object_status:349 OR ca_object.object_status:347 OR ca_object.object_status:193)".$vs_refine, array("sort" => "ca_objects.creation_date", "no_cache" => !$this->opb_cache_searches, "checkAccess" => $this->opa_access_values));
+			$qr_objects_refine = $o_obj_search_refine->search("ca_objects.creation_date:\"".$vn_y."\" AND NOT ca_objects.source_id:".$this->opn_user_contributed_source_id." AND (ca_object.object_status:349 OR ca_object.object_status:347 OR ca_object.object_status:193)".$vs_refine, array("sort" => "ca_objects.creation_date", "no_cache" => !$this->opb_cache_searches, "checkAccess" => $this->opa_access_values));
 			$va_object_ids = array();
 			while($qr_objects_refine->nextHit()){
 				$va_object_ids[] = $qr_objects_refine->get("ca_objects.object_id");
