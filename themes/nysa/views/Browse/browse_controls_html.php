@@ -47,13 +47,22 @@
 	JavascriptLoadManager::register('cycle');
 	
 	if (!$this->request->isAjax()) {
-		if ($this->getVar('browse_selector')) {
-	?>
-			<div class="browseTargetSelect"><?php print _t('Browse for').' '.$this->getVar('browse_selector'); ?></div>
-	<?php
+		#if ($this->getVar('browse_selector')) {
+		#	print '<div class="browseTargetSelect">'._t('Browse for').' '.$this->getVar('browse_selector').'</div>';
+		#}
+		$vs_browse_target_name = "";
+		switch($vs_browse_target){
+			case "ca_objects":
+				$vs_browse_target_name = " Documents";	
+			break;
+			# -----------------------------------------
+			case "ca_occurrences":
+				$vs_browse_target_name = " Lesson Plans";	
+			break;
+			# -----------------------------------------
 		}
 ?>
-	<h1><?php print _t('Browse the Archive'); ?></h1>
+	<h1><?php print _t('Browse the Archive for %1', $vs_browse_target_name); ?></h1>
 	<div id="browse"><div id="resultBox"> 
 <?php
 	}

@@ -67,7 +67,9 @@ a{
 	color: #006794;
 	text-decoration: underline;
 }
-
+HR{
+	border:1px solid #DEDEDE;
+}
 .formErrors{
 	color: #df7720;
 	font-family: Helvetica, sans-serif;
@@ -417,7 +419,12 @@ font-size:13px;
 	width: 980px;
 	height: 44px;
 	clear:both;
+}
+#TopicBar.archive{
 	background-color: #e28c2b;
+}
+#TopicBar.edu{
+	background-color: #a1b535;
 }
 
 #TopicBar h1 {
@@ -835,6 +842,15 @@ margin-bottom:0;
 	outline-width:0px;
 	height:100px;
 }
+#detailBody .unit input[type="checkbox"] {
+	padding: 0px;
+	margin: 0px;
+	border: 0px;
+	width:auto;
+	outline-style:none;
+	outline-width:0px;
+	height:auto;
+}
 #mainContent h2 {margin: 15px 0 10px 0;
 padding:0;
 }
@@ -1233,8 +1249,8 @@ td.advSearchElement{
 	width:2%;
 }
 .searchSec{
-	float:left;
-	width:440px;
+	/*float:left;
+	width:440px;*/
 	padding-top:5px;
 }
 .searchSecNav{
@@ -1244,7 +1260,7 @@ td.advSearchElement{
 	padding:6px 10px 5px 10px;
 	font-size:13px;
 	text-align:left;
-	width:430px;
+	/*width:430px;*/
 }
 .searchSecNav .nav{
 	float:right;
@@ -1266,7 +1282,7 @@ td.advSearchElement{
 .searchSec .results{
 	padding: 10px;
 	line-height:1.6em;
-	width:430px;
+	/*width:430px;*/
 }
 .searchSec .results a{
 	color:#000000;
@@ -1538,6 +1554,10 @@ input.addItemToSetControlInThumbnails {
 }
 #entityResults .resultBg, #collectionResults .resultBg, #occurrenceResults .resultBg, #placeResults .resultBg{
 	background-color: #F2F2F2;
+}
+#occurrenceResults .occThumb{
+	float:left;
+	margin:0px 10px 10px 0px;
 }
 
 

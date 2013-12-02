@@ -30,6 +30,7 @@
  	
 $vo_result 				= $this->getVar('result');
 $vn_items_per_page		= $this->getVar('current_items_per_page');
+$t_occurrence = new ca_occurrences();
 
 if($vo_result) {
 	print '<div id="occurrenceResults">';
@@ -51,16 +52,39 @@ if($vo_result) {
 		
 		
 		$va_labels = $vo_result->getDisplayLabels($this->request);
-		print "<div".(($vs_class) ? " class='$vs_class'" : "").">";
-		print caNavLink($this->request, join($va_labels, "; "), '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
-		if($vs_idno){
-			print ", ".$vs_idno;
+		print "<div".(($vs_class) ? " class='$vs_class'" : "")." style='clear:both;'>";
+		$t_occurrence->load($vn_occurrence_id);
+		$vs_padding = 0;
+		$va_related_objects_links = $t_occurrence->get("ca_objects_x_occurrences.relation_id", array("returnAsArray" => true));
+		if(sizeof($va_related_objects_links)){
+			$t_objects_x_occurrences = new ca_objects_x_occurrences();
+			foreach($va_related_objects_links as $vn_relation_id){
+				$t_objects_x_occurrences->load($vn_relation_id);
+				$va_reps = $t_objects_x_occurrences->get("ca_objects_x_occurrences.representation_list", array("returnAsArray" => true, 'idsOnly' => true));
+				if(is_array($va_reps)) {
+					foreach($va_reps as $vn_relation_id => $va_attr) {
+						$t_rep = new ca_object_representations($va_attr['representation_list']);
+						$va_info = $t_rep->getMediaInfo("media");
+						$vs_padding = round($va_info["thumbnail"]["HEIGHT"]/2) - 7;
+						print "<div class='occThumb'>".$t_rep->getMediaTag('media', 'thumbnail')."</div><!-- end occThumb -->";
+						break;
+					}
+				}
+				break;
+			}
 		}
+		print "<div style='padding-top:".$vs_padding."px;'>".caNavLink($this->request, join($va_labels, "; "), '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
 		print ", ".$vo_result->get('ca_occurrences.type_id', array("convertCodesToDisplayText" => true));
-		print "</div>\n";
+		if($vo_result->get('ca_occurrences.blankWorksheet')){
+			print ", <span class='blankWorksheet' style='text-decoration:underline;'>Blank Worksheet*</span>";
+		}
+		print "</div></div>\n";
 		$vn_i++;
 		
 	}
+	TooltipManager::add(
+		".blankWorksheet", "Blank worksheets are shells of lessons included here so you can customize and download them for classroom use."
+	);
 	print "</div>\n";
 }
 ?>

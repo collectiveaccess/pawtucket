@@ -37,7 +37,7 @@
 <?php
 			}
 ?>
-				<h2><?php print _t('Occurrences'); ?></h2>
+				<h2><?php print _t('Lesson Plans'); ?></h2>
 				<div class="searchSecNav">
 <?php
 					if ($vn_num_hits > $vn_num_hits_per_page) {

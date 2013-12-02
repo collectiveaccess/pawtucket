@@ -1,6 +1,6 @@
 <?php
 /* ----------------------------------------------------------------------
- * /views/nysa/ca_occ_pdf_html.php 
+ * /views/nysa/custom_worksheet_html.php 
  * ----------------------------------------------------------------------
  * CollectiveAccess
  * Open-source collections management software
@@ -25,10 +25,9 @@
  *
  * ----------------------------------------------------------------------
  */	
-	$va_occ_info = $this->getVar("occ_info");
-	$va_occ_info2 = $this->getVar("occ_info2");
-	$va_related_objects_info = $this->getVar("related_objects_info");
-	$vs_title = $this->getVar("title");
+	$va_worksheet_info = $this->getVar("worksheet_info");
+	$va_images = $this->getVar("images");
+	$vs_image_info = $this->getVar("image_info");
 ?>
 <HTML>
 	<HEAD>
@@ -50,8 +49,6 @@
 			  text-align: center;
 			  border-top: 2px solid gray;
 			}
-			.image{max-height:500px;}
-			HR{ border:1px solid #DEDEDE;}
 			-->
 		</style>
 	</HEAD>
@@ -59,30 +56,36 @@
 		<div id='footer'>
 			<b>New York State Archives</b> - http://www.archives.nysed.gov
 		</div>
-
 <?php
-		print "<H1>".$vs_title."</H1>";
-		if(is_array($va_occ_info) && sizeof($va_occ_info)){
-			foreach($va_occ_info as $vs_attribute => $vs_info){
-				print "<div class='unit'>".$vs_info."</div>";
-			}
-		}
-		if(is_array($va_related_objects_info) && sizeof($va_related_objects_info)){
-			foreach($va_related_objects_info as $vn_relation_id => $va_object_info){
-				foreach($va_object_info["reps"] as $vs_media_tag){
-					print "<div class='unit image'>".$vs_media_tag."</div>";
-				}
-				if($va_object_info["object_caption_info"]){
-					print "<div class='unit'>".$va_object_info["object_caption_info"]."</div>";
-				}
-				foreach($va_object_info["md"] as $vs_attribute => $vs_info){
-					print "<div class='unit'>".$vs_info."</div>";
-				}
-			}
-		}
-		if(is_array($va_occ_info2) && sizeof($va_occ_info2)){
-			foreach($va_occ_info2 as $vs_attribute => $vs_info){
-				print "<div class='unit'>".$vs_info."</div>";
+		foreach($va_worksheet_info as $vs_attribute => $vs_info){
+			switch($vs_attribute){
+				case "title":
+					if($vs_info){
+						print "<H1>".$vs_info."</H1>";
+					}
+				break;
+				# -------
+				case "questions":
+					# --- put the images out before the questions
+					if(is_array($va_images) && sizeof($va_images)){
+						foreach($va_images as $vs_image){
+							print "<div class='unit'>".$vs_image."</div>";
+						}
+						if($vs_image_info){
+							print "<div class='unit'>".$vs_image_info."</div>";
+						}
+					}
+					if($vs_info){
+						print "<div class='unit'>".$vs_info."</div>";
+					}
+				break;
+				# -------
+				default:
+					if($vs_info){
+						print "<div class='unit'>".$vs_info."</div>";
+					}
+				break;
+				# -------
 			}
 		}
 ?>

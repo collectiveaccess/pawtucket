@@ -30,9 +30,9 @@
 	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
 ?>
 	<script type="text/javascript">
-		 jQuery(document).ready(function() {
-			jQuery('#quickSearch').searchlight('<?php print $this->request->getBaseUrlPath(); ?>/index.php/Search/lookup', {showIcons: false, searchDelay: 100, minimumCharacters: 3, limitPerCategory: 3});
-		});
+		 //jQuery(document).ready(function() {
+		//	jQuery('#quickSearch').searchlight('<?php print $this->request->getBaseUrlPath(); ?>/index.php/Search/lookup', {showIcons: false, searchDelay: 100, minimumCharacters: 3, limitPerCategory: 3});
+		//});
 		// initialize CA Utils
 			var caUIUtils = caUI.initUtils();
 	</script>
@@ -174,21 +174,58 @@
 ?>
 			<div id="nav">
 				<ul>
-				<li class="list-item-one"><a href="#">DIGITAL COLLECTIONS</a></li>
+				<li class="list-item-one"><?php print caNavLink($this->request, _t("DIGITAL COLLECTIONS"), "", "", "Browse", "Index", array("target" => "ca_objects")); ?></li>
 				<li><a href="#">RESEARCH</a></li>
 				<li><a href="#">MANAGING RECORDS</a></li>
 				<li><a href="#">GRANTS &amp; AWARDS</a></li>
-				<li><a href="#">EDUCATION</a></li>
+				<li><a href="#"><?php print caNavLink($this->request, _t("EDUCATION"), "", "", "Browse", "Index", array("target" => "ca_occurrences")); ?></a></li>
 				<li><a href="#">WORKSHOPS</a></li>
 			</ul>
 			</div><!-- end nav -->
-			<div id="TopicBar">
-			<h1>Digital Collections</h1>
+<?php
+	$vs_header = "archive";
+	if($this->request->getController() == "Browse"){
+		switch($this->request->session->getVar('pawtucket2_browse_target')){
+			case "ca_occurrences":
+				$vs_header = "edu";
+			break;
+			# ------------
+			case "ca_objects";
+				$vs_header = "archive";
+			break;
+			# ------------
+		}
+	}
+	if($this->request->getController() == "Search"){
+		switch($this->request->session->getVar('pawtucket2_search_target')){
+			case "ca_occurrences":
+				$vs_header = "edu";
+			break;
+			# ------------
+			case "ca_objects";
+				$vs_header = "archive";
+			break;
+			# ------------
+		}
+	}
+	if(($this->request->getController() == "Occurrence") || ($this->request->getController() == "Download")){
+		$vs_header = "edu";
+	}
+	
+	if($this->request->getController() == "Object"){
+		$vs_header = "archive";
+	}
+	
+	if($vs_header == "edu"){
+?>
+			<div id="TopicBar" class="edu">
+			<h1>Education</h1>
 				<div id="objectSearch">
 				<div id="search"><form name="header_search" action="<?php print caNavUrl($this->request, '', 'Search', 'Index'); ?>" method="get">
 						<a href="#" name="searchButtonSubmit" onclick="document.forms.header_search.submit(); return false;"></a>
-						<input type="text" name="search" value="SEARCH DIGITAL COLLECTIONS" onclick='jQuery("#quickSearch").select();' id="quickSearch"  autocomplete="off" size="100"/>
+						<input type="text" name="search" value="SEARCH LESSONS" onclick='jQuery("#quickSearch").select();' id="quickSearch"  autocomplete="off" size="100"/>
 						<input class="submit" type="submit" name="s" value="" />
+						<input type="hidden" name="target" value="ca_occurrences" />
 				</form></div>
 				</div>
 				
@@ -196,6 +233,35 @@
 			</div><!-- end colored "Ditigal Collections" bar -->
 			<div id="menuBar">
 			<?php				
-				print join(" ", $this->getVar('nav')->getHTMLMenuBarAsLinkArray());
+				print caNavLink($this->request, _t("Browse Lesson Plans"), "", "", "Browse", "Index", array("target" => "ca_occurrences"));
+				#print caNavLink($this->request, _t("Advanced Search"), "", "", "AdvancedSearch", "Index", array("target" => "ca_occurrences"));
+				print " ".caNavLink($this->request, _t("About"), "", "", "About", "Education");
 ?>
 			</div>
+<?php
+	}else{
+?>
+			<div id="TopicBar" class="archive">
+			<h1>Digital Collections</h1>
+				<div id="objectSearch">
+				<div id="search"><form name="header_search" action="<?php print caNavUrl($this->request, '', 'Search', 'Index'); ?>" method="get">
+						<a href="#" name="searchButtonSubmit" onclick="document.forms.header_search.submit(); return false;"></a>
+						<input type="text" name="search" value="SEARCH DIGITAL COLLECTIONS" onclick='jQuery("#quickSearch").select();' id="quickSearch"  autocomplete="off" size="100"/>
+						<input class="submit" type="submit" name="s" value="" />
+						<input type="hidden" name="target" value="ca_objects" />
+				</form></div>
+				</div>
+				
+
+			</div><!-- end colored "Ditigal Collections" bar -->
+			<div id="menuBar">
+			<?php				
+				print " ".caNavLink($this->request, _t("Browse the Collection"), "", "", "Browse", "Index", array("target" => "ca_objects"));
+				print " ".caNavLink($this->request, _t("Advanced Search"), "", "", "AdvancedSearch", "Index", array("target" => "ca_objects"));
+				print " ".caNavLink($this->request, _t("About"), "", "", "About", "DigitalCollection");
+?>
+			</div>
+<?php
+	
+	}
+?>

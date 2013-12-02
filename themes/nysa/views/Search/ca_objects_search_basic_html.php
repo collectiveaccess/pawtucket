@@ -33,8 +33,9 @@
  	<div id="resultBox">
 <?php
 	if($vo_result) {
+		print $this->render('Results/ca_objects_search_secondary_results.php');
 ?>
-		<h2><?php print _t("Items"); ?></h2>
+		<h2><?php print _t("Items from the Digital Archive"); ?></h2>
 <?php
 		print $this->render('Results/paging_controls_html.php');
 		if($vo_result->numHits() > 0){
@@ -62,8 +63,6 @@
 		}else{
 			print $this->render('Results/ca_objects_results_'.$vs_view.'_html.php');
 		}
-		
-		print $this->render('Results/ca_objects_search_secondary_results.php');
 ?>		
 	</div><!-- end sectionbox -->
 <?php
