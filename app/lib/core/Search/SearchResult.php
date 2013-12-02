@@ -79,6 +79,10 @@ class SearchResult extends BaseObject {
 		$this->opo_datamodel = Datamodel::load();
 		$this->opo_subject_instance = $this->opo_datamodel->getInstanceByTableName($this->ops_table_name, true);
 		
+		$this->ops_subject_pk = $this->opo_subject_instance->primaryKey();
+		$this->ops_subject_idno = $this->opo_subject_instance->getProperty('ID_NUMBERING_ID_FIELD');
+		$this->opb_use_identifiers_in_urls = (bool)$this->opo_subject_instance->getAppConfig()->get('use_identifiers_in_urls');
+		
 		$this->opa_prefetch_cache = array();
 		$this->opa_rel_prefetch_cache = array();
 		$this->opa_timestamp_cache = array();
@@ -112,6 +116,12 @@ class SearchResult extends BaseObject {
 		$this->opo_tep = $GLOBALS["_DbResult_time_expression_parser"];
 	}
 	# ------------------------------------------------------------------
+	public function cloneInit() {
+		$this->opo_db = new Db();
+		$this->opo_datamodel = Datamodel::load();
+		$this->opo_subject_instance = $this->opo_datamodel->getInstanceByTableName($this->ops_table_name, true);
+	}
+	# ------------------------------------------------------------------
 	public function init($po_engine_result, $pa_tables, $pa_options=null) {
 		
 		$this->opn_table_num = $this->opo_subject_instance->tableNum();
@@ -120,7 +130,6 @@ class SearchResult extends BaseObject {
 		$this->opa_cached_result_counts = array();
 		
 		$this->opo_engine_result = $po_engine_result;
-		if (!is_array($pa_tables)) { print caPrintStackTrace(); }
 		$this->opa_tables = $pa_tables;
 		
 		$this->errors = array();
@@ -688,7 +697,6 @@ class SearchResult extends BaseObject {
 				case 'children':
 					if ($t_instance->isHierarchical()) {
 						//unset($va_path_components['components'][1]);	// remove 'children' from field path
-						
 						$vs_field_spec = join('.', array_values($va_path_components['components']));
 						if ($vn_id = $this->get($va_path_components['table_name'].'.'.$t_instance->primaryKey(), array('returnAsArray' => false))) {
 							if($t_instance->load($vn_id)) {
@@ -756,14 +764,20 @@ class SearchResult extends BaseObject {
 					if ($t_instance->isHierarchical()) {
 						$vs_field_spec = join('.', array_values($va_path_components['components']));
 						$vs_hier_pk_fld = $t_instance->primaryKey();
-						if ($va_ids = $this->get($va_path_components['table_name'].'.'.$vs_hier_pk_fld, array_merge($pa_options, array('returnAsArray' => true, 'returnAsLink'=> false)))) {
-							if ($va_path_components['field_name'] == $vs_hier_pk_fld) {
-								$va_vals = $va_ids;
-							} else {
-								$va_vals = array();
+						if ($va_ids = $this->get($va_path_components['table_name'].'.'.$vs_hier_pk_fld, array_merge($pa_options, array('returnAsArray' => true, 'returnAsLink'=> false, 'returnAllLocales' => false)))) {
+							$va_vals = array();
+							if ($va_path_components['subfield_name'] == $vs_hier_pk_fld) {
 								foreach($va_ids as $vn_id) {
+									// TODO: This is too slow
 									if($t_instance->load($vn_id)) {
-										$va_vals[] = $t_instance->get($vs_field_spec.".preferred_labels", $pa_options);
+										$va_vals = array_merge($va_vals, $t_instance->get($va_path_components['table_name'].".hierarchy.".$vs_hier_pk_fld, $pa_options));
+									}
+								}
+							} else {
+								foreach($va_ids as $vn_id) {
+									// TODO: This is too slow
+									if($t_instance->load($vn_id)) {
+										$va_vals = $t_instance->get($vs_field_spec.".preferred_labels", $pa_options);
 									}
 								}
 							}
@@ -1461,6 +1475,26 @@ class SearchResult extends BaseObject {
 	/**
 	 *
 	 */
+	public function getWithTemplate($ps_template, $pa_options=null) {	
+		return caProcessTemplateForIDs($ps_template, $this->ops_table_name, array($this->get($this->ops_table_name.".".$this->ops_subject_pk)), $pa_options);
+	}
+	# ------------------------------------------------------------------
+	/**
+	 *
+	 */
+	public function getWithTemplateForResults($ps_template, $pa_options=null) {	
+		$pn_start = caGetOption('start', $pa_options, 0);
+		$pn_end = caGetOption('end', $pa_options, $this->numHits());
+		
+		$this->seek($pn_start);
+		$vn_c = 0;
+		
+		return caProcessTemplateForIDs($ps_template, $this->ops_table_name, array($this->get($this->ops_table_name.".".$this->ops_subject_pk)), $pa_options);
+	}
+	# ------------------------------------------------------------------
+	/**
+	 *
+	 */
 	private function _getAttributeAsHTMLLink($ps_val, $ps_field, $pa_attributes=array(), $pa_options=null) {
 		if (!is_array($pa_attributes)) { $pa_attributes = array(); }
 		$vs_return_as_link_class = 	(isset($pa_options['returnAsLinkClass'])) ? (string)$pa_options['returnAsLinkClass'] : '';
@@ -1962,6 +1996,17 @@ class SearchResult extends BaseObject {
 			}
 		}
 		return $this->opa_cached_result_counts[$vs_key] = $va_result;
+	}
+	# ------------------------------------------------------------------
+	/**
+	 *
+	 */
+	public function getIdentifierForUrl() {
+		if ($this->opb_use_identifiers_in_urls && $this->ops_subject_idno) {
+			return $this->get($this->ops_subject_idno);
+		} else {
+			return $this->get($this->ops_subject_pk);
+		}
 	}
 	# ------------------------------------------------------------------
 }

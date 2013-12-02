@@ -2501,7 +2501,6 @@
 						if (is_array($va_criteria) && sizeof($va_criteria)) { 
 							$va_wheres[] = "(li.item_id NOT IN (".join(",", array_keys($va_criteria))."))";
 						}
-						
 					
 						if ($this->opo_config->get('perform_item_level_access_checking')) {
 							if ($t_item = $this->opo_datamodel->getInstanceByTableName($vs_browse_table_name, true)) {
