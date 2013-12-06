@@ -6041,8 +6041,9 @@ class BaseModel extends BaseObject {
 	 * @param int $pn_id optional, id of record to be treated as root
 	 * @param array $pa_options
 	 *		returnDeleted = return deleted records in list (def. false)
-	 *		additionalTableToJoin: name of table to join to hierarchical table (and return fields from); only fields related many-to-one are currently supported
-	 *		
+	 *		additionalTableToJoin = name of table to join to hierarchical table (and return fields from); only fields related many-to-one are currently supported
+	 *		idsOnly = 	
+	 *
 	 * @return DbResult
 	 */
 	public function &getHierarchy($pn_id=null, $pa_options=null) {
@@ -6150,6 +6151,9 @@ class BaseModel extends BaseObject {
 						$this->errors = array_merge($this->errors, $o_db->errors());
 						return null;
 					} else {
+						if (caGetOption('idsOnly', $pa_options, false)) {
+							return $qr_hier->getAllFieldValues($this->primaryKey());
+						}
 						return $qr_hier;
 					}
 				} else {
