@@ -122,6 +122,7 @@ require_once(__CA_APP_DIR__."/helpers/gisHelpers.php");
 require_once(__CA_LIB_DIR__."/ca/ApplicationPluginManager.php");
 require_once(__CA_LIB_DIR__."/core/Parsers/htmlpurifier/HTMLPurifier.standalone.php");
 require_once(__CA_LIB_DIR__."/ca/MediaContentLocationIndexer.php");
+require_once(__CA_LIB_DIR__.'/ca/MediaReplicator.php');
 
 /**
  * Base class for all database table classes. Implements database insert/update/delete
@@ -1026,6 +1027,78 @@ class BaseModel extends BaseObject {
 			return $vs_prop;
 		}
 	}
+	
+	/**
+	 * Fetches intrinsic field values from specified fields and rows. If field list is omitted
+	 * an array with all intrinsic fields is returned. Note that this method returns only those
+	 * fields that are present in the table underlying the model. Configured metadata attributes 
+	 * for the model are not returned. See BaseModelWithAttributes::getAttributeForIDs() if you 
+	 * need to fetch attribute values for several rows in a single pass.
+	 *
+	 * You can control which fields are returned using the $pa_fields parameter, an array of field names. If this
+	 * is empty or omitted all fields in the table will be returned. For best performance use as few fields as possible.
+	 *
+	 * Note that if you request only a single field value the returned array will have values set to the request field. If more
+	 * than one field is requested the values in the returned array will be arrays key'ed on field name.
+	 * 
+	 * The primary key for each row is always returned as a key in the returned array of values. The key will not be included 
+	 * with field values unless you explicitly request it in the $pa_fields array. 
+	 *
+	 * @param array $pa_ids List of primary keys to fetch field values for
+	 * @param array $pa_fields List of fields to return values for. 
+	 * @param array $pa_options options array; can be omitted:
+	 * 		There are no options yet.
+	 * @return array An array with keys set to primary keys of fetched rows and values set to either (a) a field value when
+	 * only a single field is requested or (b) an array key'ed on field name when more than one field is requested
+	 *
+	 * @SeeAlso BaseModelWithAttributes::getAttributeForIDs()
+	 */
+	public function getFieldValuesForIDs($pa_ids, $pa_fields=null, $pa_options=null) {
+		if ((!is_array($pa_ids) && (int)$pa_ids > 0)) { $pa_ids = array($pa_ids); }
+		if (!is_array($pa_ids) || !sizeof($pa_ids)) { return null; }
+		
+		$va_ids = array();
+		foreach($pa_ids as $vn_id) {
+			if ((int)$vn_id <= 0) { continue; }
+			$va_ids[] = (int)$vn_id;
+		}
+		if (!sizeof($va_ids)) { return null; }
+		
+		
+		$vs_table_name = $this->tableName();
+		$vs_pk = $this->primaryKey();
+		
+		$va_fld_list = array();
+		if (is_array($pa_fields) && sizeof($pa_fields)) {
+			foreach($pa_fields as $vs_fld) {
+				if ($this->hasField($vs_fld)) {
+					$va_fld_list[$vs_fld] = true;
+				}
+			}
+			$va_fld_list = array_keys($va_fld_list);
+		}
+		$vs_fld_list = (sizeof($va_fld_list)) ? join(", ", $va_fld_list) : "*";
+		
+		$o_db = $this->getDb();
+		
+		$qr_res = $o_db->query("
+			SELECT {$vs_pk}, {$vs_fld_list}
+			FROM {$vs_table_name}
+			WHERE
+				{$vs_pk} IN (?)
+		", array($va_ids));
+		
+		$va_vals = array();
+		$vs_single_fld = (sizeof($va_fld_list) == 1) ? $va_fld_list[0] : null;
+		while($qr_res->nextRow()) {
+			if ($vs_single_fld) {
+				$va_vals[(int)$qr_res->get($vs_pk)] = $qr_res->get($vs_single_fld);
+			} else {
+				$va_vals[(int)$qr_res->get($vs_pk)] = $qr_res->getRow();
+			}
+		}
+		return $va_vals;
+	}
 
 	/**
 	 * Set field value(s) for the table row represented by this object
@@ -1569,6 +1642,51 @@ class BaseModel extends BaseObject {
 		return false;
 	}
 	# --------------------------------------------------------------------------------
+	/**
+	 * Returns array of intrinsic field value arrays for the specified rows
+	 *
+	 * @param array $pa_ids An array of row_ids to get field values for
+	 * @param $ps_table_name string The table to fetch values from. If omitted the name of the subclass through which the method was invoked is uses. This means that, for example, ca_entities::getFieldValueArraysForIDs(array(1,2,3)) and BaseModel::getFieldValueArraysForIDs(array(1,2,3), "ca_entities") are the same thing.
+	 * @return array An array of value arrays indexed by row_id
+	 */
+	static function getFieldValueArraysForIDs($pa_ids, $ps_table_name=null) {
+		if(!is_array($pa_ids) && is_numeric($pa_ids)) {
+			$pa_ids = array($pa_ids);
+		}
+		if (!sizeof($pa_ids)) { return array(); }
+		$va_value_arrays = array();
+		
+		$o_dm = Datamodel::load();
+		
+		$vs_table_name = $ps_table_name ? $ps_table_name : get_called_class();
+		if (!($t_instance = $o_dm->getInstanceByTableName($vs_table_name, true))) { return false; }
+		$vs_pk = $t_instance->primaryKey();
+		
+		// first check cache
+		foreach($pa_ids as $vn_i => $vn_id) {
+			if (isset(BaseModel::$s_instance_cache[$vs_table_name][$vn_id])) {
+				$va_value_arrays[$vn_id] = BaseModel::$s_instance_cache[$vs_table_name][$vn_id];
+				unset($pa_ids[$vn_i]);
+			}
+		}
+		
+		if (!sizeof($pa_ids)) { return $va_value_arrays; }
+		
+		$o_db = $t_instance->getDb();
+		
+		$qr_res = $o_db->query("
+			SELECT * FROM {$vs_table_name} WHERE {$vs_pk} IN (?)
+		", array($pa_ids));
+		
+		// pull values from database
+		while($qr_res->nextRow()) {
+			$va_row = $qr_res->getRow();
+			$va_value_arrays[$va_row[$vs_pk]] = $va_row;
+		}
+		
+		return $va_value_arrays;
+	}
+	# --------------------------------------------------------------------------------
 	# --- Content methods (just your standard Create, Return, Update, Delete methods)
 	# --------------------------------------------------------------------------------
 	/**
@@ -2024,7 +2142,6 @@ class BaseModel extends BaseObject {
 								return false;
 							}
 							if (!is_numeric($this->_FIELD_VALUES[$start_field_name]) && !($va_attr["IS_NULL"] && is_null($this->_FIELD_VALUES[$start_field_name]))) {
-								print_r($this->_FIELD_VALUES); print "f=$start_field_name"; print_R($va_attr); print json_encode($this->_FIELD_VALUES);
 								$this->postError(1100, _t("Starting date is invalid"),"BaseModel->insert()");
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
@@ -2036,7 +2153,7 @@ class BaseModel extends BaseObject {
 								if ($vb_we_set_transaction) { $this->removeTransaction(false); }
 								return false;
 							}
-							if (is_null($this->_FIELD_VALUES[$end_field_name])) { $vm_end_val = 'null'; } else { $end_field_name = $this->_FIELD_VALUES[$end_field_name]; }
+							if (is_null($this->_FIELD_VALUES[$end_field_name])) { $vm_end_val = 'null'; } else { $vm_end_val = $this->_FIELD_VALUES[$end_field_name]; }
 							
 							$vs_fields .= "{$start_field_name}, {$end_field_name},";
 							$vs_values .= "{$vm_start_val}, {$vm_end_val},";
@@ -2665,8 +2782,9 @@ class BaseModel extends BaseObject {
 							break;
 						# -----------------------------
 						case (FT_MEDIA):
-							$va_limit_to_versions = (isset($pa_options['updateOnlyMediaVersions']) ? $pa_options['updateOnlyMediaVersions'] : null);
-							if ($vs_media_sql = $this->_processMedia($vs_field, array('these_versions_only' => $va_limit_to_versions))) {
+							$va_limit_to_versions = caGetOption("updateOnlyMediaVersions", $pa_options, null);
+							
+							if ($vs_media_sql = $this->_processMedia($vs_field, array('processingMediaForReplication' => caGetOption('processingMediaForReplication', $pa_options, false), 'these_versions_only' => $va_limit_to_versions))) {
 								$vs_sql .= $vs_media_sql;
 								$vn_fields_that_have_been_set++;
 							} else {
@@ -2856,6 +2974,7 @@ class BaseModel extends BaseObject {
 				}
 			}
 			$this->logChange("D");
+			
 			return $vn_rc;
 		}
 		$this->clearErrors();
@@ -3181,7 +3300,7 @@ class BaseModel extends BaseObject {
 						$this->update();
 						continue;
 					} else {
-						$this->postError(100, _t("Couldn't queue mirror using '%1' for version '%2' (handler '%3')", $vs_mirror_method, $ps_version, $queue),"BaseModel->retryMediaMirror()");
+						$this->postError(100, _t("Couldn't queue mirror using '%1' for version '%2' (handler '%3')", $vs_mirror_method, $ps_version, $vs_queue),"BaseModel->retryMediaMirror()");
 					}
 					break;
 			}
@@ -3682,7 +3801,7 @@ class BaseModel extends BaseObject {
 				{
 					continue;
 				} else {
-					$this->postError(100, _t("Couldn't queue mirror using '%1' for version '%2' (handler '%3')", $vs_mirror_method, $v, $queue),"BaseModel->_removeMedia()");
+					$this->postError(100, _t("Couldn't queue mirror using '%1' for version '%2' (handler '%3')", $vs_mirror_method, $v, $vs_queue),"BaseModel->_removeMedia()");
 				}
 			}
 		}
@@ -4487,6 +4606,7 @@ class BaseModel extends BaseObject {
 		set_time_limit($vn_max_execution_time);
 		if ($vb_is_fetched_file) { @unlink($vs_tmp_file); }
 		if ($vb_is_archive) { @unlink($vs_archive); @unlink($vs_primary_file_tmp); @unlink($vs_archive_original); }
+		
 		return $vs_sql;
 	}
 	# --------------------------------------------------------------------------------
@@ -4608,12 +4728,12 @@ class BaseModel extends BaseObject {
 	/**
 	 * Fetches hash directory
 	 * 
-	 * @access private
+	 * @access protected
 	 * @param string $basepath path
 	 * @param int $id identifier
 	 * @return string directory
 	 */
-	public function _getDirectoryHash ($basepath, $id) {
+	protected function _getDirectoryHash ($basepath, $id) {
 		$n = intval($id / 100);
 		$dirs = array();
 		$l = strlen($n);
@@ -4627,6 +4747,368 @@ class BaseModel extends BaseObject {
 		}
 
 		return join("/", $dirs);
+	}
+	# --------------------------------------------------------------------------------
+	# --- Media replication
+	# --------------------------------------------------------------------------------
+	/**
+	 * Returns a list of all media replication targets defined for the media loaded into the specified FT_MEDIA field $ps_field
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getMediaReplicationTargets($ps_field, $ps_version='original', $pa_options=null) {
+		$va_media_info = $this->getMediaInfo($ps_field, $ps_version);
+		if (!$va_media_info) { return null; }
+		
+		$vs_trigger = caGetOption('trigger', $pa_options, null);
+		$vn_access = caGetOption('access', $pa_options, null);
+		
+		$va_volume_info = $this->_MEDIA_VOLUMES->getVolumeInformation($va_media_info['VOLUME']);
+		if(isset($va_volume_info['replication']) && is_array($va_volume_info['replication'])) {
+			if ($vs_trigger || (!is_null($vn_access) && is_array($va_target_info['access']))) {
+				$va_tmp = array();
+				foreach($va_volume_info['replication'] as $vs_target => $va_target_info) {
+					if (
+						($va_target_info['trigger'] == $vs_trigger)
+						&&
+						(
+							(is_null($vn_access) || !is_array($va_target_info['access']))
+							||
+							(in_array($vn_access, $va_target_info['access']))
+						)
+					) {
+						$va_tmp[$vs_target] = $va_target_info;
+					}
+				}
+				return $va_tmp;
+			}
+			
+			return $va_volume_info['replication'];
+		}
+		return array();
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * Returns a list of media replication targets for the which the media loaded into the specified FT_MEDIA field $ps_field has not already been replicated
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getAvailableMediaReplicationTargets($ps_field, $ps_version='original', $pa_options=null) {
+		if (!($va_targets = $this->getMediaReplicationTargets($ps_field, $ps_version, $pa_options))) { return null; }
+		
+	
+		$va_used_targets = array_keys($this->getUsedMediaReplicationTargets($ps_field, $ps_version, $pa_options));
+	
+		foreach($va_used_targets as $vs_used_target) {
+			unset($va_targets[$vs_used_target]);
+		}
+		return $va_targets;
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * Returns a list of media replication targets for the which the media loaded into the specified FT_MEDIA field $ps_field has not already been replicated
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getAvailableMediaReplicationTargetsAsHTMLFormElement($ps_name, $ps_field, $ps_version='original', $pa_attributes=null, $pa_options=null) {
+		if (!($va_targets = $this->getAvailableMediaReplicationTargets($ps_field, $ps_version))) { return null; }
+		if (sizeof($va_targets) == 0) { return ''; }
+		
+		$va_opts = array();
+		foreach($va_targets as $vs_target_code => $va_target_info) {
+			$va_opts[$va_target_info['name']] = $vs_target_code;
+		}
+		return caHTMLSelect($ps_name, $va_opts, $pa_attributes, $pa_options);
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * Returns a list of media replication targets for the which the media loaded into the specified FT_MEDIA field $ps_field has already been replicated
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getUsedMediaReplicationTargets($ps_field, $ps_version='original', $pa_options=null) {
+		if (!($va_targets = $this->getMediaReplicationTargets($ps_field, $ps_version, $pa_options))) { return null; }
+		
+		$va_media_info = $this->getMediaInfo($ps_field);
+		$va_used_targets = array();
+		if (is_array($va_media_info['REPLICATION_STATUS'])) {
+			foreach($va_media_info['REPLICATION_STATUS'] as $vs_used_target => $vn_target_status) {
+				if ($vn_target_status != __CA_MEDIA_REPLICATION_STATE_ERROR__) { $va_used_targets[] = $vs_used_target; }
+			}
+		}
+		
+		foreach($va_targets as $vs_target => $va_target_info) {
+			if (!in_array($vs_target, $va_used_targets)) { unset($va_targets[$vs_target]); }
+		}
+		return $va_targets;
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * 
+	 *
+	 * @param string $ps_field
+	 * @param string $ps_target
+	 * @return bool
+	 */
+	public function replicateMedia($ps_field, $ps_target) {
+		$va_targets = $this->getMediaReplicationTargets($ps_field, 'original');
+		$va_target_info = $va_targets[$ps_target];
+		
+		// TODO: generalize this metadata? Perhaps let the plugin deal with it?
+		$pa_data = array(
+			'title' => $va_target_info['options']['title'] ? caProcessTemplateForIDs($va_target_info['options']['title'], $this->tableNum(), array($this->getPrimaryKey()), array('requireLinkTags' => true)) : "",
+			'description' => $va_target_info['options']['description'] ? caProcessTemplateForIDs($va_target_info['options']['description'], $this->tableNum(), array($this->getPrimaryKey()), array('requireLinkTags' => true)) : "",
+			'tags' => $va_target_info['options']['tags'] ? caProcessTemplateForIDs($va_target_info['options']['tags'], $this->tableNum(), array($this->getPrimaryKey()), array('requireLinkTags' => true)) : "",
+			'category' => $va_target_info['options']['category']
+		);
+		
+		$vs_version = $pa_target_info['version'];
+		if (!in_array($vs_version, $this->getMediaVersions($ps_field))) {
+			$vs_version = 'original';
+		}
+	
+		$o_replicator = new MediaReplicator();
+		
+		if ($this->getAppConfig()->get('queue_enabled')) {
+			// Queue replication
+			$o_tq = new TaskQueue();
+			$vs_row_key = join("/", array($this->tableName(), $this->getPrimaryKey()));
+			$vs_entity_key = join("/", array($this->tableName(), $ps_field, $this->getPrimaryKey(), $vs_version));
+
+			if (!($o_tq->cancelPendingTasksForEntity($vs_entity_key))) {
+				//$this->postError(560, _t("Could not cancel pending tasks: %1", $this->error),"BaseModel->replicateMedia()");
+				//return false;
+			}
+
+			if ($o_tq->addTask(
+				'mediaReplication',
+				array(
+					"FIELD" => $ps_field,
+					"TARGET" => $ps_target,
+					"TABLE" => $this->tableName(),
+					"VERSION" => $vs_version,
+
+					"TARGET_INFO" => $va_target_info,
+					"DATA" => $pa_data,
+
+					"PK" => $this->primaryKey(),
+					"PK_VAL" => $this->getPrimaryKey()
+				),
+				array("priority" => 100, "entity_key" => $vs_entity_key, "row_key" => $vs_row_key, 'user_id' => $AUTH_CURRENT_USER_ID)))
+			{
+				
+				$va_media_info = $this->getMediaInfo($ps_field);
+				$va_media_info['REPLICATION_STATUS'][$ps_target] = __CA_MEDIA_REPLICATION_STATE_PENDING__;	// pending means it's queued
+				$va_media_info['REPLICATION_LOG'][$ps_target][] = array('STATUS' => __CA_MEDIA_REPLICATION_STATE_PENDING__, 'DATETIME' => time());
+				$va_media_info['REPLICATION_KEYS'][$ps_target] = null;
+				
+				$this->setMediaInfo($ps_field, $va_media_info);
+				$this->setMode(ACCESS_WRITE);
+				$this->update();
+				return null;
+			} else {
+				$this->postError(100, _t("Couldn't queue mirror using '%1' for version '%2' (handler '%3')", 'mediaReplication', $vs_version, $queue),"BaseModel->replicateMedia()");
+			}
+			
+			$vs_key = null;
+		} else {		
+			// Do replication right now, in-process
+			// (mark replication as started)
+				
+			$va_media_info = $this->getMediaInfo($ps_field);
+			$va_media_info['REPLICATION_STATUS'][$ps_target] = __CA_MEDIA_REPLICATION_STATE_UPLOADING__;
+			$va_media_info['REPLICATION_LOG'][$ps_target][] = array('STATUS' => __CA_MEDIA_REPLICATION_STATE_UPLOADING__, 'DATETIME' => time());
+			$va_media_info['REPLICATION_KEYS'][$ps_target] = null;
+			
+			$this->setMediaInfo($ps_field, $va_media_info);
+			$this->setMode(ACCESS_WRITE);
+			$this->update(array('processingMediaForReplication' => true));
+			
+			if (!is_array($va_media_desc = $this->_FIELD_VALUES[$ps_field])) {
+				throw new Exception(_t("Could not record replication status: %1 has no media description data", $ps_field));
+			}
+			
+			try {
+				if ($vs_key = $o_replicator->replicateMedia($this->getMediaPath($ps_field, $vs_version), $va_target_info, $pa_data)) {
+					$vn_status = $o_replicator->getReplicationStatus($va_target_info, $vs_key);
+					
+					$va_media_info['REPLICATION_STATUS'][$ps_target] = $vn_status;
+					$va_media_info['REPLICATION_LOG'][$ps_target][] = array('STATUS' => $vn_status, 'DATETIME' => time());
+					$va_media_info['REPLICATION_KEYS'][$ps_target] = $vs_key;
+					$this->setMediaInfo($ps_field, $va_media_info);
+					$this->update(array('processingMediaForReplication' => true));
+				
+				} else {
+					$va_media_info['REPLICATION_STATUS'][$ps_target] = __CA_MEDIA_REPLICATION_STATE_ERROR__;
+					$va_media_info['REPLICATION_LOG'][$ps_target][] = array('STATUS' => __CA_MEDIA_REPLICATION_STATE_ERROR__, 'DATETIME' => time());
+					$va_media_info['REPLICATION_KEYS'][$ps_target] = null;
+					$this->setMediaInfo($ps_field, $va_media_info);
+					$this->update(array('processingMediaForReplication' => true));
+					
+					$this->postError(3300, _t('Media replication for %1 failed', $va_target_info['name']), 'BaseModel->replicateMedia');
+					
+					return null;
+				}
+			} catch (Exception $e) {
+				$va_media_info['REPLICATION_STATUS'][$ps_target] = __CA_MEDIA_REPLICATION_STATE_ERROR__;
+				$va_media_info['REPLICATION_LOG'][$ps_target][] = array('STATUS' => __CA_MEDIA_REPLICATION_STATE_ERROR__, 'DATETIME' => time());
+				$va_media_info['REPLICATION_KEYS'][$ps_target] = null;
+				$this->setMediaInfo($ps_field, $va_media_info);
+				$this->update(array('processingMediaForReplication' => true));
+				
+				$this->postError(3300, _t('Media replication for %1 failed: %2', $va_target_info['name'], $e->getMessage()), 'BaseModel->replicateMedia');
+					
+				return null;
+			}
+		}
+		return $vs_key;
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * 
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getReplicatedMediaUrl($ps_field, $ps_target, $pa_options=null) {
+		$va_media_info = $this->getMediaInfo($ps_field); 
+		if (!isset($va_media_info['REPLICATION_STATUS'][$ps_target])) { return null; }
+		if ($va_media_info['REPLICATION_STATUS'][$ps_target] != __CA_MEDIA_REPLICATION_STATE_COMPLETE__) { return false; }
+		
+		$va_targets = $this->getMediaReplicationTargets($ps_field, 'original');
+		$va_target_info = $va_targets[$ps_target];
+		
+		if ($vs_replication_key = $va_media_info['REPLICATION_KEYS'][$ps_target]) {
+			$o_replicator = new MediaReplicator();
+			return $o_replicator->getUrl($vs_replication_key, $va_target_info, $pa_options);
+		}
+		return null;
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * 
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function removeMediaReplication($ps_field, $ps_target, $ps_replication_key, $pa_options=null) {
+		$va_media_info = $this->getMediaInfo($ps_field); 
+		if (!caGetOption('force', $pa_options, false) && !isset($va_media_info['REPLICATION_STATUS'][$ps_target])) { return null; }	
+		
+		$va_targets = $this->getMediaReplicationTargets($ps_field, 'original');
+		$va_target_info = $va_targets[$ps_target];
+		
+		$o_replicator = new MediaReplicator();
+		try {
+			$o_replicator->removeMediaReplication($ps_replication_key, $va_target_info, array());
+			unset($va_media_info['REPLICATION_STATUS'][$ps_target]);
+			$this->setMode(ACCESS_WRITE);
+			$this->setMediaInfo($ps_field, $va_media_info);
+			$this->update(array('processingMediaForReplication' => true));
+		} catch(Exception $e) {
+			unset($va_media_info['REPLICATION_STATUS'][$ps_target]);
+			$this->setMode(ACCESS_WRITE);
+			$this->setMediaInfo($ps_field, $va_media_info);
+			$this->update(array('processingMediaForReplication' => true));
+			
+			$this->postError(3310, _t('Deletion of replicated media for %1 failed: %2', $va_target_info['name'], $e->getMessage()), 'BaseModel->removeMediaReplication');
+				
+			return false;
+		}
+		return true;
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * 
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getMediaReplicationKey($ps_field, $ps_target) {
+		$va_media_info = $this->getMediaInfo($ps_field); 
+		if (!isset($va_media_info['REPLICATION_STATUS'][$ps_target])) { return null; }
+		
+		return (isset($va_media_info['REPLICATION_KEYS']) && isset($va_media_info['REPLICATION_KEYS'][$ps_target])) ? $va_media_info['REPLICATION_KEYS'][$ps_target] : "";
+	}
+	# --------------------------------------------------------------------------------
+	/**
+	 * 
+	 *
+	 * @param string $ps_field
+	 * @param 
+	 */
+	public function getMediaReplicationStatus($ps_field, $ps_target) {
+		$va_media_info = $this->getMediaInfo($ps_field); 
+		if (!isset($va_media_info['REPLICATION_STATUS'][$ps_target])) { return null; }
+		
+		$va_targets = $this->getMediaReplicationTargets($ps_field, 'original');
+		$va_target_info = $va_targets[$ps_target];
+		
+		$vn_current_status = $va_media_info['REPLICATION_STATUS'][$ps_target];
+		
+		$vs_repl_key = (isset($va_media_info['REPLICATION_KEYS']) && isset($va_media_info['REPLICATION_KEYS'][$ps_target])) ? $va_media_info['REPLICATION_KEYS'][$ps_target] : "";
+		
+		switch($vn_current_status) {
+			case __CA_MEDIA_REPLICATION_STATE_PENDING__:
+				$va_status_info = array(
+					'code' => __CA_MEDIA_REPLICATION_STATE_PENDING__,
+					'key' => $vs_repl_key,
+					'status' => _t('Replication pending')
+				);
+				break;
+			case __CA_MEDIA_REPLICATION_STATE_UPLOADING__:
+				$va_status_info = array(
+					'code' => __CA_MEDIA_REPLICATION_STATE_UPLOADING__,
+					'key' => $vs_repl_key,
+					'status' => _t('Uploading media')
+				);
+				break;
+			case __CA_MEDIA_REPLICATION_STATE_PROCESSING__:
+				$o_replicator = new MediaReplicator();
+				if (($vn_status = $o_replicator->getReplicationStatus($va_target_info, $va_media_info['REPLICATION_KEYS'][$ps_target])) != __CA_MEDIA_REPLICATION_STATE_PROCESSING__) {
+					// set to new status
+					
+					$va_media_info = $this->getMediaInfo($ps_field);
+					$va_media_info['REPLICATION_STATUS'][$ps_target] = $vn_status;
+					$va_media_info['REPLICATION_LOG'][$ps_target][] = array('STATUS' => $vn_status, 'DATETIME' => time());
+					$this->setMode(ACCESS_WRITE);
+					$this->setMediaInfo($ps_field, $va_media_info);
+					$this->update();
+					return $this->getMediaReplicationStatus($ps_field, $ps_target);
+				}
+				$va_status_info = array(
+					'code' => __CA_MEDIA_REPLICATION_STATE_PROCESSING__,
+					'key' => $vs_repl_key,
+					'status' => _t('Media is being processed by replication target')
+				);
+				break;
+			case __CA_MEDIA_REPLICATION_STATE_COMPLETE__:
+				$va_status_info = array(
+					'code' => __CA_MEDIA_REPLICATION_STATE_COMPLETE__,
+					'key' => $vs_repl_key,
+					'status' => _t('Replication complete')
+				);
+				break;
+			case __CA_MEDIA_REPLICATION_STATE_ERROR__:
+				$va_status_info = array(
+					'code' => __CA_MEDIA_REPLICATION_STATE_ERROR__,
+					'key' => $vs_repl_key,
+					'status' => _t('Replication failed')
+				);
+				break;
+			default:
+				$va_status_info = array(
+					'code' => 0,
+					'key' => $vs_repl_key,
+					'status' => _t('Status unknown')
+				);
+				break;
+		}
+		return $va_status_info;
 	}
 	# --------------------------------------------------------------------------------
 	# --- Uploaded file handling
@@ -4845,7 +5327,8 @@ class BaseModel extends BaseObject {
 					exit;
 				}
 
-				$properties = $ff->getProperties();
+				if(!is_array($properties = $ff->getProperties())) { $properties = array(); }
+				
 				if ($properties['dangerous'] > 0) { $vn_dangerous = 1; }
 
 				if (($dirhash = $this->_getDirectoryHash($vi["absolutePath"], $this->getPrimaryKey())) === false) {
@@ -6042,7 +6525,7 @@ class BaseModel extends BaseObject {
 	 * @param array $pa_options
 	 *		returnDeleted = return deleted records in list (def. false)
 	 *		additionalTableToJoin = name of table to join to hierarchical table (and return fields from); only fields related many-to-one are currently supported
-	 *		idsOnly = 	
+	 *		idsOnly = return simple array of primary key values for child records rather than full data array
 	 *
 	 * @return DbResult
 	 */
@@ -6062,12 +6545,14 @@ class BaseModel extends BaseObject {
 					return null;
 				}
 			}
-			$vn_hierarchy_id = $this->get($vs_hier_id_fld);
 			
 			$vs_hier_id_sql = "";
-			if ($vn_hierarchy_id) {
-				// TODO: verify hierarchy_id exists
-				$vs_hier_id_sql = " AND (".$vs_hier_id_fld." = ".$vn_hierarchy_id.")";
+			if ($vs_hier_id_fld) {
+				$vn_hierarchy_id = $this->get($vs_hier_id_fld);
+				if ($vn_hierarchy_id) {
+					// TODO: verify hierarchy_id exists
+					$vs_hier_id_sql = " AND (".$vs_hier_id_fld." = ".$vn_hierarchy_id.")";
+				}
 			}
 			
 			
@@ -6172,7 +6657,7 @@ class BaseModel extends BaseObject {
 	 * @param array $pa_options
 	 *
 	 *		additionalTableToJoin: name of table to join to hierarchical table (and return fields from); only fields related many-to-one are currently supported
-	 *		idsOnly: if true, only the primary key id values of the chidlren records are returned
+	 *		idsOnly = return simple array of primary key values for child records rather than full data array
 	 *		returnDeleted = return deleted records in list (def. false)
 	 *		maxLevels = 
 	 *		dontIncludeRoot = 
@@ -6834,7 +7319,7 @@ class BaseModel extends BaseObject {
 				'select_item_text', 'hide_select_if_only_one_option', 'field_errors', 'display_form_field_tips', 'form_name',
 				'no_tooltips', 'tooltip_namespace', 'extraLabelText', 'width', 'height', 'label', 'list_code', 'hide_select_if_no_options', 'id',
 				'lookup_url', 'progress_indicator', 'error_icon', 'maxPixelWidth', 'displayMediaVersion', 'FIELD_TYPE', 'DISPLAY_TYPE', 'choiceList',
-				'readonly'
+				'readonly', 'description'
 			) 
 			as $vs_key) {
 			if(!isset($pa_options[$vs_key])) { $pa_options[$vs_key] = null; }
@@ -7427,20 +7912,21 @@ $pa_options["display_form_field_tips"] = true;
 									$vs_height = ((int)$vs_height * 16)."px";
 								}
 								
+								if(!is_array($va_toolbar_config = $this->getAppConfig()->getAssoc('wysiwyg_editor_toolbar'))) { $va_toolbar_config = array(); }
+								
 								$vs_element .= "<script type='text/javascript'>jQuery(document).ready(function() {
-		jQuery('#".$pa_options["id"]."').ckeditor(function() {
-				this.on( 'change', function(e) { 
-					if (caUI && caUI.utils) { caUI.utils.showUnsavedChangesWarning(true);  }
-				 });
-			},
-			{
-				toolbar: ".json_encode(array_values($this->getAppConfig()->getAssoc('wysiwyg_editor_toolbar'))).",
-				width: '{$vs_width}',
-				height: '{$vs_height}',
-				toolbarLocation: 'top',
-				enterMode: CKEDITOR.ENTER_BR
-			}
-		);
+								var ckEditor = CKEDITOR.replace( '".$pa_options['id']."',
+								{
+									toolbar : ".json_encode(array_values($va_toolbar_config)).",
+									width: '{$vs_width}',
+									height: '{$vs_height}',
+									toolbarLocation: 'top',
+									enterMode: CKEDITOR.ENTER_BR
+								});
+						
+								ckEditor.on('instanceReady', function(){ 
+									 ckEditor.document.on( 'keydown', function(e) {if (caUI && caUI.utils) { caUI.utils.showUnsavedChangesWarning(true); } });
+								});
  	});									
 </script>";
 							}
@@ -7635,7 +8121,7 @@ $pa_options["display_form_field_tips"] = true;
 				) {
 					if (preg_match("/\^DESCRIPTION/", $ps_formatted_element)) {
 						$ps_formatted_element = str_replace("^LABEL",$vs_field_label, $ps_formatted_element);
-						$ps_formatted_element = str_replace("^DESCRIPTION",$va_attr["DESCRIPTION"], $ps_formatted_element);
+						$ps_formatted_element = str_replace("^DESCRIPTION",((isset($pa_options["description"]) && $pa_options["description"]) ? $pa_options["description"] : $va_attr["DESCRIPTION"]), $ps_formatted_element);
 					} else {
 						// no explicit placement of description text, so...
 						$vs_field_id = '_'.$this->tableName().'_'.$this->getPrimaryKey().'_'.$pa_options["name"].'_'.$pa_options['form_name'];
@@ -7643,7 +8129,7 @@ $pa_options["display_form_field_tips"] = true;
 
 
 						if (!isset($pa_options['no_tooltips']) || !$pa_options['no_tooltips']) {
-							TooltipManager::add('#'.$vs_field_id, "<h3>{$vs_field_label}</h3>".$va_attr["DESCRIPTION"], $pa_options['tooltip_namespace']);
+							TooltipManager::add('#'.$vs_field_id, "<h3>{$vs_field_label}</h3>".((isset($pa_options["description"]) && $pa_options["description"]) ? $pa_options["description"] : $va_attr["DESCRIPTION"]), $pa_options['tooltip_namespace']);
 						}
 					}
 
@@ -8020,7 +8506,7 @@ $pa_options["display_form_field_tips"] = true;
 					if ($this->tableName() == $va_rel_info['rel_keys']['one_table']) {
 						if ($t_item_rel->load($pn_relation_id)) {
 							$t_item_rel->setMode(ACCESS_WRITE);
-							$t_item_rel->set($va_rel_info['rel_keys']['many_table_field'], null);
+							$t_item_rel->set($va_rel_info['rel_keys']['many_table_field'], $this->getPrimaryKey());
 							$t_item_rel->update();
 							
 							if ($t_item_rel->numErrors()) {
@@ -8354,6 +8840,7 @@ $pa_options["display_form_field_tips"] = true;
 			
 			$va_new_relations = array();
 			foreach($va_to_reindex_relations as $vn_relation_id => $va_row) {
+				$t_item_rel->clear();
 				$t_item_rel->setMode(ACCESS_WRITE);
 				unset($va_row[$vs_rel_pk]);
 				$va_row[$vs_item_pk] = $pn_to_id;
@@ -9900,9 +10387,33 @@ $pa_options["display_form_field_tips"] = true;
 		$t_instance = new $vs_table;
 		
 		$va_sql_wheres = array();
+		
+		//
+		// Convert type id
+		//
+		if (method_exists($this, "getTypeFieldName")) {
+			$vs_type_field_name = $this->getTypeFieldName();
+			if (isset($pa_values[$vs_type_field_name]) && !is_numeric($pa_values[$vs_type_field_name])) {
+				if ($vn_id = ca_lists::getItemID($this->getTypeListCode(), $pa_values[$vs_type_field_name])) {
+					$pa_values[$vs_type_field_name] = $vn_id;
+				}
+			}
+		}
+		
+		//
+		// Convert other intrinsic list references
+		//
+		foreach($pa_values as $vs_field => $vm_value) {
+			if($vs_list_code = $t_instance->getFieldInfo($vs_field, 'LIST_CODE')) {
+				if ($vn_id = ca_lists::getItemID($vs_list_code, $vm_value)) {
+					$pa_values[$vs_field] = $vn_id;
+				}
+			}
+		}
+		
 		foreach ($pa_values as $vs_field => $vm_value) {
 			if (is_array($vm_value)) { continue; }
-			
+		
 			# support case where fieldname is in format table.fieldname
 			if (preg_match("/([\w_]+)\.([\w_]+)/", $vs_field, $va_matches)) {
 				if ($va_matches[1] != $vs_table) {
@@ -9971,6 +10482,7 @@ $pa_options["display_form_field_tips"] = true;
 						if ($vn_limit && ($vn_c >= $vn_limit)) { break; }
 					}
 				}
+				return $va_instances;
 				break;
 			case 'firstid':
 				if($qr_res->nextRow()) {
