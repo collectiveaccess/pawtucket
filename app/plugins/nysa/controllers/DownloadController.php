@@ -197,20 +197,26 @@
  				if($va_values = $t_occurrence->get("ca_occurrences.{$vs_attribute_code}", array("convertCodesToDisplayText" => false, "returnAsArray" => true))){
 					$va_output_parts = array();
 					foreach($va_values as $k => $va_value){
-						# --- display hierarchy path for "lessonTopic", "learning_standard", "commonCore"
-						if(in_array($vs_attribute_code, array("lessonTopic", "learning_standard", "commonCore"))){
-							$vs_tmp = "";
-							$va_hierarchy_ancestors = $t_list_items->getHierarchyAncestors($va_value[$vs_attribute_code], array("idsOnly" => true, "includeSelf" => true));
-							# --- remove the root - we don't want to display it
-							$va_root = array_pop($va_hierarchy_ancestors);
-							foreach($va_hierarchy_ancestors as $vni => $vn_list_item_id){
-								$vs_tmp = $t_lists->getItemForDisplayByItemID($vn_list_item_id).(($vni > 0) ? " > ".$vs_tmp : "");
-							}
-							$va_output_parts[] = $vs_tmp;
-						}else{							
-							$vs_value = "";
-							if($vs_value = trim($va_value[$vs_attribute_code])){
-								$va_output_parts[] = $t_lists->getItemForDisplayByItemID($vs_value);
+						if($va_value[$vs_attribute_code]){
+							# --- display hierarchy path for "lessonTopic", "learning_standard", "commonCore"
+							if(in_array($vs_attribute_code, array("lessonTopic", "learning_standard", "commonCore"))){
+								$vs_tmp = "";
+								$va_hierarchy_ancestors = $t_list_items->getHierarchyAncestors($va_value[$vs_attribute_code], array("idsOnly" => true, "includeSelf" => true));
+								if(is_array($va_hierarchy_ancestors) && sizeof($va_hierarchy_ancestors)){
+									# --- remove the root - we don't want to display it
+									$va_root = array_pop($va_hierarchy_ancestors);
+									if(is_array($va_hierarchy_ancestors) && sizeof($va_hierarchy_ancestors)){
+										foreach($va_hierarchy_ancestors as $vni => $vn_list_item_id){
+											$vs_tmp = $t_lists->getItemForDisplayByItemID($vn_list_item_id).(($vni > 0) ? " > ".$vs_tmp : "");
+										}
+										$va_output_parts[] = $vs_tmp;
+									}
+								}
+							}else{							
+								$vs_value = "";
+								if($vs_value = trim($va_value[$vs_attribute_code])){
+									$va_output_parts[] = $t_lists->getItemForDisplayByItemID($vs_value);
+								}
 							}
 						}
 					}

@@ -216,6 +216,10 @@
 		$vs_header = "archive";
 	}
 	
+	if(($this->request->getController() == "About") && ($this->request->getAction() == "Education")){
+		$vs_header = "edu";
+	}
+	
 	if($vs_header == "edu"){
 ?>
 			<div id="TopicBar" class="edu">
