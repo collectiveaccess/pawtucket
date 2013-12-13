@@ -229,7 +229,10 @@ if (!$this->request->isAjax()) {
 							if($ps_mode == "print"){
 								print "<input type='checkbox' checked name='print_fields[]' value='rep".$t_rep->get("representation_id")."'> ";
 							}
-							print $t_rep->getMediaTag('media', 'medium');
+							# --- open in media viewer
+							print "<a href='#' onclick='caMediaPanel.showPanel(\"".caNavUrl($this->request, 'Detail', 'Object', 'GetRepresentationInfo', array('object_id' => $t_objects_x_occurrences->get("ca_objects.object_id"), 'representation_id' => $t_rep->getPrimaryKey()))."\"); return false;' >".$t_rep->getMediaTag('media', 'medium')."</a>";
+	
+							#print $t_rep->getMediaTag('media', 'medium');
 							print "</div><!-- end unit -->";
 						}
 					}
