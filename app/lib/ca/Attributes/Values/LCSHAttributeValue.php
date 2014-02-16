@@ -178,7 +178,7 @@
 			return $this->ops_uri_value;
 		}
  		# ------------------------------------------------------------------
- 		public function parseValue($ps_value, $pa_element_info) {
+ 		public function parseValue($ps_value, $pa_element_info, $pa_options=null) {
  			$o_config = Configuration::load();
  			
  			$ps_value = trim(preg_replace("![\t\n\r]+!", ' ', $ps_value));
@@ -211,7 +211,13 @@
 					$o_client->setConfig(array(
 						'maxredirects' => 0,
 						'timeout'      => 30));
-					$o_response = $o_client->request(Zend_Http_Client::HEAD);
+						
+					try {
+						$o_response = $o_client->request(Zend_Http_Client::HEAD);
+					} catch (Exception $e) {
+						$this->postError(1970, _t('Could not connect to LCSH service for %1: %2', $ps_value, $e->getMessage()), 'LCSHAttributeValue->parseValue()');
+						return false;
+					}
 	
 					$vn_status = $o_response->getStatus();
 					$va_headers = $o_response->getHeaders();
@@ -275,14 +281,14 @@
 					)
 				);
 				
-			if ($pa_options['po_request']) {
-				$vs_url = caNavUrl($pa_options['po_request'], 'lookup', 'LCSH', 'Get', array('max' => 100, 'element_id' => (int)$pa_element_info['element_id']));
+			if ($pa_options['request']) {
+				$vs_url = caNavUrl($pa_options['request'], 'lookup', 'LCSH', 'Get', array('max' => 100, 'element_id' => (int)$pa_element_info['element_id']));
 			} else {
 				// hardcoded default for testing.
 				$vs_url = '/index.php/lookup/LCSH/Get';	
 			}
 			
-			$vs_element .= " <a href='#' style='display: none;' id='{fieldNamePrefix}".$pa_element_info['element_id']."_link{n}' target='_lcsh_details'>"._t("More &rsaquo;")."</a>";
+			$vs_element .= " <a href='#' class='caLCSHServiceMoreLink' id='{fieldNamePrefix}".$pa_element_info['element_id']."_link{n}' target='_lcsh_details'>"._t("More &rsaquo;")."</a>";
 		
 			$vs_element .= '</div>';
 			$vs_element .= "
@@ -318,7 +324,7 @@
  			return $vs_element;
  		}
  		# ------------------------------------------------------------------
- 		public function getAvailableSettings() {
+ 		public function getAvailableSettings($pa_element_info=null) {
  			global $_ca_attribute_settings;
  			
  			return $_ca_attribute_settings['LCSHAttributeValue'];
