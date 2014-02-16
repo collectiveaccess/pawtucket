@@ -199,6 +199,7 @@
 			$va_settings = $this->getAvailableSettings();
 			$va_setting_values = is_array($pa_options['settings']) ? $pa_options['settings'] : array();
 			
+			$va_options = array('id_prefix' => $pa_options['id']);
 			foreach($va_settings as $vs_setting => $va_setting_info) {
 				$va_options['id'] = $pa_options['id']."_{$vs_setting}";
 				$va_options['label_id'] = $va_options['id'].'_label';
@@ -270,7 +271,7 @@
 				$vs_label_id = "setting_{$ps_setting}_label";
 			}
 			
-			$vs_return = "\n".'<div class="formLabel">'."\n";
+			$vs_return = "\n".'<div class="formLabel" id="'.$vs_input_id.'_container">'."\n";
 			$vs_return .= '<span id="'.$vs_label_id.'"  class="'.$vs_label_id.'">'.$va_properties['label'].'</span>';
 			
 			
@@ -323,6 +324,16 @@
 					$va_attributes = array('value' => '1', 'id' => $vs_input_id);
 					if ((int)$vs_value === 1) {
 						$va_attributes['checked'] = '1';
+					}
+					if (isset($va_properties['hideOnSelect'])) {
+						if (!is_array($va_properties['hideOnSelect'])) { $va_properties['hideOnSelect'] = array($va_properties['hideOnSelect']); }
+						
+						$va_ids = array();
+						foreach($va_properties['hideOnSelect'] as $vs_n) {
+							$va_ids[] = "#".$pa_options['id_prefix']."_{$vs_n}_container";
+						}
+						$va_attributes['onchange'] = 'jQuery(this).prop("checked") ? jQuery("'.join(",", $va_ids).'").slideUp(250).find("input, textarea").val("") : jQuery("'.join(",", $va_ids).'").slideDown(250);';
+						
 					}
 					$vs_return .= caHTMLCheckboxInput($vs_input_name, $va_attributes, array());
 					break;
@@ -460,6 +471,19 @@
 							
 							$va_opts = array('id' => $vs_input_id, 'width' => $vn_width, 'height' => $vn_height, 'value' => is_array($vs_value) ? $vs_value[0] : $vs_value, 'values' => is_array($vs_value) ? $vs_value : array($vs_value));
 							$vs_select_element = caHTMLSelect($vs_input_name, $va_select_opts, array(), $va_opts);
+						} elseif ((int)$va_properties['showMetadataElementsWithDataType'] > 0) {
+							require_once(__CA_MODELS_DIR__.'/ca_metadata_elements.php');
+							
+							$va_rep_elements = ca_metadata_elements::getElementsAsList(true, $va_properties['table'], null, true, false, true, array($va_properties['showMetadataElementsWithDataType']));
+							
+							if (is_array($va_rep_elements)) {
+								$va_select_opts = array();
+								foreach($va_rep_elements as $vs_element_code => $va_element_info) {
+									$va_select_opts[$va_element_info['display_label']] = $vs_element_code;
+								}
+								$va_opts = array('id' => $vs_input_id, 'width' => $vn_width, 'height' => $vn_height, 'value' => is_array($vs_value) ? $vs_value[0] : $vs_value, 'values' => is_array($vs_value) ? $vs_value : array($vs_value));
+								$vs_select_element = caHTMLSelect($vs_input_name, $va_select_opts, array(), $va_opts);
+							}
 						} else {
 							// Regular drop-down with configured options
 							if ($vn_height > 1) { $va_attr['multiple'] = 1; $vs_input_name .= '[]'; }

@@ -135,6 +135,8 @@ class SearchEngine extends SearchBase {
 			$ps_search .= $vs_append_to_search;
 		}
 		
+		$ps_search = str_replace("[BLANK]", '"[BLANK]"', $ps_search);	// the special [BLANK] search term, which returns records that have *no* content in a specific fields, has to be quoted in order to protect the square brackets from the parser.
+		
 		$t = new Timer();
 		if (!is_array($pa_options)) { $pa_options = array(); }
 		$vn_limit = (isset($pa_options['limit']) && ($pa_options['limit'] > 0)) ? (int)$pa_options['limit'] : null;
@@ -761,9 +763,9 @@ class SearchEngine extends SearchBase {
 		if (sizeof($va_access_points = $this->getAccessPoints($this->opn_tablenum))) {
 			// if field is access point then do rewrite
 			if (
-				isset($va_access_points[$vs_fld]) 
+				isset($va_access_points[$vs_fld_lc = mb_strtolower($vs_fld)]) 
 				&&
-				($va_ap_info = $va_access_points[$vs_fld])
+				($va_ap_info = $va_access_points[$vs_fld_lc])
 			) {
 				$va_fields = isset($va_ap_info['fields']) ? $va_ap_info['fields'] : null;
 				if (!in_array($vs_bool = strtoupper($va_ap_info['boolean']), array('AND', 'OR'))) {
@@ -783,6 +785,7 @@ class SearchEngine extends SearchBase {
 					}
 				}
 				
+				if (sizeof($va_terms['signs']) > 0) { array_pop($va_terms['signs']); }
 				return $va_terms;
 			}
 		}
@@ -944,7 +947,7 @@ class SearchEngine extends SearchBase {
 					$vs_query .= '(' . $subquery->__toString() . ')';
 					break;	
 				case 'Zend_Search_Lucene_Search_Query_Range':
-					$vs_query = $subquery;
+					$vs_query .= '(' . $subquery->__toString() . ')';
 					break;
 				default:
 					$vs_query .= '(' . $this->_queryToString($subquery) . ')';
@@ -1018,9 +1021,11 @@ class SearchEngine extends SearchBase {
 	 * in the restriction. You may pass numeric type_id and alphanumeric type codes interchangeably.
 	 *
 	 * @param array $pa_type_codes_or_ids List of type_id or code values to filter search by. When set, the search will only consider items of the specified types. Using a hierarchical parent type will automatically include its children in the restriction. 
+	 * @param array $pa_options Options include
+	 *		includeSubtypes = include any child types in the restriction. Default is true.
 	 * @return boolean True on success, false on failure
 	 */
-	public function setTypeRestrictions($pa_type_codes_or_ids) {
+	public function setTypeRestrictions($pa_type_codes_or_ids, $pa_options=null) {
 		$t_instance = $this->opo_datamodel->getInstanceByTableName($this->ops_tablename, true);
 		
 		if (!$pa_type_codes_or_ids) { return false; }
@@ -1044,11 +1049,13 @@ class SearchEngine extends SearchBase {
 			if (!$vn_type_id) { return false; }
 			
 			if (isset($va_type_list[$vn_type_id]) && $va_type_list[$vn_type_id]) {	// is valid type for this subject
-				// See if there are any child types
-				$t_item = new ca_list_items($vn_type_id);
-				$va_ids = $t_item->getHierarchyChildren(null, array('idsOnly' => true));
-				$va_ids[] = $vn_type_id;
-				$this->opa_search_type_ids = array_merge($this->opa_search_type_ids, $va_ids);
+				if (caGetOption('includeSubtypes', $pa_options, true)) {
+					// See if there are any child types
+					$t_item = new ca_list_items($vn_type_id);
+					$va_ids = $t_item->getHierarchyChildren(null, array('idsOnly' => true));
+					$va_ids[] = $vn_type_id;
+					$this->opa_search_type_ids = array_merge($this->opa_search_type_ids, $va_ids);
+				}
 			}
 		}
 		return true;
