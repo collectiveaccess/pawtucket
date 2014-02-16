@@ -76,7 +76,7 @@ var methods = {
 			show_empty_annotation_label_text_in_text_boxes: true,
             
             /* functional options */
-            use_annotations: true,							// display annotation tools + annotations
+            use_annotations: false,							// display annotation tools + annotations
             display_annotations: true,						// display annotations on load
             lock_annotations: false,						// lock annotations on load - will display but cannot add, remove or drag existing annotations
             lock_annotation_text: false,					// lock annotation text on load - will display text but not be editable
