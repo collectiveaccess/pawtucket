@@ -38,7 +38,8 @@ require_once(__CA_LIB_DIR__.'/core/Datamodel.php');
 require_once(__CA_LIB_DIR__.'/core/Configuration.php');
 require_once(__CA_LIB_DIR__.'/core/Parsers/ZipFile.php');
 require_once(__CA_LIB_DIR__.'/core/Logging/Eventlog.php');
-
+require_once(__CA_LIB_DIR__.'/core/Utils/Encoding.php');
+require_once(__CA_LIB_DIR__.'/core/Zend/Measure/Length.php');
 
 # ----------------------------------------------------------------------
 # String localization functions (getText)
@@ -143,15 +144,6 @@ function caEscapeForXML($ps_text) {
 	$ps_text = str_replace("'", "&apos;", $ps_text);
 	
 	return str_replace("\"", "&quot;", $ps_text);
-}
-# ----------------------------------------
-function caUnescapeFromXML($ps_text) {
-	$ps_text = str_replace("&amp;", "&", $ps_text);
-	$ps_text = str_replace("&lt;", "<",  $ps_text);
-	$ps_text = str_replace("&gt;", ">", $ps_text);
-	$ps_text = str_replace("&apos;", "'", $ps_text);
-	
-	return str_replace("&quot;", "\"", $ps_text);
 }
 # ----------------------------------------
 function caMakeProperUTF8ForXML($ps_text){
@@ -306,9 +298,10 @@ function caFileIsIncludable($ps_file) {
 	 * @param bool $pb_recursive Optional. By default caGetDirectoryContentsAsList() will recurse through all sub-directories of $dir; set this to false to only consider files that are in $dir itself.
 	 * @param bool $pb_include_hidden_files Optional. By default caGetDirectoryContentsAsList() does not consider hidden files (files starting with a '.') when calculating file counts. Set this to true to include hidden files in counts. Note that the special UNIX '.' and '..' directory entries are *never* counted as files.
 	 * @param bool $pb_sort Optional. If set paths are returns sorted alphabetically. Default is false.
+	 * @param bool $pb_include_directories. If set paths to directories are included. Default is false (only files are returned).
 	 * @return array An array of file paths.
 	 */
-	function &caGetDirectoryContentsAsList($dir, $pb_recursive=true, $pb_include_hidden_files=false, $pb_sort=false) {
+	function &caGetDirectoryContentsAsList($dir, $pb_recursive=true, $pb_include_hidden_files=false, $pb_sort=false, $pb_include_directories=false) {
 		$va_file_list = array();
 		if(substr($dir, -1, 1) == "/"){
 			$dir = substr($dir, 0, strlen($dir) - 1);
@@ -318,8 +311,11 @@ function caFileIsIncludable($ps_file) {
 			foreach($va_paths as $item) {
 				if ($item != "." && $item != ".." && ($pb_include_hidden_files || (!$pb_include_hidden_files && $item{0} !== '.'))) {
 					$vb_is_dir = is_dir("{$dir}/{$item}");
+					if ($pb_include_directories && $vb_is_dir) {
+						$va_file_list["{$dir}/{$item}"] = true;
+					}
 					if ($pb_recursive && $vb_is_dir) { 
-						$va_file_list = array_merge($va_file_list, array_flip(caGetDirectoryContentsAsList("{$dir}/{$item}", true, $pb_include_hidden_files)));
+						$va_file_list = array_merge($va_file_list, array_flip(caGetDirectoryContentsAsList("{$dir}/{$item}", true, $pb_include_hidden_files, false, $pb_include_directories)));
 					} else { 
 						if (!$vb_is_dir) { 
 							$va_file_list["{$dir}/{$item}"] = true;
@@ -810,39 +806,46 @@ function caFileIsIncludable($ps_file) {
 	 * @return float The converted value
 	 */
 	function caConvertLocaleSpecificFloat($ps_value, $locale = "en_US") {
-		if (!function_exists("NumberFormatter")) { return $ps_value; }
-		$fmt = new NumberFormatter($locale, NumberFormatter::DECIMAL );
-		return (float)$fmt->parse($ps_value);
+		$vo_locale = new Zend_Locale($locale);
+
+		try {
+			return Zend_Locale_Format::getNumber($ps_value, array('locale' => $locale));
+		} catch (Zend_Locale_Exception $e) { // happens when you enter 54.33 but 54,33 is expected in the current locale
+			return floatval($ps_value);
+		}
 	}
 	# ---------------------------------------
 	/**
 	 * Takes a standard formatted float (eg. 54.33) and converts it to the locale
 	 * format needed for display (eg 54,33)
 	 *
-	 * @param string $ps_value The value to convert
+	 * @param string $pn_value The value to convert
 	 * @param string $locale Which locale is to be used to return the value
 	 * @return float The converted value
 	 */
-	function caConvertFloatToLocale($ps_value, $locale = "en_US") {
-		if (!function_exists("NumberFormatter")) { return $ps_value; }
-		$fmt = new NumberFormatter($locale, NumberFormatter::DECIMAL );
-		return $fmt->format($ps_value);
+	function caConvertFloatToLocale($pn_value, $locale = "en_US") {
+		$vo_locale = new Zend_Locale($locale);
+
+		try {
+			return Zend_Locale_Format::toNumber($pn_value, array('locale' => $locale));
+		} catch (Zend_Locale_Exception $e) {
+			return $pn_value;
+		}
 	}
 	# ---------------------------------------
 	/**
 	 * Get the decimal separator
 	 *
-	 * @param string $ps_value The value to convert
-	 * @param string $locale Which locale is to be used to return the value
-	 * @return float The converted value
+	 * @param string $locale Which locale is to be used to determine the value
+	 * @return string The separator
 	 */
 	function caGetDecimalSeparator($locale = "en_US") {
-		if (!function_exists("NumberFormatter")) { return $ps_value; }
-		if ($locale != "en_US") {
-			$fmt = new NumberFormatter($locale, NumberFormatter::DECIMAL );
-			return $fmt->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL);
+		$va_symbols = Zend_Locale_Data::getList($locale,'symbols');
+		if(isset($va_symbols['decimal'])){
+			return $va_symbols['decimal'];
+		} else {
+			return '.';
 		}
-		return ".";
 	}
 	# ---------------------------------------
 	/**
@@ -1031,7 +1034,7 @@ function caFileIsIncludable($ps_file) {
 			'file_locking' => true,				/* cache corruption avoidance */
 			'read_control' => false,			/* no read control */
 			'file_name_prefix' => $ps_prefix,	/* prefix of cache files */
-			'cache_file_umask' => 0700			/* permissions of cache files */
+			'cache_file_perm' => 0700			/* permissions of cache files */
 		);
 
 
@@ -1299,6 +1302,31 @@ function caFileIsIncludable($ps_file) {
 	}
 	# ---------------------------------------
 	/**
+	 * Recursively encode array (or string) as UTF8 text
+	 *
+	 * @param mixed $pm_input Array or string to encode
+	 * @return mixed Encoded array or string
+	 */
+	function caEncodeUTF8Deep(&$pm_input) {
+		if (is_string($pm_input)) {
+			$pm_input = Encoding::toUTF8($pm_input);
+		} else if (is_array($pm_input)) {
+			foreach ($pm_input as &$vm_value) {
+				caEncodeUTF8Deep($vm_value);
+			}
+
+			unset($vm_value);
+		} else if (is_object($pm_input)) {
+			$va_keys = array_keys(get_object_vars($pm_input));
+
+			foreach ($va_keys as $vs_key) {
+				caEncodeUTF8Deep($pm_input->$vs_key);
+			}
+		}
+		return $pm_input;
+	}
+	# ---------------------------------------
+	/**
 	 * Converts all accent characters to ASCII characters.
 	 *
 	 * If there are no accent characters, then the string given is just returned.
@@ -1516,15 +1544,71 @@ function caFileIsIncludable($ps_file) {
 	}
 	# ---------------------------------------
 	/**
-	 * 
+	 * Extract specified option from an options array. 
+	 * An options array is simply an associative array where keys are option names and values are option values.
+	 * caGetOption() provides a simple interface to grab values, force default values for non-existent settings and enforce simple validation rules.
 	 *
-	 * @param mixed $ps_options
-	 * @param array $pa_options
-	 * @param mixed $pm_default
+	 * @param mixed $ps_option The option to extract
+	 * @param array $pa_options The options array to extract values from
+	 * @param mixed $pm_default An optional default value to return if $ps_option is not set in $pa_options 
+	 * @param array $pa_parse_options Option parser options (cross your eyes now) include:
+	 *		forceLowercase = transform option value to all lowercase [default=false]
+	 *		forceUppercase = transform option value to all uppercase [default=false]
+	 *		validValues = array of values that are possible for this option. If the option value is not in the list then the default is returned. If no default is set then the first value in the validValues list is returned. Note that by default all comparisons are case-insensitive. 
+	 *		caseSensitive = do case sensitive comparisons when checking the option value against the validValues list [default=false]
+	 *		castTo = array|int|string
 	 * @return mixed
 	 */
-	function caGetOption($ps_option, $pa_options, $pm_default=null) {
-		return (isset($pa_options[$ps_option]) && !is_null($pa_options[$ps_option])) ? $pa_options[$ps_option] : $pm_default;
+	function caGetOption($ps_option, $pa_options, $pm_default=null, $pa_parse_options=null) {
+		$va_valid_values = null;
+		$vb_case_insensitive = false;
+		if (isset($pa_parse_options['validValues']) && is_array($pa_parse_options['validValues'])) {
+			$va_valid_values = $pa_parse_options['validValues'];
+			if (!isset($pa_parse_options['caseSensitive']) || !$pa_parse_options['caseSensitive']) {
+				$va_valid_values = array_map(function($v) { return mb_strtolower($v); }, $va_valid_values);
+				$vb_case_insensitive = true;
+			}
+		}
+		$vm_val = (isset($pa_options[$ps_option]) && !is_null($pa_options[$ps_option])) ? $pa_options[$ps_option] : $pm_default;
+		
+		if(is_array($va_valid_values)) {
+			if (!in_array($vb_case_insensitive ? mb_strtolower($vm_val) : $vm_val, $va_valid_values)) {
+				$vm_val = $pm_default;
+				if (!in_array($vb_case_insensitive ? mb_strtolower($vm_val) : $vm_val, $va_valid_values)) {
+					$vm_val = array_shift($va_valid_values);
+				}
+			}
+		}
+		
+		if (isset($pa_parse_options['forceLowercase']) && $pa_parse_options['forceLowercase']) {
+			$vm_val = mb_strtolower($vm_val);
+		} elseif (isset($pa_parse_options['forceUppercase']) && $pa_parse_options['forceUppercase']) {
+			$vm_val = mb_strtoupper($vm_val);
+		}
+		
+		$vs_cast_to = (isset($pa_parse_options['castTo']) && ($pa_parse_options['castTo'])) ? strtolower($pa_parse_options['castTo']) : '';
+		switch($vs_cast_to) {
+			case 'int':
+				$vm_val = (int)$vm_val;
+				break;
+			case 'float':
+				$vm_val = (float)$vm_val;
+				break;
+			case 'string':
+				$vm_val = (string)$vm_val;
+				break;
+			case 'array':
+				if(!is_array($vm_val)) {
+					if (strlen($vm_val)) {
+						$vm_val = array($vm_val);
+					} else {
+						$vm_val = array();
+					}
+				}
+				break;
+		}
+		
+		return $vm_val;
 	}
 	# ---------------------------------------
 	/**
@@ -1535,7 +1619,7 @@ function caFileIsIncludable($ps_file) {
 	 * @return array
 	 */
 	function caGetOptions($pa_options, $pa_defaults) {
-		$va_proc_options = $pa_options;
+		$va_proc_options = is_array($pa_options) ? $pa_options : array();
 		
 		foreach($pa_defaults as $vs_opt => $vs_opt_default_val) {
 			if (!isset($va_proc_options[$vs_opt])) { $va_proc_options[$vs_opt] = $vs_opt_default_val; }
@@ -1559,7 +1643,7 @@ function caFileIsIncludable($ps_file) {
 			if (is_array($vm_v)) {
 				$pa_array[$vn_k] = caSanitizeArray($vm_v);
 			} else {
-				if (!preg_match("!^[\p{L}\p{N}\p{P}]+!", $vm_v)) {
+				if ((!preg_match("!^[\p{L}\p{N}\p{P}]+!", $vm_v)) || (!mb_detect_encoding($vm_v))) {
 					unset($pa_array[$vn_k]);
 				}
 			}
@@ -1766,6 +1850,114 @@ function caFileIsIncludable($ps_file) {
 	 */
 	function caIsAssociativeArray($pa_array) {
 	  return (bool)count(array_filter(array_keys($pa_array), 'is_string'));
+	}
+	# ----------------------------------------
+	/**
+	 *
+	 */
+	function caIsIndexedArray($pa_array) {
+		return (is_array($pa_array) && !caIsAssociativeArray($pa_array));
+	}
+	# ----------------------------------------
+	/**
+	 *
+	 */
+	function caGetProcessUserID() {
+	  if (function_exists("posix_geteuid")) {
+	  	return posix_geteuid();
+	  }
+	  return null;
+	}
+	# ----------------------------------------
+	/**
+	 *
+	 */
+	function caGetProcessUserName() {
+	  if (function_exists("posix_getpwuid")) {
+	  	if (is_array($va_user = posix_getpwuid(caGetProcessUserID()))) {
+	  		return $va_user['name'];
+	  	}
+	  }
+	  return null;
+	}
+	# ----------------------------------------
+	/**
+	 *
+	 */
+	function caGetProcessGroupID() {
+	  if (function_exists("posix_getegid")) {
+	  	return posix_geteuid();
+	  }
+	  return null;
+	}
+	# ----------------------------------------
+	/**
+	 *
+	 */
+	function caGetProcessGroupName() {
+	  if (function_exists("posix_getgrgid")) {
+	  	if (is_array($va_group = posix_getgrgid(caGetProcessGroupID()))) {
+	  		return $va_group['name'];
+	  	}
+	  }
+	  return null;
+	}
+	# ----------------------------------------
+	/**
+	 *
+	 */
+	function caDetermineWebServerUser() {
+	  if (!caIsRunFromCLI() && ($vs_user = caGetProcessUserName())) {	// we're running on the web server
+	  	return $vs_user;
+	  }
+	  
+	  if(function_exists("posix_getpwnam")) {
+		  // Not running in web server so try to guess
+		  foreach(array('apache', 'www-data', 'www', 'httpd', 'nobody') as $vs_possible_user) {
+			if (posix_getpwnam($vs_possible_user)) {
+				return $vs_possible_user;
+			}
+		  }
+	  }
+	  
+	  return null;
+	}
+	# ----------------------------------------
+	/**
+	 * Convert currency value to another currency.
+	 *
+	 * @param $ps_value string Currency value with specifier (Ex. $500, USD 500, ¥1200, CAD 750)
+	 * @param $ps_to string Specifier of currency to convert value to (Ex. USD, CAD, EUR)
+	 * @param $pa_options array Options are:
+	 *		numericValue = return floating point numeric value only, without currency specifier. Default is false.
+	 *
+	 * @return string Converted value with currency specifier, unless numericValue option is set. Returns null if value could not be converted.
+	 */
+	function caConvertCurrencyValue($ps_value, $ps_to, $pa_options=null) {
+		require_once(__CA_LIB_DIR__."/core/Plugins/CurrencyConversion/EuroBank.php");
+		
+		try {
+			return WLPlugCurrencyConversionEuroBank::convert($ps_value, $ps_to, $pa_options);
+		} catch (Exception $e) {
+			return null;
+		}
+	}
+	# ----------------------------------------
+	/**
+	 * Returns list of currencies for which conversion can be done.
+	 *
+	 * @return array List of three character currency codes, or null if conversion is not available.
+	 */
+	function caAvailableCurrenciesForConversion() {
+		require_once(__CA_LIB_DIR__."/core/Plugins/CurrencyConversion/EuroBank.php");
+		
+		try {
+			$va_currency_list = WLPlugCurrencyConversionEuroBank::getCurrencyList();
+			sort($va_currency_list);
+			return $va_currency_list;
+		} catch (Exception $e) {
+			return null;
+		}
 	}
 	# ----------------------------------------
 ?>
