@@ -1,13 +1,13 @@
 <?php
 /** ---------------------------------------------------------------------
- * app/lib/core/Plugins/Visualizer/WLPlugVisualizerMap.php : visualizes data as a map 
+ * app/lib/core/Plugins/Visualizer/WLPlugVisualizerTimelineJS.php : visualizes data as a timeline 
  * ----------------------------------------------------------------------
  * CollectiveAccess
  * Open-source collections management software
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2013 Whirl-i-Gig
+ * Copyright 2014 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -34,72 +34,132 @@
     *
     */ 
     
-include_once(__CA_LIB_DIR__."/core/Plugins/IWLPlugGeographicMap.php");
+include_once(__CA_LIB_DIR__."/core/Plugins/IWLPlugVisualizer.php");
 include_once(__CA_LIB_DIR__."/core/Plugins/Visualizer/BaseVisualizerPlugin.php");
 include_once(__CA_APP_DIR__."/helpers/gisHelpers.php");
 
-class WLPlugVisualizerMap Extends BaseVisualizerPlugIn Implements IWLPlugVisualizer {
-	
+class WLPlugVisualizerTimelineJS Extends BaseVisualizerPlugIn Implements IWLPlugVisualizer {
 	# ------------------------------------------------
 	/**
 	 *
 	 */
 	public function __construct() {
 		parent::__construct();
-		$this->info['NAME'] = 'Map';
+		$this->info['NAME'] = 'TimelineJS';
 		
-		$this->description = _t('Visualizes data as a map');
+		$this->description = _t('Visualizes data as a timeline using TimelineJS');
 	}
 	# ------------------------------------------------
 	/**
-	 * Generate maps output in specified format
+	 * Generate timeline output in specified format
 	 *
 	 * @param array $pa_viz_settings Array of visualization settings taken from visualization.conf
 	 * @param string $ps_format Specifies format to generate output in. Currently only 'HTML' is supported.
 	 * @param array $pa_options Array of options to use when rendering output. Supported options are:
 	 *		width =
 	 *		height =
-	 *		mapType - type of map to render; valid values are 'ROADMAP', 'SATELLITE', 'HYBRID', 'TERRAIN'; if not specified 'google_maps_default_type' setting in app.conf is used; if that is not set default is 'SATELLITE'
-	 *		showNavigationControls - if true, navigation controls are displayed; default is to use 'google_maps_show_navigation_controls' setting in app.conf
-	 *		showScaleControls -  if true, scale controls are displayed; default is to use 'google_maps_show_scale_controls' setting in app.conf
-	 *		showMapTypeControls -  if true, map type controls are displayed; default is to use 'google_maps_show_map_type_controls' setting in app.conf
-	 *		minZoomLevel - Minimum zoom level to allow; leave null if you don't want to enforce a limit
-	 *		maxZoomLevel - Maximum zoom level to allow; leave null if you don't want to enforce a limit
-	 *		zoomLevel - Zoom map to specified level rather than fitting all markers into view; leave null if you don't want to specify a zoom level. IF this option is set minZoomLevel and maxZoomLevel will be ignored.
-	 *		pathColor - 
-	 *		pathWeight -
-	 *		pathOpacity - 
 	 *		request = current request; required for generation of editor links
 	 */
 	public function render($pa_viz_settings, $ps_format='HTML', $pa_options=null) {
 		if (!($vo_data = $this->getData())) { return null; }
+		$this->opn_num_items_rendered = 0;
 		
 		$po_request = (isset($pa_options['request']) && $pa_options['request']) ? $pa_options['request'] : null;
+		if (!$po_request) { return ''; }
 		
 		list($vs_width, $vs_height) = $this->_parseDimensions(caGetOption('width', $pa_options, 500), caGetOption('height', $pa_options, 500));
 		
-		$o_map = new GeographicMap($vs_width, $vs_height, $pa_options['id']);
-		$this->opn_num_items_rendered = 0;
-		
-		foreach($pa_viz_settings['sources'] as $vs_source_code => $va_source_info) {
-			$vs_color = $va_source_info['color']; 
-			if (method_exists($vo_data, "seek")) { $vo_data->seek(0); }
-			
-			$va_opts = array('renderLabelAsLink' => false, 'request' => $po_request, 'color' => $vs_color);
-			
-			$va_opts['labelTemplate'] = $va_source_info['display']['title_template'];
-			if(isset($va_source_info['display']['ajax_content_url']) && ($va_source_info['display']['ajax_content_url'])) {
-				$va_opts['ajaxContentUrl'] = $va_source_info['display']['ajax_content_url'];
-			} else {
-				$va_opts['contentTemplate'] = $va_source_info['display']['description_template'];
-			}
-			
-			$va_ret = $o_map->mapFrom($vo_data, $va_source_info['data'], $va_opts);
-			if (is_array($va_ret) && isset($va_ret['items'])) {
-				$this->opn_num_items_rendered += (int)$va_ret['items'];
+		// Calculate how many items will be rendered on the timeline
+		// from the entire data set
+		$qr_res = $this->getData();
+		while($qr_res->nextHit()) {
+			foreach($pa_viz_settings['sources'] as $vs_source_name => $va_source) {
+				if($qr_res->get($va_source['data'])) {
+					$this->opn_num_items_rendered++;
+				}
 			}
 		}
-		return $o_map->render($ps_format, $pa_options);
+		
+		$vs_buf = "
+	<div id='timeline-embed' style='width: {$vs_width}; height: {$vs_height};'></div>
+    <script type='text/javascript'>
+		jQuery(document).ready(function() {
+			createStoryJS({
+				type:       'timeline',
+				width:      '{$vs_width}',
+				height:     '{$vs_height}',
+				source:     '".caNavUrl($po_request, '*', '*', '*', array('renderData' => '1', 'viz' => $pa_viz_settings['code']))."',
+				embed_id:   'timeline-embed'
+			});
+		});
+	</script>
+";
+		
+		return $vs_buf;
+	}
+	# ------------------------------------------------
+	/**
+	 * Generate timeline data feed
+	 *
+	 * @param array $pa_viz_settings Array of visualization settings taken from visualization.conf
+	 * @param array $pa_options Array of options to use when rendering output. Supported options are:
+	 *		NONE
+	 */
+	public function getDataForVisualization($pa_viz_settings, $pa_options=null) {
+		$va_data = array(		
+			"headline" => isset($pa_viz_settings['display']['headline']) ? $pa_viz_settings['display']['headline'] : '',
+			"type" => "default",
+			"text" => isset($pa_viz_settings['display']['introduction']) ? $pa_viz_settings['display']['introduction'] : '',
+			"asset" => array(
+				"media" => "",
+				"credit" => "",
+				"caption" => ""
+			)
+        );
+        
+        $po_request = caGetOption('request', $pa_options, null);
+		
+		$qr_res = $this->getData();
+		$vs_table_name = $qr_res->tableName();
+		$vs_pk = $qr_res->primaryKey();
+		
+		$vn_c = 0;
+		$va_results = array();
+		
+		while($qr_res->nextHit()) {
+			foreach($pa_viz_settings['sources'] as $vs_source_name => $va_source) {
+				$vs_dates = $qr_res->get($va_source['data'], array('sortable' => true, 'returnAsArray'=> false, 'delimiter' => ';'));
+				$va_dates = explode(";", $vs_dates);
+	
+				$va_date_list = explode("/", $va_dates[0]);
+				if (!$va_date_list[0] || !$va_date_list[1]) continue; 
+				$va_timeline_dates = caGetDateRangeForTimelineJS($va_date_list);
+		
+				$vn_row_id = $qr_res->get("{$vs_table_name}.{$vs_pk}");
+				$vs_title = $qr_res->getWithTemplate($va_source['display']['title_template']);
+	
+				$va_data['date'][] = array(
+					"startDate" => $va_timeline_dates['start'],
+					"endDate" => $va_timeline_dates['end'],
+					"headline" => $po_request ? caEditorLink($po_request, $vs_title, '', $vs_table_name, $vn_row_id) : $vs_title,
+					"text" => $qr_res->getWithTemplate($va_source['display']['description_template']),
+					"tag" => $vs_tag,
+					"classname" => "",
+					"asset" => array(
+						"media" => $qr_res->getWithTemplate($va_source['display']['image'], array('returnURL' => true)),
+						"thumbnail" => $qr_res->getWithTemplate($va_source['display']['icon'], array('returnURL' => true)),
+						"credit" => $qr_res->getWithTemplate($va_source['display']['credit_template']),
+						"caption" => $qr_res->getWithTemplate($va_source['display']['caption_template'])
+					)
+				);
+			}
+			
+			$vn_c++;
+			if ($vn_c > 2000) { break; }
+		}
+		
+		
+		return json_encode(array('timeline' => $va_data));
 	}
 	# ------------------------------------------------
 	/**
@@ -123,6 +183,7 @@ class WLPlugVisualizerMap Extends BaseVisualizerPlugIn Implements IWLPlugVisuali
 		$va_sources = $pa_viz_settings['sources'];
 		foreach($va_sources as $vs_source_code => $va_source_info) {
 			$va_tmp = explode('.', $va_source_info['data']);
+			$t_instance = $o_dm->getInstanceByTableName($va_tmp[0], true);
 			if (!($t_instance = $o_dm->getInstanceByTableName($va_tmp[0], true))) { unset($va_sources[$vs_source_code]); continue; } 
 			if (!$t_instance->hasField($va_tmp[1]) && (!$t_instance->hasElement($va_tmp[1]))) { unset($va_sources[$vs_source_code]); }
 		}
@@ -150,10 +211,10 @@ class WLPlugVisualizerMap Extends BaseVisualizerPlugIn Implements IWLPlugVisuali
 	 * @return void 
 	 */
 	public function registerDependencies() {
-		$va_packages = array("openlayers", "maps");
+		$va_packages = array("timelineJS");
 		foreach($va_packages as $vs_package) { JavascriptLoadManager::register($vs_package); }
 		return $va_packages;
 	}
-	# --------------------------------------------------------------------------------
+	# ------------------------------------------------
 }
 ?>

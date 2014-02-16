@@ -415,15 +415,6 @@ class WLPlugMediaGmagick Extends BaseMediaPlugin Implements IWLPlugMedia {
 	}
 	# ------------------------------------------------
 	/**
-	 * Returns text content for indexing, or empty string if plugin doesn't support text extraction
-	 *
-	 * @return String Extracted text
-	 */
-	public function getExtractedText() {
-		return '';
-	}
-	# ------------------------------------------------
-	/**
 	 * Returns array of extracted metadata, key'ed by metadata type or empty array if plugin doesn't support metadata extraction
 	 *
 	 * @return Array Extracted metadata
@@ -526,8 +517,8 @@ class WLPlugMediaGmagick Extends BaseMediaPlugin Implements IWLPlugMedia {
 									if ( $this->handle->writeimage($vs_tmp_basename) ) {
 										$va_tmp = $this->handle->getimagegeometry();
 										$this->properties["faces"] = $this->opa_faces = caDetectFaces($vs_tmp_basename, $va_tmp['width'], $va_tmp['height']);
-										@unlink($vs_tmp_basename);
 									}
+									@unlink($vs_tmp_basename);
 								}
 							}
 	
@@ -670,7 +661,7 @@ class WLPlugMediaGmagick Extends BaseMediaPlugin Implements IWLPlugMedia {
 							break;
 						case 'south':
 							$vn_watermark_x = ($cw - $vn_watermark_width)/2;
-							$vn_watermark_y = $cw - $vn_watermark_width;
+							$vn_watermark_y = $ch - $vn_watermark_height;
 							break;
 						case 'center':
 							$vn_watermark_x = ($cw - $vn_watermark_width)/2;
@@ -987,8 +978,8 @@ class WLPlugMediaGmagick Extends BaseMediaPlugin Implements IWLPlugMedia {
 			// read original file
 			$vo_plugin->divineFileFormat($this->filepath);
 			$vo_plugin->read($this->filepath);
-
-			$va_return = $vo_plugin->writePreviews($ps_filepath,$pa_options);
+			$va_return = $vo_plugin->writePreviews($this->filepath,$pa_options);
+			
 			return $va_return;
 		} else {
 			return null;
