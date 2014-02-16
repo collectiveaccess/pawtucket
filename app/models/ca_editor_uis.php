@@ -192,7 +192,7 @@ class ca_editor_uis extends BundlableLabelableBaseModelWithAttributes {
 		
 		),
 		"RELATED_TABLES" => array(
-		
+			
 		)
 	);	
 	
@@ -217,13 +217,29 @@ class ca_editor_uis extends BundlableLabelableBaseModelWithAttributes {
 
 	protected $FIELDS;
 	
+	
+	static $s_loaded_relationship_tables = false;
+	
 	# ----------------------------------------
 	public function __construct($pn_id=null) {
 		parent::__construct($pn_id);
+		
+		if (!ca_editor_uis::$s_loaded_relationship_tables) {
+			require_once(__CA_MODELS_DIR__.'/ca_relationship_types.php');
+			$t_rel = new ca_relationship_types();
+			$va_rels = $t_rel->getRelationshipsUsingTypes();
+			
+			$o_dm = Datamodel::load();
+			foreach($va_rels as $vn_table_num => $va_rel_table_info) {
+				BaseModel::$s_ca_models_definitions['ca_editor_uis']['FIELDS']['editor_type']['BOUNDS_CHOICE_LIST'][$va_rel_table_info['name']] = $vn_table_num;
+			}
+			
+			ca_editor_uis::$s_loaded_relationship_tables = true;
+		}
 	}
 	# ------------------------------------------------------
-	protected function initLabelDefinitions() {
-		parent::initLabelDefinitions();
+	protected function initLabelDefinitions($pa_options=null) {
+		parent::initLabelDefinitions($pa_options);
 		
 		$this->BUNDLES['ca_users'] = array('type' => 'special', 'repeating' => true, 'label' => _t('User access'));
 		$this->BUNDLES['ca_user_groups'] = array('type' => 'special', 'repeating' => true, 'label' => _t('Group access'));
@@ -499,10 +515,9 @@ class ca_editor_uis extends BundlableLabelableBaseModelWithAttributes {
 		if (!($va_screens = $this->getScreens($po_request, $pn_type_id))) { return false; }
 		
 		$va_nav = array();
-		
 		$vn_default_screen_id = null;
 		foreach($va_screens as $va_screen) {
-			if(isset($pa_options['restrictToTypes']) && is_array($pa_options['restrictToTypes'] && is_array($va_screen['typeRestrictions']) && (sizeof($va_screen['typeRestrictions']) > 0))) {
+			if(isset($pa_options['restrictToTypes']) && is_array($pa_options['restrictToTypes']) && is_array($va_screen['typeRestrictions']) && (sizeof($va_screen['typeRestrictions']) > 0)) {
 				$vb_skip = true;
 				foreach($pa_options['restrictToTypes'] as $vn_res_type_id => $vs_res_type) {
 					if (isset($va_screen['typeRestrictions'][$vn_res_type_id]) && $va_screen['typeRestrictions'][$vn_res_type_id]) {

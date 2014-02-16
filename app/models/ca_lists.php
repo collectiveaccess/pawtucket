@@ -364,6 +364,7 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 	 *			item_id =		optional item_id to use as root of hierarchy for returned items; if this is not set (the default) then all items in the list are returned
 	 *			sort =			if set to a __CA_LISTS_SORT_BY_*__ constant, will force the list to be sorted by that criteria overriding the sort order set in the ca_lists.default_sort field
 	 *			idsOnly = 		if true, only the primary key id values of the list items are returned
+	 *			enabledOnly =	return only enabled list items [default=false]
 	 *			labelsOnly = 	if true only labels in the current locale are returns in an array key'ed on item_id
 	 *
 	 * @return array List of items indexed first on item_id and then on locale_id of label
@@ -373,6 +374,8 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 		if (!is_array($pa_options)) { $pa_options = array(); }
 		if (!isset($pa_options['returnHierarchyLevels'])) { $pa_options['returnHierarchyLevels'] = false; }
 		if ((isset($pa_options['directChildrenOnly']) && $pa_options['directChildrenOnly'])) { $pa_options['returnHierarchyLevels'] = false; }
+	
+		$vb_enabled_only = caGetOption('enabledOnly', $pa_options, false);
 	
 		$vb_labels_only = false;
 		if (isset($pa_options['labelsOnly']) && $pa_options['labelsOnly']) {
@@ -400,7 +403,7 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 
 		$vs_hier_sql = '';
 		if ($t_list_item->getPrimaryKey()) {
-			$vs_hier_sql = " AND ((cli.hier_left >= ".((int)$t_list_item->get('hier_left')).") AND (cli.hier_right <= ".((int)$t_list_item->get('hier_right'))."))";
+			$vs_hier_sql = " AND ((cli.hier_left >= ".(floatval($t_list_item->get('hier_left'))).") AND (cli.hier_right <= ".(floatval($t_list_item->get('hier_right')))."))";
 		}
 		
 		if (!isset($pa_options['returnHierarchyLevels']) || !$pa_options['returnHierarchyLevels']) {
@@ -429,6 +432,9 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 				$vs_order_by = "ORDER BY {$vs_order_by}";
 			}
 			
+			$vs_enabled_sql = '';
+			if ($vb_enabled_only) { $vs_enabled_sql = ' AND (cli.is_enabled = 1)'; }
+			
 			$vs_direct_children_sql = '';
 			if ((isset($pa_options['directChildrenOnly']) && $pa_options['directChildrenOnly'])) {
 				$vs_direct_children_sql = " AND cli.parent_id = ".(int)$pn_item_id;
@@ -439,7 +445,7 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 				FROM ca_list_items cli
 				INNER JOIN ca_list_item_labels AS clil ON clil.item_id = cli.item_id
 				WHERE
-					(cli.deleted = 0) AND (clil.is_preferred = 1) AND (cli.list_id = ?) {$vs_type_sql} {$vs_direct_children_sql} {$vs_hier_sql}
+					(cli.deleted = 0) AND (clil.is_preferred = 1) AND (cli.list_id = ?) {$vs_type_sql} {$vs_direct_children_sql} {$vs_hier_sql} {$vs_enabled_sql}
 				{$vs_order_by}
 			";
 			//print $vs_sql;
@@ -498,6 +504,7 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 			
 			foreach($va_list_items as $vn_i => $va_item) {
 				if ($pn_type_id && $va_item['NODE']['type_id'] != $pn_type_id) { continue; }
+				if ($vb_enabled_only && !$va_item['NODE']['is_enabled']) { continue; }
 				
 				$vn_item_id = $va_item['NODE']['item_id'];
 				$vn_parent_id = $va_item['NODE']['parent_id'];
@@ -560,7 +567,7 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 		$va_items = $pa_items[$pn_root_id];
 		if (!is_array($va_items)) { return; }
 		if (isset($pa_options['extractValuesByUserLocale']) && $pa_options['extractValuesByUserLocale']) {
-			ksort($va_items);
+			uksort($va_items, "strnatcasecmp");
 			foreach($va_items as $vs_key => $va_items_by_item_id) {
 				foreach($va_items_by_item_id as $vn_item_id => $va_item_level) {
 					// output this item
@@ -1007,7 +1014,7 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 	 * If no list is specified the currently loaded list is used.
 	 *
 	 * @param mixed $pm_list_name_or_id List code or list_id of list to return default item_id for. If omitted the currently loaded list will be used.
-	 * @return int The item_id of the default element or null if no list was specified or loaded, or if no default is set for the list in question.
+	 * @return int The item_id of the default element or null if no list was specified or loaded. If no default is set for the list in question the first item found is returned.
 	 */
 	public function getDefaultItemID($pm_list_name_or_id=null) {
 		if($pm_list_name_or_id) {
@@ -1024,7 +1031,7 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 			return $t_list_item->getPrimaryKey();
 		}
 		
-		return null;
+		return array_shift($this->getItemsForList($vn_list_id, array('idsOnly' => true)));
 	}
 	# ------------------------------------------------------
 	/**
@@ -1147,7 +1154,17 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 						}
 					}
 					
+
 					if ($va_limit_to_listIDs = ((isset($pa_options['limitToListIDs']) && is_array($pa_options['limitToListIDs'])) ? $pa_options['limitToListIDs'] : null)) {
+						// for some reason the option comes back as array(0 => null) if no list is selected in UI
+						// -> have to make sure to catch this case here
+						if((sizeof($va_limit_to_listIDs)==1) && empty($va_limit_to_listIDs[0])){
+							$va_limit_to_listIDs = null;
+						}
+					}
+
+
+					if (is_array($va_limit_to_listIDs) && sizeof($va_item_ids)){
 						// filter out items from tables we don't want
 					
 						$qr_list_items = $t_list->makeSearchResult("ca_list_items", array_values($va_item_ids));
@@ -1339,8 +1356,8 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 					)
 				);
 				
-				if ($pa_options['po_request']) {
-					$vs_url = caNavUrl($pa_options['po_request'], 'lookup', 'ListItem', 'Get', array('list' => ca_lists::getListCode($vn_list_id), 'noInline' => 1, 'noSymbols' => 1, 'max' => 100));
+				if ($pa_options['request']) {
+					$vs_url = caNavUrl($pa_options['request'], 'lookup', 'ListItem', 'Get', array('list' => ca_lists::getListCode($vn_list_id), 'noInline' => 1, 'noSymbols' => 1, 'max' => 100));
 				} else {
 					// hardcoded default for testing.
 					$vs_url = '/index.php/lookup/ListItem/Get';	
@@ -1392,8 +1409,8 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 		jQuery(document).ready(function() { 
 			var oHierBrowser = caUI.initHierBrowser('{$ps_name}_hierarchyBrowser{n}', {
 				uiStyle: '".(($vs_render_as == 'vert_hierbrowser') ? 'vertical' : 'horizontal')."',
-				levelDataUrl: '".caNavUrl($pa_options['po_request'], 'lookup', 'ListItem', 'GetHierarchyLevel', array('noSymbols' => 1))."',
-				initDataUrl: '".caNavUrl($pa_options['po_request'], 'lookup', 'ListItem', 'GetHierarchyAncestorList')."',
+				levelDataUrl: '".caNavUrl($pa_options['request'], 'lookup', 'ListItem', 'GetHierarchyLevel', array('noSymbols' => 1))."',
+				initDataUrl: '".caNavUrl($pa_options['request'], 'lookup', 'ListItem', 'GetHierarchyAncestorList')."',
 				
 				selectOnLoad : true,
 				browserWidth: ".(int)$va_width['dimension'].",
@@ -1401,12 +1418,12 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 				className: '".(($vs_render_as == 'vert_hierbrowser') ? 'hierarchyBrowserLevelVertical' : 'hierarchyBrowserLevel')."',
 				classNameContainer: '".(($vs_render_as == 'vert_hierbrowser') ? 'hierarchyBrowserContainerVertical' : 'hierarchyBrowserContainer')."',
 				
-				editButtonIcon: '<img src=\"".$pa_options['po_request']->getThemeUrlPath()."/graphics/buttons/arrow_grey_right.gif\" border=\"0\" title=\"Edit\"/>',
+				editButtonIcon: '<img src=\"".$pa_options['request']->getThemeUrlPath()."/graphics/buttons/arrow_grey_right.gif\" border=\"0\" title=\"Edit\"/>',
 				
 				initItemID: '{".$pa_options['element_id']."}',
 				defaultItemID: '".$t_list->getDefaultItemID()."',
 				useAsRootID: '".$t_root_item->getPrimaryKey()."',
-				indicatorUrl: '".$pa_options['po_request']->getThemeUrlPath()."/graphics/icons/indicator.gif',
+				indicatorUrl: '".$pa_options['request']->getThemeUrlPath()."/graphics/icons/indicator.gif',
 				
 				currentSelectionDisplayID: '{$ps_name}_browseCurrentSelectionText{n}',
 				onSelection: function(item_id, parent_id, name, display) {
@@ -1417,7 +1434,7 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 		if ($vs_render_as == 'horiz_hierbrowser_with_search') {
 			$vs_buf .= "jQuery('#{$ps_name}_hierarchyBrowserSearch{n}').autocomplete(
 					{
-						source: '".caNavUrl($pa_options['po_request'], 'lookup', 'ListItem', 'Get', array('list' => ca_lists::getListCode($vn_list_id), 'noSymbols' => 1))."', 
+						source: '".caNavUrl($pa_options['request'], 'lookup', 'ListItem', 'Get', array('list' => ca_lists::getListCode($vn_list_id), 'noSymbols' => 1))."', 
 						minLength: 3, delay: 800,
 						select: function(event, ui) {
 							oHierBrowser.setUpHierarchy(ui.item.id);	// jump browser to selected item
@@ -1443,6 +1460,9 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 					)
 				);
 				return $vs_buf;
+				break;
+			case 'options':
+				return $va_options;
 				break;
 			default:
 				if (!sizeof($va_options)) { return ''; }	// return empty string if list has no values
@@ -1602,6 +1622,49 @@ class ca_lists extends BundlableLabelableBaseModelWithAttributes {
 		}
 		
 		return $va_lists;
+	}
+	# ---------------------------------------------------------------------------------------------
+	/**
+	 * Overrides BundlableLabelableBaseModelWithAttributes:isSaveable to implement system list access restrictions
+	 */
+	public function isSaveable($po_request, $ps_bundle_name=null) {
+		if(parent::isSaveable($po_request, $ps_bundle_name)){ // user could save this list
+			if($this->getPrimaryKey()){
+				if($this->get('is_system_list')){
+					if(!$po_request->user->canDoAction('can_edit_system_lists')){
+						return false;
+					}
+				}
+			}
+
+			return true;
+		} else {
+			// BundlableLabelableBaseModelWithAttributes:isSaveable returned false
+			// => user can't edit this list at all, no matter how is_system_list is set
+			return false;
+		}
+	}
+	# ---------------------------------------------------------------------------------------------
+	/**
+	 * Overrides BundlableLabelableBaseModelWithAttributes:isDeletable to implement system list access restrictions
+	 */
+	public function isDeletable($po_request) {
+
+		if(parent::isDeletable($po_request)){ // user could delete this list
+			if($this->getPrimaryKey()){
+				if($this->get('is_system_list')){
+					if(!$po_request->user->canDoAction('can_delete_system_lists')){
+						return false;
+					}
+				}
+			}
+
+			return true;
+		} else {
+			// BundlableLabelableBaseModelWithAttributes:isDeletable returned false
+			// => user can't delete this list at all, no matter how is_system_list is set
+			return false;
+		}
 	}
 	# ---------------------------------------------------------------------------------------------
 	/**

@@ -309,8 +309,8 @@ class ca_tour_stops extends BundlableLabelableBaseModelWithAttributes {
 		parent::__construct($pn_id);	# call superclass constructor
 	}
 	# ------------------------------------------------------
-	protected function initLabelDefinitions() {
-		parent::initLabelDefinitions();
+	protected function initLabelDefinitions($pa_options=null) {
+		parent::initLabelDefinitions($pa_options);
 		$this->BUNDLES['ca_objects'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related objects'));
 		$this->BUNDLES['ca_entities'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related entities'));
 		$this->BUNDLES['ca_places'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related places'));
@@ -355,6 +355,9 @@ class ca_tour_stops extends BundlableLabelableBaseModelWithAttributes {
 	 	if (!$vn_pk) { return null; }		// have to load a row first
 	 	
 	 	$vs_template = $this->getAppConfig()->get('ca_tour_stops_hierarchy_browser_display_settings');
+	 	if (!$vs_template) {
+	 		$vs_template = "^ca_tour_stops.preferred_labels.name"; 
+	 	}
 	 	
 	 	$vs_label = $this->getLabelForDisplay(false);
 	 	$vs_hier_fld = $this->getProperty('HIERARCHY_ID_FLD');
@@ -373,15 +376,11 @@ class ca_tour_stops extends BundlableLabelableBaseModelWithAttributes {
 	 	$va_children = $t_stop->getHierarchyChildren(null, array('idsOnly' => true));
 	 	$va_stop_hierarchy_root = array(
 	 		$t_stop->get($vs_hier_fld) => array(
-	 			'stop_id' => $vn_pk,
+	 			'item_id' => $vn_pk,
 	 			'name' => $vs_name = caProcessTemplateForIDs($vs_template, 'ca_tour_stops', array($vn_pk)),
 	 			'hierarchy_id' => $vn_hier_id,
 	 			'children' => sizeof($va_children)
-	 		),
-	 		'stop_id' => $vn_pk,
-			'name' => $vs_name,
-			'hierarchy_id' => $vn_hier_id,
-			'children' => sizeof($va_children)
+	 		)
 	 	);
 	 	
 	 	return $va_stop_hierarchy_root;
@@ -486,6 +485,5 @@ class ca_tour_stops extends BundlableLabelableBaseModelWithAttributes {
 		return $this->getTourStopIDsByName($pa_label_values['name'], $pn_parent_id, $pn_type_id);
 	}
 	# ------------------------------------------------------
-	 # ------------------------------------------------------
 }
 ?>
