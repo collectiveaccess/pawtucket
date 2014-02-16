@@ -1,13 +1,13 @@
 <?php
 /** ---------------------------------------------------------------------
- * app/lib/ca/BatchEditorProgress.php : 
+ * app/lib/ca/HierarchicalReindexingProgress.php : AppController plugin to add page shell around content
  * ----------------------------------------------------------------------
  * CollectiveAccess
  * Open-source collections management software
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2012 Whirl-i-Gig
+ * Copyright 2011 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -36,24 +36,15 @@
   * after the web UI page has been sent to the client
   */
  
+ 	require_once(__CA_LIB_DIR__.'/core/Datamodel.php');
  	require_once(__CA_LIB_DIR__.'/core/Controller/AppController/AppControllerPlugin.php');
- 	require_once(__CA_LIB_DIR__.'/ca/BatchProcessor.php');
  
-	class BatchEditorProgress extends AppControllerPlugin {
+	class HierarchicalReindexingProgress extends AppControllerPlugin {
 		# -------------------------------------------------------
-		private $request;
-		private $ot_set;
-		private $ot_subject;
-		private $opa_options;
-		# -------------------------------------------------------
-		public function __construct($po_request, $t_set, $t_subject, $pa_options=null) {
-			$this->request = $po_request;
-			$this->ot_set = $t_set;
-			$this->ot_subject = $t_subject;
-			$this->opa_options = is_array($pa_options) ? $pa_options : array();
-		}
+		
 		# -------------------------------------------------------
 		public function dispatchLoopShutdown() {	
+		
 			//
 			// Force output to be sent - we need the client to have the page before
 			// we start flushing progress bar updates
@@ -65,20 +56,50 @@
 			$resp->clearContent();
 			
 			//
-			// Do batch processing
+			// Do reindexing
 			//
-			if ($req->isLoggedIn()) {
-				set_time_limit(3600*24); // if it takes more than 24 hours we're in trouble
-
-				if(isset($this->opa_options['isBatchDelete']) && $this->opa_options['isBatchDelete']) {
-					$va_errors = BatchProcessor::deleteBatchForSet($this->request, $this->ot_set, $this->ot_subject, array_merge($this->opa_options, array('progressCallback' => 'caIncrementBatchEditorProgress', 'reportCallback' => 'caCreateBatchEditorResultsReport')));	
-				} elseif(isset($this->opa_options['isBatchTypeChange']) && $this->opa_options['isBatchTypeChange']) {
-					$va_errors = BatchProcessor::changeTypeBatchForSet($this->request, $this->opa_options['type_id'], $this->ot_set, $this->ot_subject, array_merge($this->opa_options, array('progressCallback' => 'caIncrementBatchEditorProgress', 'reportCallback' => 'caCreateBatchEditorResultsReport')));	
-				} else {
-					$va_errors = BatchProcessor::saveBatchEditorFormForSet($this->request, $this->ot_set, $this->ot_subject, array_merge($this->opa_options, array('progressCallback' => 'caIncrementBatchEditorProgress', 'reportCallback' => 'caCreateBatchEditorResultsReport')));	
+			
+			if ($req->isLoggedIn() && $req->user->canDoAction('can_do_search_reindex')) {
+				set_time_limit(3600*8);
+				$o_db = new Db();
+				$t_timer = new Timer();
+				$o_dm = Datamodel::load();
+	
+				$va_table_names = $o_dm->getTableNames();
+				
+				$vn_tc = 0;
+				foreach($va_table_names as $vs_table) {
+					if ($o_instance = $o_dm->getInstanceByTableName($vs_table)) {
+						if ($o_instance->isHierarchical()) {
+							if (!$o_instance->rebuildAllHierarchicalIndexes()) {
+								$o_instance->rebuildHierarchicalIndex();
+							}
+						}
+						
+						caIncrementHierachicalReindexProgress( 
+							_t('Rebuilding hierarchical index for %1', $o_instance->getProperty('NAME_PLURAL')),
+							$t_timer->getTime(2),
+							memory_get_usage(true),
+							$va_table_names,
+							$o_instance->tableNum(),
+							$o_instance->getProperty('NAME_PLURAL'),
+							$vn_tc+1
+						);
+					}
+					$vn_tc++;
 				}
+				
+				caIncrementHierachicalReindexProgress(
+					_t('Index rebuild complete!'),
+					$t_timer->getTime(2),
+					memory_get_usage(true),
+					$va_table_names,
+					null,
+					null,
+					sizeof($va_table_names)
+				);
 			}
-		}	
+		}
 		# -------------------------------------------------------
 	}
 ?>

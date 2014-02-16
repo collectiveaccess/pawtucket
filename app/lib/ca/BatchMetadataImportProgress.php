@@ -1,13 +1,13 @@
 <?php
 /** ---------------------------------------------------------------------
- * app/lib/ca/BatchEditorProgress.php : 
+ * app/lib/ca/BatchMetadataImportProgress.php : 
  * ----------------------------------------------------------------------
  * CollectiveAccess
  * Open-source collections management software
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2012 Whirl-i-Gig
+ * Copyright 2013 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -39,17 +39,13 @@
  	require_once(__CA_LIB_DIR__.'/core/Controller/AppController/AppControllerPlugin.php');
  	require_once(__CA_LIB_DIR__.'/ca/BatchProcessor.php');
  
-	class BatchEditorProgress extends AppControllerPlugin {
+	class BatchMetadataImportProgress extends AppControllerPlugin {
 		# -------------------------------------------------------
 		private $request;
-		private $ot_set;
-		private $ot_subject;
 		private $opa_options;
 		# -------------------------------------------------------
-		public function __construct($po_request, $t_set, $t_subject, $pa_options=null) {
+		public function __construct($po_request, $pa_options=null) {
 			$this->request = $po_request;
-			$this->ot_set = $t_set;
-			$this->ot_subject = $t_subject;
 			$this->opa_options = is_array($pa_options) ? $pa_options : array();
 		}
 		# -------------------------------------------------------
@@ -69,14 +65,14 @@
 			//
 			if ($req->isLoggedIn()) {
 				set_time_limit(3600*24); // if it takes more than 24 hours we're in trouble
-
-				if(isset($this->opa_options['isBatchDelete']) && $this->opa_options['isBatchDelete']) {
-					$va_errors = BatchProcessor::deleteBatchForSet($this->request, $this->ot_set, $this->ot_subject, array_merge($this->opa_options, array('progressCallback' => 'caIncrementBatchEditorProgress', 'reportCallback' => 'caCreateBatchEditorResultsReport')));	
-				} elseif(isset($this->opa_options['isBatchTypeChange']) && $this->opa_options['isBatchTypeChange']) {
-					$va_errors = BatchProcessor::changeTypeBatchForSet($this->request, $this->opa_options['type_id'], $this->ot_set, $this->ot_subject, array_merge($this->opa_options, array('progressCallback' => 'caIncrementBatchEditorProgress', 'reportCallback' => 'caCreateBatchEditorResultsReport')));	
-				} else {
-					$va_errors = BatchProcessor::saveBatchEditorFormForSet($this->request, $this->ot_set, $this->ot_subject, array_merge($this->opa_options, array('progressCallback' => 'caIncrementBatchEditorProgress', 'reportCallback' => 'caCreateBatchEditorResultsReport')));	
-				}
+			
+				$va_errors = BatchProcessor::importMetadata(
+					$req, 
+					(isset($_FILES['sourceFile']['tmp_name']) && $_FILES['sourceFile']['tmp_name']) ? $_FILES['sourceFile']['tmp_name'] : $req->getParameter('sourceUrl', pString),
+					$req->getParameter('importer_id', pInteger),
+					$req->getParameter('inputFormat', pString),
+					array_merge($this->opa_options, array('progressCallback' => 'caIncrementBatchMetadataImportProgress', 'reportCallback' => 'caUpdateBatchMetadataImportResultsReport'))
+				);
 			}
 		}	
 		# -------------------------------------------------------
