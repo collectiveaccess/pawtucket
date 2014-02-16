@@ -128,7 +128,7 @@
 			return $this->ops_uri_value;
 		}
  		# ------------------------------------------------------------------
- 		public function parseValue($ps_value, $pa_element_info) {
+ 		public function parseValue($ps_value, $pa_element_info, $pa_options=null) {
 			$va_settings = $this->getSettingValuesFromElementArray($pa_element_info, array('uBioKeyCode'));
  			$ps_value = trim(preg_replace("![\t\n\r]+!", ' ', $ps_value));
  			$va_return = "";
@@ -176,8 +176,8 @@
 					)
 				);
 
-			if ($pa_options['po_request']) {
-				$vs_url = caNavUrl($pa_options['po_request'], 'lookup', 'Taxonomy', 'Get', array('max' => 100));
+			if ($pa_options['request']) {
+				$vs_url = caNavUrl($pa_options['request'], 'lookup', 'Taxonomy', 'Get', array('max' => 100));
 			} else {
 				// hardcoded default for testing.
 				$vs_url = '/index.php/lookup/Taxonomy/Get';
@@ -208,7 +208,7 @@
  			return $vs_element;
  		}
  		# ------------------------------------------------------------------
- 		public function getAvailableSettings() {
+ 		public function getAvailableSettings($pa_element_info=null) {
  			global $_ca_attribute_settings;
 
  			return $_ca_attribute_settings['TaxonomyAttributeValue'];

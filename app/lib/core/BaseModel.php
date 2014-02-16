@@ -908,6 +908,8 @@ class BaseModel extends BaseObject {
 
 				if (isset($pa_options["GET_DIRECT_DATE"]) && $pa_options["GET_DIRECT_DATE"]) {
 					$vs_prop = $this->_FIELD_VALUES[$ps_field];
+				} elseif ((isset($pa_options['sortable']) && $pa_options['sortable'])) {
+					$vs_prop = $vn_timestamp."/".$vn_timestamp;
 				} else {
 					$o_tep = new TimeExpressionParser();
 					$vn_timestamp = isset($this->_FIELD_VALUES[$ps_field]) ? $this->_FIELD_VALUES[$ps_field] : 0;
@@ -950,6 +952,8 @@ class BaseModel extends BaseObject {
 						$o_tep->setUnixTimestamps($vn_start_date, $vn_end_date);
 					}
 					$vs_prop = $o_tep->getText($pa_options);
+				} elseif ((isset($pa_options['sortable']) && $pa_options['sortable'])) {
+					$vs_prop = $vn_start_date."/".$vn_timestamp;
 				} else {
 					$vs_prop = array($vn_start_date, $vn_end_date);
 				}
@@ -6675,6 +6679,7 @@ class BaseModel extends BaseObject {
 		if ($pn_id && $pb_include_self) { $pb_dont_include_root = false; }
 		
 		if ($qr_hier = $this->getHierarchy($pn_id, $pa_options)) {
+			if ($pb_ids_only) { return $qr_hier; }
 			$vs_hier_right_fld 			= $this->getProperty("HIERARCHY_RIGHT_INDEX_FLD");
 			
 			$va_indent_stack = array();
@@ -8804,9 +8809,9 @@ $pa_options["display_form_field_tips"] = true;
 				$va_to_reindex_relations[(int)$qr_res->get('relation_id')] = $qr_res->getRow();	
 			}
 			if (!sizeof($va_to_reindex_relations)) { return 0; }
-			
 			$va_new_relations = array();
 			foreach($va_to_reindex_relations as $vn_relation_id => $va_row) {
+				$t_item_rel->clear();
 				$t_item_rel->setMode(ACCESS_WRITE);
 				unset($va_row[$vs_rel_pk]);
 				

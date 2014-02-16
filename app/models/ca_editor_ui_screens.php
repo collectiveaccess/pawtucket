@@ -189,7 +189,7 @@ class ca_editor_ui_screens extends BundlableLabelableBaseModelWithAttributes {
 		
 		),
 		"RELATED_TABLES" => array(
-		
+			
 		)
 	);
 	# ------------------------------------------------------
@@ -212,8 +212,8 @@ class ca_editor_ui_screens extends BundlableLabelableBaseModelWithAttributes {
 		parent::__construct($pn_id);
 	}
 	# ------------------------------------------------------
-	protected function initLabelDefinitions() {
-		parent::initLabelDefinitions();
+	protected function initLabelDefinitions($pa_options=null) {
+		parent::initLabelDefinitions($pa_options);
 		
 		$this->BUNDLES['ca_editor_ui_bundle_placements'] = array('type' => 'special', 'repeating' => false, 'label' => _t('Screen content'));
 		$this->BUNDLES['ca_editor_ui_screen_type_restrictions'] = array('type' => 'special', 'repeating' => false, 'label' => _t('Type restrictions'));
@@ -377,7 +377,7 @@ class ca_editor_ui_screens extends BundlableLabelableBaseModelWithAttributes {
 	 *
 	 * @param mixed $pm_table_name_or_num The table name or number specifying the content type to fetch bundles for. If omitted the content table of the currently loaded display will be used.
 	 * @param array $pa_options Supported options are:
-	 *		NONE YET
+	 *		dontCache = disable caching when fetching model properties
 	 * @return array And array of bundles keyed on display label. Each value is an array with these keys:
 	 *		bundle = The bundle name (eg. ca_objects.idno)
 	 *		display = Display label for each available bundle
@@ -386,11 +386,16 @@ class ca_editor_ui_screens extends BundlableLabelableBaseModelWithAttributes {
 	 * Will return null if table name or number is invalid.
 	 */
 	public function getAvailableBundles($pm_table_name_or_num=null, $pa_options=null) {
+		$pb_dont_cache = caGetOption('dontCache', $pa_options, false);
 		if (!$pm_table_name_or_num) { $pm_table_name_or_num = $this->getTableNum(); }
 		
 		if (!is_numeric($pm_table_name_or_num)) { $pm_table_name_or_num = $this->_DATAMODEL->getTableNum($pm_table_name_or_num); }
 		if (!($t_instance = $this->_DATAMODEL->getInstanceByTableNum($pm_table_name_or_num, false))) { return null; }
 		$vs_table = $t_instance->tableName();
+
+		// if cache is disabled, make sure bundle definitions are up-to-date for this instance. they are usually cached.
+		if($pb_dont_cache) { $t_instance->reloadLabelDefinitions(); }
+
 		$vs_table_display_name = $t_instance->getProperty('NAME_PLURAL');
 		
 		$t_placement = new ca_editor_ui_bundle_placements(null, array());
@@ -398,7 +403,7 @@ class ca_editor_ui_screens extends BundlableLabelableBaseModelWithAttributes {
 		
 		$va_available_bundles = array();
 		
-		$va_elements = ca_metadata_elements::getElementsAsList(true, $pm_table_name_or_num, null, true, false, true);
+		$va_elements = ca_metadata_elements::getElementsAsList(true, $pm_table_name_or_num, null, !$pb_dont_cache, false, true);
 		foreach($va_defined_bundles as $vs_bundle => $va_info) {
 			$vs_bundle_proc = preg_replace('!^ca_attribute_!', '', $vs_bundle);
 			$va_additional_settings = array();
@@ -406,6 +411,12 @@ class ca_editor_ui_screens extends BundlableLabelableBaseModelWithAttributes {
 				case 'intrinsic':
 					$va_field_info = $t_instance->getFieldInfo($vs_bundle);
 					if (isset($va_field_info['DONT_ALLOW_IN_UI']) && $va_field_info['DONT_ALLOW_IN_UI']) { continue(2); }
+					if (is_subclass_of($t_instance, 'BaseRelationshipModel')) {
+						if (isset($va_field_info['IDENTITY']) && $va_field_info['IDENTITY']) { continue(2); }
+						if ($t_instance->getTypeFieldName() == $vs_bundle) { continue(2); }
+						if ($t_instance->getLeftTableFieldName() == $vs_bundle) { continue(2); }
+						if ($t_instance->getRightTableFieldName() == $vs_bundle) { continue(2); }
+					}
 					break;
 				case 'preferred_label':
 				case 'nonpreferred_label':
@@ -568,6 +579,22 @@ class ca_editor_ui_screens extends BundlableLabelableBaseModelWithAttributes {
 							'width' => "275px", 'height' => 4,
 							'label' => _t('Relationship display template'),
 							'description' => _t('Layout for relationship when displayed in list (can include HTML). Element code tags prefixed with the ^ character can be used to represent the value in the template. For example: <i>^my_element_code</i>.')
+						),
+						'minRelationshipsPerRow' => array(
+							'formatType' => FT_NUMBER,
+							'displayType' => DT_FIELD,
+							'width' => 5, 'height' => 1,
+							'default' => '',
+							'label' => _t('Minimum number of relationships of this kind to be associated with an item. '),
+							'description' => _t('If set to 0 a delete button will allow a cataloguer to clear all relationships.  If set to 1 or more, it will not be possible to delete all relationships once the minimum is established. Note that this is only a user interface limitations rather than constraints on the underlying data model.')
+						),
+						'maxRelationshipsPerRow' => array(
+							'formatType' => FT_NUMBER,
+							'displayType' => DT_FIELD,
+							'width' => 5, 'height' => 1,
+							'default' => '',
+							'label' => _t('Maximum number of relationships of this kind that can be associated with an item'),
+							'description' => _t('The extent of repeatability for the relationship will match the number entered here. Note that this is only a user interface limitations rather than constraints on the underlying data model.')
 						)
 					);
 					
@@ -660,21 +687,37 @@ class ca_editor_ui_screens extends BundlableLabelableBaseModelWithAttributes {
 							)
 						);
 					} else {
-						if ($vs_bundle == 'ca_commerce_order_history') {
-							$va_additional_settings = array(
-								'order_type' => array(
-									'formatType' => FT_TEXT,
-									'displayType' => DT_SELECT,
-									'takesLocale' => false,
-									'default' => '',
-									'options' => array(
-										_t('Sales order') => 'O',
-										_t('Loan') => 'L'
-									),
-									'label' => _t('Type of order'),
-									'description' => _t('Determines which type of order is displayed.')
-								)		
-							);
+						switch($vs_bundle) {
+							case 'ca_commerce_order_history':
+								$va_additional_settings = array(
+									'order_type' => array(
+										'formatType' => FT_TEXT,
+										'displayType' => DT_SELECT,
+										'takesLocale' => false,
+										'default' => '',
+										'options' => array(
+											_t('Sales order') => 'O',
+											_t('Loan') => 'L'
+										),
+										'label' => _t('Type of order'),
+										'description' => _t('Determines which type of order is displayed.')
+									)		
+								);
+								break;
+							case 'ca_object_representation_chooser':
+								$va_additional_settings = array(
+									'element_code' => array(
+										'formatType' => FT_TEXT,
+										'displayType' => DT_SELECT,
+										'takesLocale' => false,
+										'default' => '',
+										'showMetadataElementsWithDataType' => 21, // 21="ObjectRepresentation" metadata elements
+										'table' => $pm_table_name_or_num,
+										'label' => _t('Metadata element'),
+										'description' => _t('Metadata element to store representation selection in. Must be of type ObjectRepresentation.')
+									)		
+								);
+								break;
 						}
 					}
 					break;

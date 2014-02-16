@@ -88,7 +88,7 @@ class CollectiveAccessDataReader extends BaseDataReader {
 		$this->opn_current_row = 0;
 		
 		try {
-			$this->opo_client = new Client($u="http://".$va_url['user'].":".$va_url['pass']."@".$va_url['host'].($vs_path ? "/".$vs_path : ""));
+			$this->opo_client = new Client("http://".$va_url['user'].":".$va_url['pass']."@".$va_url['host'].($vs_path ? "/".$vs_path : ""));
 			$request = $this->opo_client->get("/service.php/find/{$vs_table}?".$va_url['query']);
 			$response = $request->send();
 			$data = $response->json();
@@ -119,13 +119,14 @@ class CollectiveAccessDataReader extends BaseDataReader {
 			
 			$this->opn_current_row++;
 			try {
-				$request = $this->opo_client->get($x="/service.php/item/{$this->ops_table}/id/{$vn_id}?pretty=1&format=import");
+				$request = $this->opo_client->get("/service.php/item/{$this->ops_table}/id/{$vn_id}?pretty=1&format=import");
 				$response = $request->send();
 				$data = $response->json();
 				//print_R($data);
 				$this->opa_row_buf[$this->opn_current_row] = $data;
 			} catch (Exception $e) {
-				return false;
+				//return false;
+				return $this->nextRow();	// try the next row?
 			}
 			
 		
@@ -363,29 +364,41 @@ class CollectiveAccessDataReader extends BaseDataReader {
 				}
 			}
 			
+			if (is_array($va_data['nonpreferred_labels'])) {
+				foreach($va_data['nonpreferred_labels'] as $vs_locale => $va_label) {
+					foreach($va_label as $vs_f => $vs_v) {
+						$va_row[$this->ops_table.".nonpreferred_labels.{$vs_f}"] = $vs_v;
+					}
+				}
+			}
+			
 			foreach($va_data['intrinsic'] as $vs_f => $vs_v) {
 				$va_row[$this->ops_table.".{$vs_f}"] = $vs_v;
 			}
 			
-			foreach($va_data['attributes'] as $vs_f => $va_v) {
-				$va_row[$this->ops_table.".{$vs_f}"] = $this->get($this->ops_table.".{$vs_f}");
+			if (is_array($va_data['attributes'])) {
+				foreach($va_data['attributes'] as $vs_f => $va_v) {
+					$va_row[$this->ops_table.".{$vs_f}"] = $this->get($this->ops_table.".{$vs_f}");
+				}
 			}
 			
-			foreach($va_data['related'] as $vs_table => $va_rels) {
-				foreach($va_rels as $vn_i => $va_rel) {
-					foreach($va_rel as $vs_f => $vm_v) {
-						if (!is_array($vm_v)) {
+			if(is_array($va_data['related'])) {
+				foreach($va_data['related'] as $vs_table => $va_rels) {
+					foreach($va_rels as $vn_i => $va_rel) {
+						foreach($va_rel as $vs_f => $vm_v) {
+							if (!is_array($vm_v)) {
+								$va_row[$vs_table.".{$vs_f}"] = $this->get($vs_table.".{$vs_f}");
+							}
+						}
+					
+						foreach($va_rel['preferred_labels'] as $vs_f => $vs_v) {
+							$va_row[$vs_table.".preferred_labels.{$vs_f}"] = $this->get($vs_table.".preferred_labels.{$vs_f}");
+						}
+						foreach($va_rel['intrinsic'] as $vs_f => $vs_v) {
 							$va_row[$vs_table.".{$vs_f}"] = $this->get($vs_table.".{$vs_f}");
 						}
+						break;
 					}
-					
-					foreach($va_rel['preferred_labels'] as $vs_f => $vs_v) {
-						$va_row[$vs_table.".preferred_labels.{$vs_f}"] = $this->get($vs_table.".preferred_labels.{$vs_f}");
-					}
-					foreach($va_rel['intrinsic'] as $vs_f => $vs_v) {
-						$va_row[$vs_table.".{$vs_f}"] = $this->get($vs_table.".{$vs_f}");
-					}
-					break;
 				}
 			}
 		

@@ -423,15 +423,6 @@ class WLPlugMediaImagick Extends BaseMediaPlugin Implements IWLPlugMedia {
 	}
 	# ------------------------------------------------
 	/**
-	 * Returns text content for indexing, or empty string if plugin doesn't support text extraction
-	 *
-	 * @return String Extracted text
-	 */
-	public function getExtractedText() {
-		return '';
-	}
-	# ------------------------------------------------
-	/**
 	 * Returns array of extracted metadata, key'ed by metadata type or empty array if plugin doesn't support metadata extraction
 	 *
 	 * @return Array Extracted metadata
@@ -544,8 +535,8 @@ class WLPlugMediaImagick Extends BaseMediaPlugin Implements IWLPlugMedia {
 									if ( $this->handle->writeImage($vs_tmp_basename) ) {
 										$va_tmp = $this->handle->getImageGeometry();
 										$this->properties["faces"] = $this->opa_faces = caDetectFaces($vs_tmp_basename, $va_tmp['width'], $va_tmp['height']);
-										@unlink($vs_tmp_basename);
 									}
+									@unlink($vs_tmp_basename);
 								}
 							}
 							$this->metadata['EXIF'] = $va_exif;
@@ -700,7 +691,7 @@ class WLPlugMediaImagick Extends BaseMediaPlugin Implements IWLPlugMedia {
 							break;
 						case 'south':
 							$vn_watermark_x = ($cw - $vn_watermark_width)/2;
-							$vn_watermark_y = $cw - $vn_watermark_width;
+							$vn_watermark_y = $ch - $vn_watermark_height;
 							break;
 						case 'center':
 							$vn_watermark_x = ($cw - $vn_watermark_width)/2;

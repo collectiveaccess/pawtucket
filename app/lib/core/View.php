@@ -137,21 +137,18 @@ class View extends BaseObject {
 	}
 	# -------------------------------------------------------
 	public function render($ps_filename) {
-		global $g_ui_locale; // current locale for user
 		ob_start();
 		$vb_output = false;
+		// handling the current locale, for example fr_FR
+		$locale=$_SESSION['session_vars']['lang'];
 		foreach(array_reverse($this->opa_view_paths) as $vs_path) {
-			if (file_exists(($vs_path ? $vs_path.'/' : '').$ps_filename.".".$g_ui_locale)) {
+			if (file_exists($vs_path.'/'.$ps_filename.".".$locale)) {
 				// if a l10ed view is at same path than normal but having the locale as last extension, display it (eg. splash_intro_text_html.php.fr_FR)
-				require($vs_path.'/'.$ps_filename.".".$g_ui_locale);
+				require($vs_path.'/'.$ps_filename.".".$locale);
 				$vb_output = true;
 				break;
-			} elseif (file_exists(($vs_path ? $vs_path.'/' : '').str_replace(".php",".".$g_ui_locale.".php",$ps_filename))) {
-				// if a l10ed view is at same path than normal but having the locale before last extension, display it (eg. splash_intro_text_html.fr_FR.php)
-				require($vs_path.'/'.str_replace(".php",".".$g_ui_locale.".php",$ps_filename));
-				$vb_output = true;
-				break;
-			} elseif (file_exists($vs_path.'/'.$ps_filename)) {
+			}
+			elseif (file_exists($vs_path.'/'.$ps_filename)) {
 				// if no l10ed version of the view, render the default one which has no locale as last extension (eg. splash_intro_text_html.php)
 				require($vs_path.'/'.$ps_filename);
 				$vb_output = true;
