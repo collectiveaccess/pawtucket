@@ -1664,7 +1664,7 @@
 			return ca_attributes::getRawAttributeValuesForIDs($this->getDb(), $this->tableNum(), $pa_ids, $vn_element_id, $pa_options);
 		}
 		# ------------------------------------------------------------------
-		// --- Utilties
+		// --- Utilities
 		# ------------------------------------------------------------------
 		/**
 		 * Copies all attributes attached to the current row to the row specified by $pn_row_id
