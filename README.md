@@ -1,7 +1,7 @@
 CollectiveAccess Pawtucket README
 ---------------------------------
 
-Thanks for downloading CollectiveAccess Pawtucket version 1.3!
+Thanks for downloading CollectiveAccess Pawtucket version 1.4!
 
 Pawtucket is general purpose public-access publishing tool for
 CollectiveAccess. It provides an easy way to create web sites around data
@@ -25,7 +25,7 @@ rather than objects) and collection-level archival finding aids (collections
 are the focus rather than objects) 
 
 Pawtucket is meant to be customized. The download version includes a basic
-default theme that supports all functionality but is visually quite plain. By
+default theme that supports all functionality. By
 editing the CSS stylesheet and system header and footer templates you can have
 Pawtucket fit into most any existing design scheme. 
 
@@ -33,6 +33,6 @@ Pawtucket fit into most any existing design scheme.
 How to Install
 --------------
 You can find installation instructions for Pawtucket at http://docs.collectiveaccess.org/wiki/Installing_Pawtucket
-Release notes are available at http://docs.collectiveaccess.org/wiki/Release_Notes_for_Pawtucket_1.3
+Release notes are available at http://docs.collectiveaccess.org/wiki/Release_Notes_for_Pawtucket_1.4
 
 If you are updating an existing installation see http://docs.collectiveaccess.org/wiki/Upgrading_Pawtucket
