@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2008-2012 Whirl-i-Gig
+ * Copyright 2008-2013 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -35,7 +35,7 @@
    */
 
 require_once(__CA_LIB_DIR__."/ca/IBundleProvider.php");
-require_once(__CA_LIB_DIR__."/ca/BundlableLabelableBaseModelWithAttributes.php");
+require_once(__CA_LIB_DIR__."/ca/RepresentableBaseModel.php");
 
 
 BaseModel::$s_ca_models_definitions['ca_occurrences'] = array(
@@ -173,10 +173,10 @@ BaseModel::$s_ca_models_definitions['ca_occurrences'] = array(
  	)
 );
 
-class ca_occurrences extends BundlableLabelableBaseModelWithAttributes implements IBundleProvider {
-	# ---------------------------------
+class ca_occurrences extends RepresentableBaseModel implements IBundleProvider {
+	# ------------------------------------------------------
 	# --- Object attribute properties
-	# ---------------------------------
+	# ------------------------------------------------------
 	# Describe structure of content object's properties - eg. database fields and their
 	# associated types, what modes are supported, et al.
 	#
@@ -308,8 +308,9 @@ class ca_occurrences extends BundlableLabelableBaseModelWithAttributes implement
 		parent::__construct($pn_id);	# call superclass constructor
 	}
 	# ------------------------------------------------------
-	protected function initLabelDefinitions() {
-		parent::initLabelDefinitions();
+	protected function initLabelDefinitions($pa_options=null) {
+		parent::initLabelDefinitions($pa_options);
+		$this->BUNDLES['ca_object_representations'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Media representations'));
 		$this->BUNDLES['ca_entities'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related entities'));
 		$this->BUNDLES['ca_objects'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related objects'));
 		$this->BUNDLES['ca_object_lots'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related lot'));
@@ -317,9 +318,10 @@ class ca_occurrences extends BundlableLabelableBaseModelWithAttributes implement
 		$this->BUNDLES['ca_collections'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related collections'));
 		$this->BUNDLES['ca_places'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related places'));
 		$this->BUNDLES['ca_storage_locations'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related storage locations'));
-		
 		$this->BUNDLES['ca_loans'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related loans'));
 		$this->BUNDLES['ca_movements'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related movements'));
+		
+		$this->BUNDLES['ca_tour_stops'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related tour stops'));
 		
 		$this->BUNDLES['ca_list_items'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related vocabulary terms'));
 		$this->BUNDLES['ca_sets'] = array('type' => 'special', 'repeating' => true, 'label' => _t('Sets'));
@@ -393,14 +395,11 @@ class ca_occurrences extends BundlableLabelableBaseModelWithAttributes implement
 			$va_occurrence_hierarchy_root = array(
 				$t_occurrence->get($vs_hier_fld) => array(
 					'occurrence_id' => $vn_pk,
+	 				'item_id' => $vn_pk,
 					'name' => $vs_name = caProcessTemplateForIDs($vs_template, 'ca_occurrences', array($vn_pk)),
 					'hierarchy_id' => $vn_hier_id,
 					'children' => sizeof($va_children)
-				),
-				'occurrence_id' => $vn_pk,
-				'name' => $vs_name,
-				'hierarchy_id' => $vn_hier_id,
-				'children' => sizeof($va_children)
+				)
 			);
 				
 	 		return $va_occurrence_hierarchy_root;
@@ -438,10 +437,10 @@ class ca_occurrences extends BundlableLabelableBaseModelWithAttributes implement
 		
 		$vs_type_sql = '';
 		if ($pn_type_id) {
-			$va_type_ids = caMakeTypeIDList('ca_occurrences', array($pn_type_id));
-			$pn_type_id = array_shift($va_type_ids);
-			$vs_type_sql = " AND cap.type_id = ?";
-			$va_params[] = (int)$pn_type_id;
+			if(sizeof($va_type_ids = caMakeTypeIDList('ca_occurrences', array($pn_type_id)))) {
+				$vs_type_sql = " AND cap.type_id IN (?)";
+				$va_params[] = $va_type_ids;
+			}
 		}
 		
 		if ($pn_parent_id) {
@@ -454,7 +453,7 @@ class ca_occurrences extends BundlableLabelableBaseModelWithAttributes implement
 				FROM ca_occurrences cap
 				INNER JOIN ca_occurrence_labels AS capl ON capl.occurrence_id = cap.occurrence_id
 				WHERE
-					capl.name = ? {$vs_type_sql} {$vs_parent_sql}
+					capl.name = ? {$vs_type_sql} {$vs_parent_sql} AND cap.deleted = 0
 			", $va_params);
 		
 		$va_occurrence_ids = array();
@@ -462,6 +461,13 @@ class ca_occurrences extends BundlableLabelableBaseModelWithAttributes implement
 			$va_occurrence_ids[] = $qr_res->get('occurrence_id');
 		}
 		return $va_occurrence_ids;
+	}
+	# ------------------------------------------------------
+	/**
+	 *
+	 */
+	public function getIDsByLabel($pa_label_values, $pn_parent_id=null, $pn_type_id=null) {
+		return $this->getOccurrenceIDsByName($pa_label_values['name'], $pn_parent_id, $pn_type_id);
 	}
 	# ------------------------------------------------------
 }

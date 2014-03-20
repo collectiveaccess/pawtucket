@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2010-2012 Whirl-i-Gig
+ * Copyright 2010-2013 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -35,7 +35,7 @@
    */
 
 require_once(__CA_LIB_DIR__."/ca/IBundleProvider.php");
-require_once(__CA_LIB_DIR__."/ca/BundlableLabelableBaseModelWithAttributes.php");
+require_once(__CA_LIB_DIR__."/ca/RepresentableBaseModel.php");
 
 
 BaseModel::$s_ca_models_definitions['ca_loans'] = array(
@@ -143,7 +143,7 @@ BaseModel::$s_ca_models_definitions['ca_loans'] = array(
  	)
 );
 
-class ca_loans extends BundlableLabelableBaseModelWithAttributes implements IBundleProvider {
+class ca_loans extends RepresentableBaseModel implements IBundleProvider {
 	# ---------------------------------
 	# --- Object attribute properties
 	# ---------------------------------
@@ -278,8 +278,9 @@ class ca_loans extends BundlableLabelableBaseModelWithAttributes implements IBun
 		parent::__construct($pn_id);	# call superclass constructor
 	}
 	# ------------------------------------------------------
-	protected function initLabelDefinitions() {
-		parent::initLabelDefinitions();
+	protected function initLabelDefinitions($pa_options=null) {
+		parent::initLabelDefinitions($pa_options);
+		$this->BUNDLES['ca_object_representations'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Media representations'));
 		$this->BUNDLES['ca_objects'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related objects'));
 		$this->BUNDLES['ca_object_lots'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related lots'));
 		$this->BUNDLES['ca_entities'] = array('type' => 'related_table', 'repeating' => true, 'label' => _t('Related entities'));
@@ -299,21 +300,44 @@ class ca_loans extends BundlableLabelableBaseModelWithAttributes implements IBun
 	 * @param string $ps_name The name to search for
 	 * @return array A list of loan_ids with the specified label
 	 */
-	public function getLoanIDsByName($ps_name) {
+	public function getLoanIDsByName($ps_name, $pn_parent_id=null, $pn_type_id=null) {
 		$o_db = $this->getDb();
+		
+		$va_params = array((string)$ps_name);
+		
+		$vs_type_sql = '';
+		if ($pn_type_id) {
+			if(sizeof($va_type_ids = caMakeTypeIDList('ca_loans', array($pn_type_id)))) {
+				$vs_type_sql = " AND cae.type_id IN (?)";
+				$va_params[] = $va_type_ids;
+			}
+		}
+		
+		if ($pn_parent_id) {
+			$vs_parent_sql = " AND cae.parent_id = ?";
+			$va_params[] = (int)$pn_parent_id;
+		} 
+		
 		$qr_res = $o_db->query("
 			SELECT DISTINCT cae.loan_id
 			FROM ca_loans cae
 			INNER JOIN ca_loan_labels AS cael ON cael.loan_id = cae.loan_id
 			WHERE
-				cael.name = ?
-		", (string)$ps_name);
+				cael.name = ? {$vs_type_sql} {$vs_parent_sql} AND cae.deleted = 0
+		", $va_params);
 		
 		$va_loan_ids = array();
 		while($qr_res->nextRow()) {
 			$va_loan_ids[] = $qr_res->get('loan_id');
 		}
 		return $va_loan_ids;
+	}
+	# ------------------------------------------------------
+	/**
+	 *
+	 */
+	public function getIDsByLabel($pa_label_values, $pn_parent_id=null, $pn_type_id=null) {
+		return $this->getLoanIDsByName($pa_label_values['name'], $pn_parent_id, $pn_type_id);
 	}
 	# ------------------------------------------------------
 }

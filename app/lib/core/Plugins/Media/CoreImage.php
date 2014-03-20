@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2010-2012 Whirl-i-Gig
+ * Copyright 2010-2013 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -38,14 +38,14 @@
  * Plugin for processing images using CoreImage (Mac OS X only)
  */
 
-include_once(__CA_LIB_DIR__."/core/Plugins/WLPlug.php");
+include_once(__CA_LIB_DIR__."/core/Plugins/Media/BaseMediaPlugin.php");
 include_once(__CA_LIB_DIR__."/core/Plugins/IWLPlugMedia.php");
 include_once(__CA_LIB_DIR__."/core/Parsers/TilepicParser.php");
 include_once(__CA_LIB_DIR__."/core/Configuration.php");
 include_once(__CA_APP_DIR__."/helpers/mediaPluginHelpers.php");
 include_once(__CA_LIB_DIR__."/core/Parsers/MediaMetadata/XMPParser.php");
 
-class WLPlugMediaCoreImage Extends WLPlug Implements IWLPlugMedia {
+class WLPlugMediaCoreImage Extends BaseMediaPlugin Implements IWLPlugMedia {
 	var $errors = array();
 	
 	var $filepath;
@@ -294,15 +294,6 @@ class WLPlugMediaCoreImage Extends WLPlug Implements IWLPlugMedia {
 	}
 	# ------------------------------------------------
 	/**
-	 * Returns text content for indexing, or empty string if plugin doesn't support text extraction
-	 *
-	 * @return String Extracted text
-	 */
-	public function getExtractedText() {
-		return '';
-	}
-	# ------------------------------------------------
-	/**
 	 * Returns array of extracted metadata, key'ed by metadata type or empty array if plugin doesn't support metadata extraction
 	 *
 	 * @return Array Extracted metadata
@@ -474,7 +465,7 @@ class WLPlugMediaCoreImage Extends WLPlug Implements IWLPlugMedia {
 						break;
 					case 'south':
 						$vn_watermark_x = ($cw - $vn_watermark_width)/2;
-						$vn_watermark_y = $cw - $vn_watermark_width;
+						$vn_watermark_y = $ch - $vn_watermark_height;
 						break;
 					case 'center':
 						$vn_watermark_x = ($cw - $vn_watermark_width)/2;
@@ -926,7 +917,7 @@ class WLPlugMediaCoreImage Extends WLPlug Implements IWLPlugMedia {
 			foreach($pa_handle['ops'] as $va_op) {
 				switch($va_op['op']) {
 					case 'annotation':
-						// TODO: watermarking and annotation is not currrently supported in this plugin
+						// TODO: annotation is not currrently supported in this plugin
 						
 						//$vs_op = '-gravity '.$va_op['position'].' -fill '.str_replace('#', '\\#', $va_op['color']).' -pointsize '.$va_op['size'].' -draw "text '.$va_op['inset'].','.$va_op['inset'].' \''.$va_op['text'].'\'"';
 						
@@ -936,10 +927,15 @@ class WLPlugMediaCoreImage Extends WLPlug Implements IWLPlugMedia {
 						//$va_ops['convert'][] = $vs_op;
 						break;
 					case 'watermark':
-						// TODO: watermarking and annotation is not currrently supported in this plugin
-						
-						//$vs_op = "-dissolve ".($va_op['opacity'] * 100)." -gravity ".$va_op['position']." ".$va_op['watermark_image']; //"  -geometry ".$va_op['watermark_width']."x".$va_op['watermark_height']; [Seems to be interpreted as scaling the image being composited on as of at least v6.5.9; so we don't scale watermarks in CoreImage... we just use the native size]
-						//$va_ops['composite'][] = $vs_op;
+                        // TODO: watermark position is not currently handled in this plugin
+
+						if (is_array($va_ops) && sizeof($va_ops)) {
+							array_unshift($va_ops, "load watermark ".caEscapeShellArg($va_op['watermark_image']));
+						}
+						$va_ops[] = "filter watermark CIStretchCrop size=".$va_op['watermark_width'].",".$va_op['watermark_height'].":cropAmount=0:centerStretchAmount=0";
+						$va_ops[] = "filter watermark CIColorMatrix RVector=1,0,0,0:GVector=0,1,0,0:BVector=0,0,1,0:AVector=0,0,0,".$va_op['opacity'].":BiasVector=0,0,0,0";
+						$va_ops[] = "filter image CISoftLightBlendMode backgroundImage=watermark";
+
 						break;
 					case 'size':
 						if ($va_op['width'] < 1) { break; }

@@ -67,7 +67,7 @@
 			$vs_date = ", ".$t_object->get("creation_date");
 		}
 		print "<div id='art_title'><span class='listhead caps'>".$vs_title;
-		if($vs_date){
+		if($vs_date && !(strstr($vs_title, $vs_date))){
 			print $vs_date;
 		}
 		print "</div>";
@@ -79,7 +79,7 @@
 				$vs_vaga_class = "vagaDisclaimer";
 			}
 			$va_media_info = $t_rep->getMediaInfo('media', $vs_display_version);
-			$vn_width = $va_media_info["WIDTH"];;
+			$vn_width = $va_media_info["WIDTH"];
 			if($vn_width > 580){
 				$vn_width = 580;
 			}
@@ -148,19 +148,19 @@
 	// 				}
 	// 			}
 				if($t_creator->get("lifespans_date")){
-					$vs_lifespan = $t_creator->get("lifespans_date");
+					if(strstr($t_creator->get("lifespans_date"), "after")){
+						$vs_lifespan = str_replace("after", "born", $t_creator->get("lifespans_date"));
+					}else{
+						$vs_lifespan = $t_creator->get("lifespans_date");
+					}
 				}
-				print "<span class='caption listhead caps'>".$vs_creator;
+				print "<span class='creator listhead caps'>".$vs_creator;
 				if($vs_lifespan){
 					print " (".$vs_lifespan.")";
 				}
 				print "</span><br/>";
 			}
 			
-			# --- identifier
-			if($t_object->get('idno')){
-				print "<span class='caption'>Identifier: ".$t_object->get('idno')."</span><br/>";
-			}
 			# --- attributes
 			$va_attributes = $this->request->config->get('ca_objects_detail_display_attributes');
 			if(is_array($va_attributes) && (sizeof($va_attributes) > 0)){
@@ -241,10 +241,22 @@
 				}
 				print "</p>";
 			}
+			if($va_external_links = $t_object->get("ca_objects.external_link.link_url", array("returnAsArray" => 1))){
+				print "<p>";
+				foreach($va_external_links as $va_external_link){
+					$vs_link_text = "";
+					$vs_link_text = $va_external_link["link_text"];
+					if(!$vs_link_text){
+						$vs_link_text = $va_external_link["link_url"];
+					}
+					print "<span class='caption'><a href='".$va_external_link["link_url"]."' target='_blank'>".$vs_link_text."</a></span><br/>";
+				}
+				print "</p>";
+			}
 			# --- map
 			if($this->request->config->get('ca_objects_map_attribute') && $t_object->get($this->request->config->get('ca_objects_map_attribute'))){
 				$o_map = new GeographicMap(200, 200, 'map');
-				$o_map->mapFrom($t_object, $this->request->config->get('ca_objects_map_attribute'));
+				$o_map->mapFrom($t_object, $this->request->config->get('ca_objects_map_attribute'), array("request" => $this->request, "checkAccess" => $va_access_values, 'contentTemplate' => "^ca_objects.preferred_labels.name"));
 				print "<p class='caption'>".$o_map->render('HTML')."</p>";
 			}
 			

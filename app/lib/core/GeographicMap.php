@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2010 Whirl-i-Gig
+ * Copyright 2010-2013 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -105,20 +105,22 @@
  	 * @param $pa_options array Optional array of options; supported options include:
  	 *			label - attribute (or field) to use for a short label for the map point, in <table>.<element_code> format (eg. "ca_objects.idno" or "ca_objects.preferred_labels.name")
  	 *			content - attribute (or field) to use for info balloon content shown when map item is clicked, in <table>.<element_code> format (eg. "ca_objects.description"). The content of the field is used as-is, so you must apply any styling to the data before it is stored in the database. If you want to style content "on-the-fly" use contentView or contentTemplate
- 	 *			contentTemplate - text template to use for info balloon content shown when map item is clicked; attributes in <table>.<element_code> format will be substituted when prefixed with a caret ("^"). Eg. "The titles of this is ^ca_objects.preferred_labels.name and the date is ^ca_objects.creation_date"
+ 	 *			contentTemplate - text template to use for info balloon content shown when map item is clicked; attributes in <table>.<element_code> format will be substituted when prefixed with a caret ("^"). Eg. "The title of this is ^ca_objects.preferred_labels.name and the date is ^ca_objects.creation_date"
  	 *			contentView - view to use to render info balloon content shown when map item is clicked; specify the view filename with path relative to the main view directory (eg. "Splash/splash_html.php"); the view will be passed a single variable, "data", containing the data object
  	 *			ajaxContentUrl - URL to use to load via AJAX in info balloon. The primary key of the item will be added to the URL as the "id" parameter. The AJAX handler referenced by the URL must return ready-to-display HTML suitable for display in an info balloon. Unlike all other balloon content options, ajaxContentUrl defers rendering of balloon content until viewed, and does not embed content in the initial HTML load. For these reasons it is usually the best performing and most scaleable option.
  	 *			checkAccess - array of access field values to filter data (item and representation level); omit or pass empty array to do no filtering
  	 *			viewPath - path to views; will use standard system view path if not defined
+ 	 *			request = current request; required for generation of editor links
+ 	 *			color = hex color to use for item marker; can include bundle display template tags for inclusion of colors stored in metadata elements
  	 * @return array Returns an array with two keys: 'points' = number of unique markers added to map; 'items' = number of result hits than were plotted at least once on the map
  	 */
  	public function mapFrom($po_data_object, $ps_georeference_field_name, $pa_options=null) {
- 		if (!isset($pa_options['label'])) {
- 			$pa_options['label'] = null;
- 		}
- 		if (!isset($pa_options['content'])) {
- 			$pa_options['content'] = null;
- 		}
+		$po_request = caGetOption('request', $pa_options, null);
+ 		$pa_options['label'] = caGetOption('label', $pa_options, null);
+ 		$pa_options['content'] = caGetOption('content', $pa_options, null);
+ 		$vs_color = caGetOption('color', $pa_options, null);
+ 		$vb_render_label_as_link = caGetOption('renderLabelAsLink', $pa_options, false);
+ 		
  		
  		$vn_point_count = 0;
  		$vn_item_count = 0;
@@ -145,12 +147,20 @@
 					
 					$vs_label = $vs_content = $vs_ajax_content = null;
 							
-					if (!is_null($pa_options['label'])) {
-						if ($pa_options['label']){ 
-							$vs_label = $po_data_object->get($pa_options['label']);
-						}
+					if (!is_null($pa_options['labelTemplate'])) {
+						$vs_label = caProcessTemplateForIDs($pa_options['labelTemplate'], $vs_table, array($vn_id), array('returnAsLink' => $vb_render_label_as_link || (strpos($pa_options['contentTemplate'], "<l>") !== false)));
 					} else {
-						$vs_label = $va_coordinate[$vs_field_name]['label'];
+						if (!is_null($pa_options['label'])) {
+							$vs_label = $po_data_object->get($pa_options['label'], array('returnAsLink' => $vb_render_label_as_link || (strpos($pa_options['contentTemplate'], "<l>") !== false)));
+						} else {
+							$vs_label = $va_coordinate['label'];
+						}
+					} 
+					
+					if (!is_null($vs_color)) {
+						$vs_color = caProcessTemplateForIDs($vs_color, $vs_table, array($vn_id), array('returnAsLink' => false));
+					} else {
+						$vs_color = null;
 					}
 					
 					if (isset($pa_options['ajaxContentUrl']) && $pa_options['ajaxContentUrl']) {
@@ -163,7 +173,7 @@
 							$vs_content = $o_view->render($pa_options['contentView']);
 						} else {
 							if (!is_null($pa_options['contentTemplate'])) {
-								$vs_content = $this->_processTemplate($po_data_object, $pa_options['contentTemplate']);
+								$vs_content = caProcessTemplateForIDs($pa_options['contentTemplate'], $po_data_object->tableName(), $po_data_object->get($po_data_object->tableName().".".$po_data_object->primaryKey(), array('returnAsArray' => true)), array('returnAsLink' => (strpos($pa_options['contentTemplate'], "<l>") !== false)));
 							} else {
 								if (!is_null($pa_options['content'])) {
 									if ($pa_options['content']){ 
@@ -183,9 +193,9 @@
 							$va_pair = explode(',', $vs_pair);
 							$va_coordinate_pairs[] = array('latitude' => $va_pair[0], 'longitude' => $va_pair[1]);
 						}
-						$this->addMapItem(new GeographicMapItem(array('coordinates' => $va_coordinate_pairs, 'label' => $vs_label, 'content' => $vs_content, 'ajaxContentUrl' => $vs_ajax_content, 'ajaxContentID' => $vn_id)));
+						$this->addMapItem(new GeographicMapItem(array('coordinates' => $va_coordinate_pairs, 'label' => $vs_label, 'content' => $vs_content, 'ajaxContentUrl' => $vs_ajax_content, 'ajaxContentID' => $vn_id, 'color' => $vs_color)));
 					} else {
-						$this->addMapItem(new GeographicMapItem(array('latitude' => $va_coordinate['latitude'], 'longitude' => $va_coordinate['longitude'], 'label' => $vs_label, 'content' => $vs_content, 'ajaxContentUrl' => $vs_ajax_content, 'ajaxContentID' => $vn_id)));
+						$this->addMapItem(new GeographicMapItem(array('latitude' => $va_coordinate['latitude'], 'longitude' => $va_coordinate['longitude'], 'label' => $vs_label, 'content' => $vs_content, 'ajaxContentUrl' => $vs_ajax_content, 'ajaxContentID' => $vn_id, 'color' => $vs_color)));
 					}
 					if (!$va_point_buf[$va_coordinate['latitude'].'/'.$va_coordinate['longitude']]) { $vn_point_count++;}
 					$va_point_buf[$va_coordinate['latitude'].'/'.$va_coordinate['longitude']]++;
@@ -219,6 +229,7 @@
  				
  				if ($va_coordinates = $po_data_object->get($ps_georeference_field_name, array('coordinates' => true, 'returnAsArray' => true, 'returnAllLocales' => true))) {
  					$vn_id = $po_data_object->get("{$vs_table}.{$vs_pk}");
+ 					$vs_table = $po_data_object->tableName();
  					foreach($va_coordinates as $vn_element_id => $va_geonames_by_locale) {
  						foreach($va_geonames_by_locale as $vn_locale_id => $va_coord_list) {
  							foreach($va_coord_list as $vn_attribute_id => $va_geoname) {
@@ -226,13 +237,23 @@
 							
 								$vs_label = $vs_content = $vs_ajax_content = null;
 					
-								if (!is_null($pa_options['label'])) {
-									if ($pa_options['label']){ 
-										$vs_label = $po_data_object->get($pa_options['label']);
-									}
+								
+								if (!is_null($pa_options['labelTemplate'])) {
+									$vs_label = caProcessTemplateForIDs($pa_options['labelTemplate'], $vs_table, array($vn_id), array('returnAsLink' => $vb_render_label_as_link || (strpos($pa_options['contentTemplate'], "<l>") !== false)));
 								} else {
-									$vs_label = $va_coordinate['label'];
+									if (!is_null($pa_options['label'])) {
+										$vs_label = $po_data_object->get($pa_options['label'], array('returnAsLink' => $vb_render_label_as_link || (strpos($pa_options['contentTemplate'], "<l>") !== false)));
+									} else {
+										$vs_label = $va_coordinate['label'];
+									}
+								} 
+								
+								if (!is_null($pa_options['color'])) {
+									$vs_color = caProcessTemplateForIDs($pa_options['color'], $vs_table, array($vn_id), array('returnAsLink' => false));
+								} else {
+									$vs_color = null;
 								}
+								
 								if (isset($pa_options['ajaxContentUrl']) && $pa_options['ajaxContentUrl']) {
 									$vs_ajax_content = $pa_options['ajaxContentUrl'];
 								} else {
@@ -243,7 +264,7 @@
 										$vs_content = $o_view->render($pa_options['contentView']);
 									} else {
 										if (!is_null($pa_options['contentTemplate'])) {
-											$vs_content = $this->_processTemplate($po_data_object, $pa_options['contentTemplate']);
+											$vs_content = caProcessTemplateForIDs($pa_options['contentTemplate'], $po_data_object->tableName(), $po_data_object->get($po_data_object->tableName().".".$po_data_object->primaryKey(), array('returnAsArray' => true)), array('returnAsLink' => (strpos($pa_options['contentTemplate'], "<l>") !== false)));
 										} else {
 											if (!is_null($pa_options['content'])) {
 												if ($pa_options['content']){ 
@@ -264,9 +285,9 @@
 										$va_pair = explode(',', $vs_pair);
 										$va_coordinate_pairs[] = array('latitude' => $va_pair[0], 'longitude' => $va_pair[1]);
 									}
-									$this->addMapItem(new GeographicMapItem(array('coordinates' => $va_coordinate_pairs, 'label' => $vs_label, 'content' => $vs_content, 'ajaxContentUrl' => $vs_ajax_content, 'ajaxContentID' => $vn_id)));
+									$this->addMapItem(new GeographicMapItem(array('coordinates' => $va_coordinate_pairs, 'label' => $vs_label, 'content' => $vs_content, 'ajaxContentUrl' => $vs_ajax_content, 'ajaxContentID' => $vn_id, 'color' => $vs_color)));
 								} else {
-									$this->addMapItem(new GeographicMapItem(array('latitude' => $va_coordinate['latitude'], 'longitude' => $va_coordinate['longitude'], 'label' => $vs_label, 'content' => $vs_content, 'ajaxContentUrl' => $vs_ajax_content, 'ajaxContentID' => $vn_id)));
+									$this->addMapItem(new GeographicMapItem(array('latitude' => $va_coordinate['latitude'], 'longitude' => $va_coordinate['longitude'], 'label' => $vs_label, 'content' => $vs_content, 'ajaxContentUrl' => $vs_ajax_content, 'ajaxContentID' => $vn_id, 'color' => $vs_color)));
 								}
 								
 								if (!$va_point_buf[$va_coordinate['latitude'].'/'.$va_coordinate['longitude']]) { $vn_point_count++;}
@@ -281,19 +302,6 @@
 		
 		return array('items' => $vn_item_count, 'points' => $vn_point_count);
 	}
- 	# -------------------------------------------------------------------
- 	private function _processTemplate($po_data_object, $ps_template) {
- 		$vs_processed_template = $ps_template;
- 		
- 		if (preg_match("!\^([A-Za-z0-9\-\_\.]+)!", $ps_template, $va_matches)) {
- 			array_shift($va_matches);
- 			$va_placeholders = array_keys(array_flip($va_matches));
- 			foreach($va_placeholders as $vs_placeholder) {
- 				$vs_processed_template = str_replace('^'.$vs_placeholder, $po_data_object->get($vs_placeholder), $vs_processed_template);
- 			}
- 		}
- 		return $vs_processed_template;
- 	}
  	# -------------------------------------------------------------------
  	/**
  	 * Render map for output

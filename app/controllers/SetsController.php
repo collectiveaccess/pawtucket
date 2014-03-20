@@ -705,7 +705,6 @@
  		public function SendReply() {
  			$pn_set_id = $this->request->getParameter('set_id', pInteger);
  			
- 			
  			$o_purifier = new HTMLPurifier();
  			$t_trans = new ca_commerce_transactions();
  			if(!$t_trans->load(array('set_id' => $pn_set_id))) {
@@ -716,7 +715,7 @@
 				$t_trans->insert();
 			}
  			
- 			$t_comm = $t_trans->sendUserMessage($o_purifier->purify($this->request->getParameter('subject', pString)), $o_purifier->purify($this->request->getParameter('message', pString)), $this->request->getUserID());
+ 			$t_comm = $t_trans->sendUserMessage('O', $o_purifier->purify($this->request->getParameter('subject', pString)), $o_purifier->purify($this->request->getParameter('message', pString)), $this->request->getUserID());
  			if ($t_comm->numErrors() == 0) {
  				$this->notification->addNotification(_t("Your inquiry was sent.  You will receive a response through this web site and by email soon."), __NOTIFICATION_TYPE_INFO__);
  			} else {
