@@ -84,7 +84,10 @@ if (!$this->request->isAjax()) {
 ?>
 					<td class="advSearchElement">
 						<div class="advSearchLabel"><?php print isset($va_bundle_info['label']) ? $va_bundle_info['label'] : $t_subject->getDisplayLabel($vs_bundle); ?></div>
-						<?php print $t_subject->htmlFormElementForSearch($this->request, $vs_bundle, array_merge($va_bundle_opts, $va_bundle_info)); ?>
+						<?php 
+							unset($va_bundle_info['label']);
+							print $t_subject->htmlFormElementForSearch($this->request, $vs_bundle, array_merge($va_bundle_opts, $va_bundle_info)); 
+						?>
 					</td><!-- end advSearchElement -->
 <?php
 					$vn_cnt++;

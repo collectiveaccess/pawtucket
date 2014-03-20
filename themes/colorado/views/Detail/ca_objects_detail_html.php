@@ -78,54 +78,34 @@
 					}
 				}
 			}
-			
-			if(
-				($vs_era = $t_object->get('ca_places.era'))
-				||
-				($vs_period = $t_object->get('ca_places.period'))
-				||
-				($vs_epoch = $t_object->get('ca_places.epoch'))
-				||
-				($vs_ageNALMA = $t_object->get('ca_places.ageNALMA'))
-				||
-				($vs_formation = $t_object->get('ca_places.formation'))
-			){
+
+			$vs_era = $t_object->get('ca_places.era', array("convertCodesToDisplayText" => true, "delimiter" => ", "));
+			$vs_period = $t_object->get('ca_places.period', array("convertCodesToDisplayText" => true, "delimiter" => ", "));
+			$vs_epoch = $t_object->get('ca_places.Epoch', array("convertCodesToDisplayText" => true, "delimiter" => ", "));
+			$vs_ageNALMA = $t_object->get('ca_places.ageNALMA', array("convertCodesToDisplayText" => true, "delimiter" => ", "));
+			$vs_formation = $t_object->get('ca_places.formation', array("convertCodesToDisplayText" => true, "delimiter" => ", "));
 ?>
 			<br><div class="unit"><h2>Stratigraphy</h2></div>
 <?php
-				if($vs_era){
-				   print "<div class='unit'><b>"._t('Era').": </b>".$vs_era."</div>";
-				}
-				if($vs_period){
-				   print "<div class='unit'><b>"._t('Period').": </b>".$vs_period."</div>";
-				}
-				if($vs_epoch){
-				   print "<div class='unit'><b>"._t('Epoch').": </b>".$vs_epoch."</div>";
-				}
-				if($vs_ageNALMA){
-				   print "<div class='unit'><b>"._t('Age').": </b>".$vs_ageNALMA."</div>";
-				}
-				if($vs_formation){
-				   print "<div class='unit'><b>"._t('Formation').": </b>".$vs_formation."</div>";
-				}
-			}
+
+			print "<div class='unit'><b>"._t('Era').": </b>".caReturnDefaultIfBlank($vs_era)."</div>";
+			print "<div class='unit'><b>"._t('Period').": </b>".caReturnDefaultIfBlank(str_replace(", -", "", $vs_period))."</div>";
+			print "<div class='unit'><b>"._t('Epoch').": </b>".caReturnDefaultIfBlank($vs_epoch)."</div>";
+			print "<div class='unit'><b>"._t('Age').": </b>".caReturnDefaultIfBlank($vs_ageNALMA)."</div>";
+			print "<div class='unit'><b>"._t('Formation').": </b>".caReturnDefaultIfBlank($vs_formation)."</div>";
 			
-			if (
-				($vs_citation = $t_object->get('ca_objects.citation'))
-				||
-				($vs_nestStructure = $t_object->get('ca_objects.nestStructure'))
-			) {
+			
+			$vs_citation = $t_object->get('ca_objects.citation', array("convertCodesToDisplayText" => true, "delimiter" => ", "));
+				
+			$vs_nestStructure = $t_object->get('ca_objects.nestStructure', array("convertCodesToDisplayText" => true, "delimiter" => ", "));
+		
 ?>
 <br><div class="unit"><h2>General</h2></div>
 <?php
 
-				if($vs_citation){
-				   print "<div class='unit'><b>"._t('Citation').": </b>".$vs_citation."</div>";
-				}
-				if($vs_nestStructure){
-				   print "<div class='unit'><b>"._t('Nest structure').": </b>".$vs_nestStructure."</div>";
-				}
-			}
+			print "<div class='unit'><b>"._t('Citation').": </b>".caReturnDefaultIfBlank($vs_citation)."</div>";
+			print "<div class='unit'><b>"._t('Nest structure').": </b>".caReturnDefaultIfBlank($vs_nestStructure)."</div>";
+			
 			
 			
 			# --- occurrences
@@ -158,6 +138,7 @@
 				foreach($va_places as $vn_index => $va_place_hier){
 					array_shift($va_place_hier); // get rid of root node, which just says "root"
 					$vs_place = array_pop($va_place_hier);
+					print $vs_place;
 					$vs_path = join(" / ", $va_place_hier);
 					$va_place_info = $va_non_hier_places[$vn_index];
 					print "<div>{$vs_path} / ".(($this->request->config->get('allow_detail_for_ca_places')) ? caNavLink($this->request, $vs_place, '', 'Detail', 'Place', 'Show', array('place_id' => $va_place_info['place_id'])) : $va_place_info['label'])."</div>";

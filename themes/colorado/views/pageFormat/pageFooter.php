@@ -1,18 +1,20 @@
 		<div style="clear:both; height:0px;"><!-- empty --></div></div><!-- end pageArea -->
-		<div id="footer">
+		<div id="footer" style="position: relative;">			
+			<div style="position: absolute; top: 5px; right: 5px;">
+				<a href="http://www.nsf.gov/"><img src='<?php print $this->request->getThemeUrlPath(); ?>/graphics/nsf.png' width='60' height='60' border='0' alt='National Science Foundation'/></a>
+			</div>
 			<div id="footerLogo"><a href="http://www.colorado.edu/"><img src='<?php print $this->request->getThemeUrlPath(); ?>/graphics/footerLogo.gif' width='170' height='60' border='0'></a></div>
-		<div id="footerText">
+			<div id="footerText">
 				UNIVERSITY OF COLORADO MUSEUM OF NATURAL HISTORY <br/>
 				Henderson Building, 15th and Broadway, Boulder, CO 80309 <br/>
 				tel: 303.492.6892 fax: 303.492.4195<br/>
 				For questions or comments, please email:<a href="mailto:cumuseum@colorado.edu">cumuseum@colorado.edu</a>
 			</div>
 			<div id="footerText2">
-				 <br>
-				 Regents of the University of Colorado &copy; 2012  <br>
-				 Built with:<a href="http://www.collectiveaccess.org">CollectiveAccess</a> &copy; 2012 
+				 Regents of the University of Colorado &copy; 2013<br/>
+				 Built with: <a href="http://www.collectiveaccess.org">CollectiveAccess</a> &copy; 2013 
 			</div>
-			</div>
+		</div>
 		
 		<div class="clearfix"></div><!-- end footer -->
 <?php

@@ -50,7 +50,7 @@ if($vo_result) {
 		$va_labels = $vo_result->getDisplayLabels($this->request);
 		$vs_caption = join('<br/>', $va_labels);
 		print "<div class='searchFullTitle'>".caNavLink($this->request, $vs_idno, '', 'Detail', 'Object', 'Show', array('object_id' => $vn_object_id))."</div>";
-		print "<div class='searchFullTextTextBlock'><b>"._t("Specimen Type").":</b> ".caReturnDefaultIfBlank($vo_result->get("ca_objects.specimenType"))."</div>";
+		print "<div class='searchFullTextTextBlock'><b>"._t("Specimen Type").":</b> ".caReturnDefaultIfBlank($vo_result->get('ca_objects.specimenType', array("convertCodesToDisplayText" => true, "delimiter" => ", ")))."</div>";
 		print "<div class='searchFullTextTextBlock'><b>"._t("Class").":</b> ".caReturnDefaultIfBlank($vo_result->get("ca_objects.class"))."</div>";
 		print "<div class='searchFullTextTextBlock'><b>"._t("Order").":</b> ".caReturnDefaultIfBlank($vo_result->get("ca_objects.order"))."</div>";
 		print "<div class='searchFullTextTextBlock'><b>"._t("Family").":</b> ".caReturnDefaultIfBlank($vo_result->get("ca_objects.family"))."</div>";
@@ -62,7 +62,7 @@ if($vo_result) {
 		print "<div class='searchFullTextTextBlock2'><b>"._t("Pore System").":</b> ".caReturnDefaultIfBlank($vo_result->get("ca_objects.poreSystem"))."</div>";
 		print "<div class='searchFullTextTextBlock2'><b>"._t("Morphotype").":</b> ".caReturnDefaultIfBlank($vo_result->get("ca_objects.morphotype"))."</div>";
 		
-		$va_locality_hier = $vo_result->get("ca_places.hierarchy.preferred_labels", array('returnAsArray' => true, 'checkAccess' => $va_access_values));
+		$va_locality_hier = $vo_result->get("ca_places.hierarchy.idno", array('returnAsArray' => true, 'checkAccess' => $va_access_values));
 		$va_locality_list = $vo_result->get("ca_places", array('returnAsArray' => true, 'checkAccess' => $va_access_values));
 		
 		$va_locality_display = array();
@@ -77,7 +77,6 @@ if($vo_result) {
 				$va_locality_display[] = join(" / ", $va_locality);
 			}
 		}
-		
 		print "<div class='searchFullTextTextBlock2'><b>"._t("Locality").":</b> ".caReturnDefaultIfBlank(join("; ", $va_locality_display))."</div>";
 		print "<div class='searchFullTextTextBlock2'><b>"._t("Locality Formation").":</b> ".caReturnDefaultIfBlank($vo_result->get("ca_places.formation"))."</div>";
 		print "<div class='searchFullTextTextBlock2'><b>"._t("Locality Member").":</b> ".caReturnDefaultIfBlank($vo_result->get("ca_places.member"))."</div>";
