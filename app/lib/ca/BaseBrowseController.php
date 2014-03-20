@@ -481,7 +481,7 @@
 								if ($va_item['parent_id'] == $vn_id) {
 									if ($vn_start <= $vn_c) {
 										$va_item['item_id'] = $va_item['id'];
-										$va_item['name'] = $va_item['label'];
+										$va_item['name'] = (isset($va_facet_info['use_idno']) && $va_facet_info['use_idno']) ? $va_item['idno'] : $va_item['label'];
 										$va_item['children'] = $va_item['child_count'];
 										unset($va_item['label']);
 										unset($va_item['child_count']);
