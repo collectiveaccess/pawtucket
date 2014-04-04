@@ -241,11 +241,15 @@ if(!(bool)$this->request->config->get("splash_disable_recently_viewed_objects"))
 
 			$this->view->setVar('recently_viewed_objects', $va_recently_viewed_objects_for_display);
 			if(is_array($va_recently_viewed_objects) && (sizeof($va_recently_viewed_objects) > 0)){
-				$va_object_info = array_shift($va_recently_viewed_objects_for_display);
-				$this->view->setVar('recently_viewed_id', $va_object_info['object_id']);
-				
-				foreach($va_versions as $vs_version) {
-					$this->view->setVar('recently_viewed_'.$vs_version, $va_media[$va_object_info['object_id']]['tags'][$vs_version]);
+				foreach($va_recently_viewed_objects_for_display as $va_object_info){
+					if($va_media[$va_object_info['object_id']]['tags'][$vs_version]){
+						$this->view->setVar('recently_viewed_id', $va_object_info['object_id']);
+					
+						foreach($va_versions as $vs_version) {
+							$this->view->setVar('recently_viewed_'.$vs_version, $va_media[$va_object_info['object_id']]['tags'][$vs_version]);
+						}
+						break;
+					}
 				}
 			} 
 } else {

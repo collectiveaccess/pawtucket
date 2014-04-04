@@ -83,10 +83,13 @@
 
 				$vn_x = 0;
 				print "<div id='browseCriteria'><span class='criteriaHeading'>"._t("You browsed for: ")."</span>";
+				
+				$t_place = new ca_places();
 				foreach($va_criteria as $vs_facet_name => $va_row_ids) {
 					$vn_x++;
 					$vn_row_c = 0;
 					foreach($va_row_ids as $vn_row_id => $vs_label) {
+						if ($vs_facet_name == 'place_facet_hier') { $t_place->load($vn_row_id); $vs_label = $t_place->get('idno'); }
 						print "{$vs_label}".caNavLink($this->request, 'x', 'close', '', 'Browse', 'removeCriteria', array('facet' => $vs_facet_name, 'id' => $vn_row_id))."\n";
 						$vn_row_c++;
 					}

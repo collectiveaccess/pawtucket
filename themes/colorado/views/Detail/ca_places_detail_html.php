@@ -74,8 +74,9 @@ if (!$this->request->isAjax()) {
 <?php
 			}
 			# --- name
-			if(is_array($va_place_hier = $t_place->get('ca_places.hierarchy.preferred_labels', array('returnAsArray' => true, 'checkAccess' => $va_access_values)))){
-				$va_place_hier = array_values($va_place_hier); array_shift($va_place_hier);
+			if(is_array($va_place_hier = $t_place->get('ca_places.hierarchy.idno', array('returnAsArray' => true, 'checkAccess' => $va_access_values)))){
+				$va_place_hier = array_values($va_place_hier);
+				array_shift($va_place_hier);
 				print "<div class='unit'><b>"._t("Locality Name")."</b>: ".join(" / ", $va_place_hier)."</div><!-- end unit -->";
 				
 			}
@@ -83,7 +84,7 @@ if (!$this->request->isAjax()) {
 			$va_attributes = $this->request->config->get('ca_places_detail_display_attributes');
 			if(is_array($va_attributes) && (sizeof($va_attributes) > 0)){
 				foreach($va_attributes as $vs_attribute_code){
-					if($vs_value = $t_place->get("ca_places.{$vs_attribute_code}")){
+					if($vs_value = $t_place->get("ca_places.{$vs_attribute_code}", array("convertCodesToDisplayText" => true, "delimiter" => ", "))){
 						print "<div class='unit'><b>".$t_place->getDisplayLabel("ca_places.{$vs_attribute_code}").":</b> ".caReturnDefaultIfBlank($vs_value)."</div><!-- end unit -->";
 					}
 				}
