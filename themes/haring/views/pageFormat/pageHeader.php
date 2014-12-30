@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="<?php print $this->request->getThemeUrlPath(true); ?>/css/iestyles.css" />
 	<![endif]-->
 <?php
-	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
+	print AssetLoadManager::getLoadHTML($this->request);
 ?>
 		<script src="/js/jquery/jquery.lightbox_me.js" type="text/javascript" charset="utf-8"></script>
 	

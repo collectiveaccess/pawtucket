@@ -17,7 +17,7 @@
 	<!--[if IE 8]><link rel="stylesheet" href="<?php print $this->request->getThemeUrlPath(true); ?>/css/ie8.css" /><![endif]-->
 	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery-tileviewer/jquery.tileviewer.css" type="text/css" media="screen" />
 <?php
-	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
+	print AssetLoadManager::getLoadHTML($this->request);
 ?>
 	<!--Fonts-->
 	<script src="<?php print $this->request->getThemeUrlPath(); ?>/js/libs/cufon-yui.js"></script>

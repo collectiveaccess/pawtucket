@@ -80,7 +80,7 @@
  		public function __construct(&$po_request, &$po_response, $pa_view_paths=null) {
  			parent::__construct($po_request, $po_response, $pa_view_paths);
 
- 			JavascriptLoadManager::register('tabUI');
+ 			AssetLoadManager::register('tabUI');
  			
  			// get configured items per page options, if specified
  			if ($va_items_per_page_for_ca_objects = $po_request->config->getList('items_per_page_options_for_ca_objects_search')) {
@@ -233,7 +233,7 @@
 					}
 					
 					if($po_request->config->get("show_map_object_search_results")){
- 						JavascriptLoadManager::register('maps');
+ 						AssetLoadManager::register('maps');
 						$this->opa_views['map'] = _t('Map');
 						if(!$this->opa_views_options['map']){
 							$this->opa_views_options['map'] = array("description" => _t("View results plotted on a map"), "icon" => "icon_map.gif");

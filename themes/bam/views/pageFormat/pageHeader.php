@@ -11,7 +11,7 @@
     <link rel="stylesheet" type="text/css" href="<?php print $this->request->getThemeUrlPath(true); ?>/css/iestyles.css" />
 	<![endif]-->
 <?php
-	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
+	print AssetLoadManager::getLoadHTML($this->request);
 ?>
 	<script type="text/javascript">
 		 jQuery(document).ready(function() {

@@ -15,7 +15,7 @@
 	<link href='http://fonts.googleapis.com/css?family=Paytone+One' rel='stylesheet' type='text/css'>
 	<link href='http://fonts.googleapis.com/css?family=Josefin+Slab:600,300' rel='stylesheet' type='text/css'>
 <?php
-	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
+	print AssetLoadManager::getLoadHTML($this->request);
 ?>
 	<script type="text/javascript">
 		 jQuery(document).ready(function() {

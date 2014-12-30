@@ -25,7 +25,7 @@
  *
  * ----------------------------------------------------------------------
  */
- 	JavascriptLoadManager::register('cycle');
+ 	AssetLoadManager::register('cycle');
  	
 	$t_object = 						$this->getVar('t_item');
 	$vn_object_id = 					$t_object->get('object_id');
@@ -157,7 +157,7 @@
 <?php
 	# --- administrator's editing form for changing access and tagging themes (novastory_category)
 	if($this->request->isLoggedIn() && $this->request->user->hasRole("admin")){
-		JavascriptLoadManager::register('bundleableEditor');
+		AssetLoadManager::register('bundleableEditor');
 ?>
 		<div id="adminForm"></div>
 		<script type="text/javascript">

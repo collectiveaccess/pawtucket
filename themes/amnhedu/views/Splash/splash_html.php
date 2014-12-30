@@ -104,7 +104,7 @@
 			</div> -->
 		</div><!-- end quickLinkItems -->
 <?php
-	JavascriptLoadManager::register('cycle');
+	AssetLoadManager::register('cycle');
 
 	 	$t_slider = new ca_sets();
 	 	$t_slider->load(array('set_code' => 'siteFeatured'));

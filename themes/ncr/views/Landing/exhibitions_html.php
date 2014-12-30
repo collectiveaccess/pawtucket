@@ -1,5 +1,5 @@
 <?php
-	JavascriptLoadManager::register("cycle");
+	AssetLoadManager::register("cycle");
 	
 	$t_list = new ca_lists();
 	$vn_type_id = $t_list->getItemIDFromList('occurrence_types', 'exhibition');

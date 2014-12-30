@@ -35,7 +35,7 @@
 	$vs_display_version =				$this->getVar('primary_rep_display_version');
 	$va_display_options =				$this->getVar('primary_rep_display_options');
 
-	JavascriptLoadManager::register('cycle');
+	AssetLoadManager::register('cycle');
 ?>	
 	<div id="detailBody">
 		<div id="pageNav">

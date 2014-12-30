@@ -26,7 +26,7 @@
  * ----------------------------------------------------------------------
  */
  
-	JavascriptLoadManager::register("cycle");
+	AssetLoadManager::register("cycle");
 	$t_object = new ca_objects();
 	
 	 $va_access_values = caGetUserAccessValues($this->request);

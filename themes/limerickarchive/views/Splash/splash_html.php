@@ -1,7 +1,7 @@
 <?php
 	require_once(__CA_LIB_DIR__."/ca/Search/CollectionSearch.php");
 	require_once(__CA_LIB_DIR__."/ca/Search/ObjectSearch.php");
-	JavascriptLoadManager::register('tabUI');
+	AssetLoadManager::register('tabUI');
 	
 	# --- get the access values for checking permissions
 	if($this->request->config->get("dont_enforce_access_settings")){
