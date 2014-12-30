@@ -35,6 +35,7 @@
    */
    
 	require_once(__CA_BASE_DIR__.'/vendor/autoload.php');	// composer
+	require_once(__CA_LIB_DIR__."/core/Utils/Debug.php");
 	
 	require_once(__CA_LIB_DIR__."/core/Cache/MemoryCache.php"); // is used in utilityHelpers
 	require_once(__CA_LIB_DIR__."/core/Cache/ExternalCache.php"); // is used in utilityHelpers
@@ -52,7 +53,7 @@
 	require(__CA_LIB_DIR__."/ca/Search/DidYouMean.php");
 	
 	require(__CA_LIB_DIR__."/ca/MetaTagManager.php");
-	require(__CA_LIB_DIR__."/ca/JavascriptLoadManager.php");
+	require(__CA_LIB_DIR__."/ca/AssetLoadManager.php");
 	require(__CA_LIB_DIR__."/ca/TooltipManager.php");
 
 	require(__CA_LIB_DIR__."/ca/ResultContext.php");
