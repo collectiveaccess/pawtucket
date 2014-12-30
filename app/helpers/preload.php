@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2008-2012 Whirl-i-Gig
+ * Copyright 2008-2014 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -34,6 +34,12 @@
    *
    */
    
+	require_once(__CA_BASE_DIR__.'/vendor/autoload.php');	// composer
+	
+	require_once(__CA_LIB_DIR__."/core/Cache/MemoryCache.php"); // is used in utilityHelpers
+	require_once(__CA_LIB_DIR__."/core/Cache/ExternalCache.php"); // is used in utilityHelpers
+	require_once(__CA_LIB_DIR__."/core/Cache/CompositeCache.php"); // is used in utilityHelpers
+	
 	require(__CA_APP_DIR__."/helpers/utilityHelpers.php");
 	require(__CA_APP_DIR__."/helpers/navigationHelpers.php");
 	require(__CA_APP_DIR__."/helpers/mailHelpers.php");

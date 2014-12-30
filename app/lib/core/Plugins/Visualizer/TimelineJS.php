@@ -143,7 +143,7 @@ class WLPlugVisualizerTimelineJS Extends BaseVisualizerPlugIn Implements IWLPlug
 					"endDate" => $va_timeline_dates['end'],
 					"headline" => $po_request ? caEditorLink($po_request, $vs_title, '', $vs_table_name, $vn_row_id) : $vs_title,
 					"text" => $qr_res->getWithTemplate($va_source['display']['description_template']),
-					"tag" => $vs_tag,
+					"tag" => '',
 					"classname" => "",
 					"asset" => array(
 						"media" => $qr_res->getWithTemplate($va_source['display']['image'], array('returnURL' => true)),
@@ -212,7 +212,7 @@ class WLPlugVisualizerTimelineJS Extends BaseVisualizerPlugIn Implements IWLPlug
 	 */
 	public function registerDependencies() {
 		$va_packages = array("timelineJS");
-		foreach($va_packages as $vs_package) { JavascriptLoadManager::register($vs_package); }
+		foreach($va_packages as $vs_package) { AssetLoadManager::register($vs_package); }
 		return $va_packages;
 	}
 	# ------------------------------------------------
