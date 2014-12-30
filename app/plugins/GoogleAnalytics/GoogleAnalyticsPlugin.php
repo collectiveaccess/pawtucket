@@ -36,7 +36,7 @@
 			// If a defined GoogleAnalytics account is defined, include the javascript code 
 			if ($account) {
 				$googleAnalyticsCode = str_replace("^account",$account,$googleAnalyticsCode);
-				JavascriptLoadManager::addComplementaryScript($googleAnalyticsCode);
+				AssetLoadManager::addComplementaryScript($googleAnalyticsCode);
 			}
 			parent::__construct();
 		}

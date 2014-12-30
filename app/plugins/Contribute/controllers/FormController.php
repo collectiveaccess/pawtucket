@@ -86,7 +86,7 @@
  			
  			ContributePlugin::setUIInfo($this->ops_ui_code, $this->opa_ui_info);
  			
- 			JavascriptLoadManager::register('panel');
+ 			AssetLoadManager::register('panel');
  			MetaTagManager::addLink('stylesheet', $po_request->getBaseUrlPath()."/app/plugins/Contribute/themes/".$this->ops_theme."/css/contribute.css",'text/css');
  			
  			$this->request->setParameter('dont_set_pawtucket2_last_page', '1');	// Setting this parameter ensures that the "last page" we (may) redirect to after submission isn't the Contribute form itself

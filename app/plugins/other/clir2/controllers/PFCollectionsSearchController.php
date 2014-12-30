@@ -87,7 +87,7 @@
  		# -------------------------------------------------------
  		public function __construct(&$po_request, &$po_response, $pa_view_paths=null) {
  			parent::__construct($po_request, $po_response, $pa_view_paths);
- 			JavascriptLoadManager::register('tabUI');
+ 			AssetLoadManager::register('tabUI');
  			
  			// redirect user if not logged in
 			if (($this->request->config->get('pawtucket_requires_login')&&!($this->request->isLoggedIn()))||($this->request->config->get('show_bristol_only')&&!($this->request->isLoggedIn()))) {

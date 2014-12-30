@@ -88,8 +88,8 @@
  		}
  		# -------------------------------------------------------
  		public function Index() {
- 			JavascriptLoadManager::register('browsable');
-			JavascriptLoadManager::register('hierBrowser');
+ 			AssetLoadManager::register('browsable');
+			AssetLoadManager::register('hierBrowser');
 			
 			// Remove any browse criteria previously set
 			$this->opo_browse->removeAllCriteria();

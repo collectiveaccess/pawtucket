@@ -44,7 +44,7 @@
 		$va_labels = $t_object->getPreferredDisplayLabelsForIDs(array_keys($va_random_items));
 		$va_media = $t_object->getPrimaryMediaForIDs(array_keys($va_random_items), array('medium'), array('checkAccess' => $this->getVar('access_values')));
 	}
-	JavascriptLoadManager::register('cycle');
+	AssetLoadManager::register('cycle');
 
 	if (sizeof($va_criteria) > 0) {
 		# --- show results

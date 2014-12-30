@@ -55,7 +55,7 @@
  			$this->view->setVar('currency', $this->opo_client_services_config->get('currency'));
  			$this->view->setVar('currency_symbol', $this->opo_client_services_config->get('currency_symbol'));
  			
-			JavascriptLoadManager::register("panel");
+			AssetLoadManager::register("panel");
  		}
  		# -------------------------------------------------------
  		/**

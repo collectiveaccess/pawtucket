@@ -56,7 +56,7 @@
 			if ($this->request->config->get('pawtucket_requires_login')&&!($this->request->isLoggedIn())) {
                 $this->response->setRedirect(caNavUrl($this->request, "", "LoginReg", "form"));
             }
-            JavascriptLoadManager::register('cycle');
+            AssetLoadManager::register('cycle');
            	$t_list = new ca_lists();
 			$this->view->setVar("user_contributed_source_id", $t_list->getItemIDFromList('object_sources', 'user_contributed'));
 			$this->view->setVar("user_contributed_other_source_id", $t_list->getItemIDFromList('object_sources', 'user_contributed_other'));

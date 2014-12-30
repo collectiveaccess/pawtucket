@@ -38,7 +38,7 @@
  		
  		# -------------------------------------------------------
  		public function __construct(&$po_request, &$po_response, $pa_view_paths=null) {
- 			JavascriptLoadManager::register('tokeninput');
+ 			AssetLoadManager::register('tokeninput');
  			
  			$this->ops_theme = __CA_THEME__;																	// get current theme
  			if(!is_dir(__CA_APP_DIR__.'/plugins/Share/themes/'.$this->ops_theme.'/views')) {		// if theme is not defined for this plugin, try to use "default" theme

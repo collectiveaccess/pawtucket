@@ -94,10 +94,10 @@
  			// Remove any browse criteria previously set
 			$this->opo_browse->removeAllCriteria();
  			parent::Index(array('dontRenderView' => true));
- 			JavascriptLoadManager::register('imageScroller');
- 			JavascriptLoadManager::register('browsable');
- 			JavascriptLoadManager::register('tabUI');
- 			JavascriptLoadManager::register('cycle');
+ 			AssetLoadManager::register('imageScroller');
+ 			AssetLoadManager::register('browsable');
+ 			AssetLoadManager::register('tabUI');
+ 			AssetLoadManager::register('cycle');
  			
  			$t_object = new ca_objects();
  			$t_featured = new ca_sets();

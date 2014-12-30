@@ -84,7 +84,7 @@
 		}
  		# -------------------------------------------------------
  		function Index() {
- 			JavascriptLoadManager::register('panel');
+ 			AssetLoadManager::register('panel');
  			$va_periods = $this->ops_periods;
  			$this->view->setVar('periods', $va_periods);
  			
@@ -95,7 +95,7 @@
  		}
  		# -------------------------------------------------------
  		function Detail() {
- 			JavascriptLoadManager::register('panel');
+ 			AssetLoadManager::register('panel');
  			if($this->request->config->get("dont_enforce_access_settings")){
  				$va_access_values = array();
  			}else{

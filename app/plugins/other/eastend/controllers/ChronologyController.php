@@ -72,7 +72,7 @@
 
  			parent::__construct($po_request, $po_response, array(__CA_APP_DIR__.'/plugins/eastend/themes/'.$this->ops_theme.'/views'));
  			
- 			JavascriptLoadManager::register('smoothDivScrollVertical');
+ 			AssetLoadManager::register('smoothDivScrollVertical');
  			MetaTagManager::addLink('stylesheet', $po_request->getBaseUrlPath()."/app/plugins/eastend/themes/".$this->ops_theme."/css/eastend.css",'text/css');
  		 	
  			$this->opo_plugin_config = Configuration::load($this->request->getAppConfig()->get('application_plugins').'/eastend/conf/eastend.conf');
@@ -129,7 +129,7 @@
  			}else{
  				$this->ops_date_range = $vn_year;
  			}
- 			JavascriptLoadManager::register('maps'); 			
+ 			AssetLoadManager::register('maps'); 			
  			
 		}
  		# -------------------------------------------------------

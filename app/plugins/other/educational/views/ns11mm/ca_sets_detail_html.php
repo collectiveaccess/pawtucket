@@ -31,7 +31,7 @@
 	$vs_title 			= $this->getVar('label');
 	$va_access_values	= $this->getVar('access_values');
 	$vn_num_more_link = $this->request->config->get("num_items_before_more_link");
-	JavascriptLoadManager::register('panel');
+	AssetLoadManager::register('panel');
 
 	if($t_occurrence->get("status") != 0){	
 		# --- check for images of the exhibitions

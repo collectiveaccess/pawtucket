@@ -35,11 +35,11 @@
  		public function __construct(&$po_request, &$po_response, $pa_view_paths=null) {
  			parent::__construct($po_request, $po_response, $pa_view_paths);
  			
- 			JavascriptLoadManager::register("panel");
+ 			AssetLoadManager::register("panel");
  		}
  		# -------------------------------------------------------
  		public function Index() {
- 			JavascriptLoadManager::register('imageScroller');
+ 			AssetLoadManager::register('imageScroller');
  			
  			$va_access_values = caGetUserAccessValues($this->request);
  			

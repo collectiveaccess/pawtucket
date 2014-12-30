@@ -26,7 +26,7 @@
  * ----------------------------------------------------------------------
  */
 
-	JavascriptLoadManager::register('sortableUI');
+	AssetLoadManager::register('sortableUI');
 
 	$vs_id_prefix 		= $this->getVar('placement_code').$this->getVar('id_prefix');
 	$t_item 			= $this->getVar('t_item');			// object representation
