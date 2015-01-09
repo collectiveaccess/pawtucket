@@ -336,7 +336,7 @@
  			$o_purifier = new HTMLPurifier();
  			$t_trans = new ca_commerce_transactions();
  			if($t_trans->load($pn_transaction_id)) {
-				$t_trans->sendUserMessage($o_purifier->purify($this->request->getParameter('subject', pString)), $o_purifier->purify($this->request->getParameter('message', pString)), $this->request->getUserID());
+				$t_trans->sendUserMessage('O', $o_purifier->purify($this->request->getParameter('subject', pString)), $o_purifier->purify($this->request->getParameter('message', pString)), $this->request->getUserID());
 				$this->notification->addNotification(_t("Sent message"), __NOTIFICATION_TYPE_INFO__);
 			}else{
 				$this->notification->addNotification(_t("Your message could not be sent"), __NOTIFICATION_TYPE_INFO__);		
