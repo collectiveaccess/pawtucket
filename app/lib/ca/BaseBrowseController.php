@@ -533,12 +533,16 @@
 										while($qr_res->nextHit()) {
 											$vn_parent_id = $qr_res->get('ca_list_items.parent_id');
 											$vn_item_id = $qr_res->get('ca_list_items.item_id');
+											$vn_access = $qr_res->get('ca_list_items.access');
+											if (!in_array($vn_access, $va_access_values)) { continue; }
 											if (!in_array($vn_item_id, $va_ancestors)) { continue; }
 										
 											$va_item = array();
 											$va_item['item_id'] = $vn_item_id;
 											$va_item['name'] = $qr_res->get('ca_list_items.preferred_labels');
 											$va_item['children'] = (isset($va_child_counts[$vn_item_id]) && $va_child_counts[$vn_item_id]) ? $va_child_counts[$vn_item_id] : 0;
+											$va_item['access'] = $vn_access;
+											$va_item['is_enabled'] = $qr_res->get('ca_list_items.is_enabled');
 											$va_json_data[$vn_item_id] = $va_item;
 										}
 									}
@@ -569,6 +573,7 @@
 									if ($vn_start <= $vn_c) {
 										$va_item['item_id'] = $va_item[$t_item->primaryKey()];
 										if (!isset($va_facet[$va_item['item_id']]) && ($vn_root == $va_item['item_id'])) { continue; }
+										if(isset($va_item['access']) && (!in_array($va_item['access'], $va_access_values))) { continue; }
 										unset($va_item['parent_id']);
 										unset($va_item['label']);
 										$va_json_data[$va_item['item_id']] = $va_item;
