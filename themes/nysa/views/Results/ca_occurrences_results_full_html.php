@@ -31,6 +31,8 @@
 $vo_result 				= $this->getVar('result');
 $vn_items_per_page		= $this->getVar('current_items_per_page');
 $t_occurrence = new ca_occurrences();
+$t_lists = new ca_lists();
+$t_list_items = new ca_list_items();
 
 if($vo_result) {
 	print '<div id="occurrenceResults">';
@@ -65,20 +67,65 @@ if($vo_result) {
 					foreach($va_reps as $vn_relation_id => $va_attr) {
 						$t_rep = new ca_object_representations($va_attr['representation_list']);
 						$va_info = $t_rep->getMediaInfo("media");
-						$vs_padding = round($va_info["thumbnail"]["HEIGHT"]/2) - 7;
-						print "<div class='occThumb'>".$t_rep->getMediaTag('media', 'thumbnail')."</div><!-- end occThumb -->";
+						$vs_padding = round($va_info["small"]["HEIGHT"]/2) - 7;
+						print "<div class='occThumb'>".$t_rep->getMediaTag('media', 'small')."</div><!-- end occThumb -->";
 						break;
 					}
 				}
 				break;
 			}
+		} else {
+			print "<div class='occThumb'></div><!-- end occThumb -->";
+		
 		}
-		print "<div style='padding-top:".$vs_padding."px;'>".caNavLink($this->request, join($va_labels, "; "), '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
-		print ", ".$vo_result->get('ca_occurrences.type_id', array("convertCodesToDisplayText" => true));
-		if($vo_result->get('ca_occurrences.blankWorksheet')){
-			print ", <span class='blankWorksheet' style='text-decoration:underline;'>Blank Worksheet*</span>";
+		print "<div class='searchFullText'>".caNavLink($this->request, join($va_labels, "; "), '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
+#		if($vo_result->get('ca_occurrences.blankWorksheet')){
+		if($vo_result->get('ca_occurrences.blankWorksheet')==671){  #671 is the item_id number for "yes" in the ca_list_items table
+			print "<br/><br/><strong>Lesson Type:</strong> <span class='blankWorksheet' style='text-decoration:underline;'>Blank Worksheet*</span>";
+		} else {
+			print "<br/><br/><strong>Lesson Type:</strong> ".$vo_result->get('ca_occurrences.type_id', array("convertCodesToDisplayText" => true));
 		}
-		print "</div></div>\n";
+			
+		$myDisplayItem = $vo_result->get('ca_occurrences.gradelevel', array("delimiter" => ', ', "convertCodesToDisplayText" => true));
+		if (strlen($myDisplayItem) > 0) {
+			print "<br/><br/><strong>Grade Level:</strong> ".$myDisplayItem;			
+		}
+		
+		$myDisplayItem = $vo_result->get('ca_occurrences.lessonTopic', array("delimiter" => '<br/>', "convertCodesToDisplayText" => false));
+		if (strlen($myDisplayItem) > 0) {
+
+					if($va_values = $t_occurrence->get("ca_occurrences.lessonTopic", array("convertCodesToDisplayText" => false, "returnAsArray" => true))){
+						$va_output_parts = array();
+		
+						$loop_count = 0;
+						foreach($va_values as $k => $va_value){
+								# --- display hierarchy path for "lessonTopic"
+									$vs_tmp = "";
+									$vs_url = "";
+												$loop_count++;
+									$va_hierarchy_ancestors = $t_list_items->getHierarchyAncestors($va_value["lessonTopic"], array("idsOnly" => true, "includeSelf" => true));
+									if(is_array($va_hierarchy_ancestors) && sizeof($va_hierarchy_ancestors)){
+										# --- remove the root - we don't want to display it
+										$va_root = array_pop($va_hierarchy_ancestors);
+										if(is_array($va_hierarchy_ancestors) && sizeof($va_hierarchy_ancestors)){
+											foreach($va_hierarchy_ancestors as $vni => $vn_list_item_id){
+													$vs_tmp = $t_lists->getItemForDisplayByItemID($vn_list_item_id).(($vni > 0) ? " > ".$vs_tmp : "");
+											}
+											if ($loop_count > 1) { $va_output_parts[] = "<br/>".$vs_tmp;}
+											else { $va_output_parts[] = $vs_tmp; }
+										}
+									}
+						}
+					}
+									
+
+
+			print "<br/><br/><strong>Lesson Topic:</strong> ";
+			print join(", ", $va_output_parts);
+
+			}
+
+		print "</div><div class='divide' style='clear:left;'><!-- empty --></div></div>\n";
 		$vn_i++;
 		
 	}
@@ -86,5 +133,9 @@ if($vo_result) {
 		".blankWorksheet", "Blank worksheets are shells of lessons included here so you can customize and download them for classroom use."
 	);
 	print "</div>\n";
+	
 }
+
+
 ?>
+

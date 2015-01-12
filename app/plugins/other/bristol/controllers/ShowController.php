@@ -41,9 +41,9 @@
  		
  		# -------------------------------------------------------
  		public function __construct(&$po_request, &$po_response, $pa_view_paths=null) {
- 			JavascriptLoadManager::register('panel');
- 			JavascriptLoadManager::register('jquery', 'expander');
- 			JavascriptLoadManager::register('jquery', 'swipe');
+ 			AssetLoadManager::register('panel');
+ 			AssetLoadManager::register('jquery', 'expander');
+ 			AssetLoadManager::register('jquery', 'swipe');
  			
  			parent::__construct($po_request, $po_response, $pa_view_paths);
  			

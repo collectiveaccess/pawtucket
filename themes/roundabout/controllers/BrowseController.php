@@ -238,7 +238,7 @@
 					}
 										
 					if($po_request->config->get("show_map_object_search_results")){
- 						JavascriptLoadManager::register('maps');
+ 						AssetLoadManager::register('maps');
 						$this->opa_views['map'] = _t('Map');
 						if(!$this->opa_views_options['map']){
 							$this->opa_views_options['map'] = array("description" => _t("View results plotted on a map"), "icon" => "icon_map.gif");

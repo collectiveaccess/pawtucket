@@ -30,7 +30,7 @@
 	$vs_title 					= $this->getVar('label');
 	$va_access_values	= $this->getVar('access_values');
 	
-	JavascriptLoadManager::register('smoothDivScrollVertical');
+	AssetLoadManager::register('smoothDivScrollVertical');
 	
 	$qr_hits = $this->getVar('browse_results');
 

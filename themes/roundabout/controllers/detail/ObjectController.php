@@ -54,7 +54,7 @@
  		 * shows the basic info for an object
  		 */ 
  		public function Show() {
- 			JavascriptLoadManager::register('panel');
+ 			AssetLoadManager::register('panel');
  			parent::Show();
  			
  			// redirect user if not logged in

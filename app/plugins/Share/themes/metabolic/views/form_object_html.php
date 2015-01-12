@@ -1,6 +1,6 @@
 <?php
 	
-	JavascriptLoadManager::register('hierBrowser');
+	AssetLoadManager::register('hierBrowser');
 	
 	$vn_object_id = $this->getVar("object_id");
 	$t_object = $this->getVar("t_object");

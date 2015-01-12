@@ -62,8 +62,8 @@
  			$this->opo_result_context = new ResultContext($po_request, 'ca_objects', 'MetabolicChronology');
  			
  			MetaTagManager::addLink('stylesheet', $po_request->getBaseUrlPath()."/app/plugins/MetabolicChronology/themes/".$this->ops_theme."/css/chronology.css",'text/css');
- 			JavascriptLoadManager::register('jcarousel');
- 			JavascriptLoadManager::register('maps');
+ 			AssetLoadManager::register('jcarousel');
+ 			AssetLoadManager::register('maps');
  			
  			
  			$t_list = new ca_lists();

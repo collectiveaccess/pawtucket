@@ -35,7 +35,7 @@
  	require_once(__CA_LIB_DIR__.'/ca/Search/OccurrenceSearch.php');
 	
 	# --- get all actions associated with the entity so can visualize in chronology timeline
- 	JavascriptLoadManager::register('jcarousel');
+ 	AssetLoadManager::register('jcarousel');
  	$t_list = new ca_lists();
  	$vn_action_type_id = $t_list->getItemIDFromList('occurrence_types', 'action');
  	$vn_context_type_id = $t_list->getItemIDFromList('occurrence_types', 'context');

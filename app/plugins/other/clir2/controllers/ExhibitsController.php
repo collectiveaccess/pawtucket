@@ -41,8 +41,8 @@
  		
  		# -------------------------------------------------------
  		public function __construct(&$po_request, &$po_response, $pa_view_paths=null) {
- 			JavascriptLoadManager::register('panel');
- 			JavascriptLoadManager::register('jquery', 'expander');
+ 			AssetLoadManager::register('panel');
+ 			AssetLoadManager::register('jquery', 'expander');
  			
  			parent::__construct($po_request, $po_response, $pa_view_paths);
 			$this->opo_plugin_config = Configuration::load($this->request->getAppConfig()->get('application_plugins').'/clir2/conf/clir2.conf');

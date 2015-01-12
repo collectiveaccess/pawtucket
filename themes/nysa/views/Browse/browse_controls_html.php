@@ -37,14 +37,20 @@
 	$vs_browse_target		= $this->getVar('target');
 	
 	$t_object = new ca_objects();
-	$va_random_items = $t_object->getRandomItems(10, array('checkAccess' => $this->getVar('access_values'), 'hasRepresentations' => 1));
+	$t_occurrence = new ca_occurrences();
+	$va_random_items = array();
+	if ($vs_browse_target == "ca_objects") {
+		$va_random_items = $t_object->getRandomItems(10, array('checkAccess' => $this->getVar('access_values'), 'hasRepresentations' => 1));
+	} else if ($vs_browse_target == "ca_collections") {
+		$va_random_items = $t_occurrence->getRandomItems(10, array('checkAccess' => $this->getVar('access_values'), 'hasRepresentations' => 1));
+	}
 	$va_labels = array();
 	$va_media = array();
 	if(is_array($va_random_items) && sizeof($va_random_items)){
 		$va_labels = $t_object->getPreferredDisplayLabelsForIDs(array_keys($va_random_items));
 		$va_media = $t_object->getPrimaryMediaForIDs(array_keys($va_random_items), array('medium'), array('checkAccess' => $this->getVar('access_values')));
 	}
-	JavascriptLoadManager::register('cycle');
+	AssetLoadManager::register('cycle');
 	
 	if (!$this->request->isAjax()) {
 		#if ($this->getVar('browse_selector')) {
@@ -57,12 +63,17 @@
 			break;
 			# -----------------------------------------
 			case "ca_occurrences":
-				$vs_browse_target_name = " Lesson Plans";	
+				$vs_browse_target_name = " Documents and Learning Activities";	
+			break;
+			# -----------------------------------------
+			case "ca_collections":
+				$vs_browse_target_name = " Collections";	
 			break;
 			# -----------------------------------------
 		}
+		
 ?>
-	<h1><?php print _t('Browse the Archive for %1', $vs_browse_target_name); ?></h1>
+	<h1><?php print _t('Browse for %1', $vs_browse_target_name); ?></h1>
 	<div id="browse"><div id="resultBox"> 
 <?php
 	}
@@ -105,7 +116,11 @@
 				print "</div><!-- end browseControls -->";
 				
 			} else {
-				print $this->render('Browse/browse_intro_text_html.php');
+				if ($vs_browse_target == 'ca_occurrences') {
+					print $this->render('Browse/lesson_browse_intro_text_html.php');
+				} else {
+					print $this->render('Browse/browse_intro_text_html.php');
+				}
 				if (sizeof($va_facets)) { 
 					print "<div class='startBrowsingBy'>"._t("Start browsing by:")."</div>";
 					print "<div id='facetList'>";
@@ -114,7 +129,13 @@
 						print "<div class='facetHeadingLink'><a href='#' onclick='caUIBrowsePanel.showBrowsePanel(\"{$vs_facet_code}\");'>".$va_facet_info['label_plural']."</a></div>\n";
 						print "<div class='facetDescription'>".$va_facet_info["description"]."</div>";
 					}
-					print "</div><!-- end facetList -->";
+					if ($vs_browse_target == "ca_objects") {
+						print " <div class='facetHeadingLink'><a href='/index.php/Browse/Index/target/ca_collections'>State agencies</a></div>
+						<div class='facetDescription'>Find records by State agency name, or by other organizations and individuals.</div>
+						</div><!-- end facetList -->";
+					} else {
+						print "</div><!-- end facetList -->";
+					}
 				}
 				if(is_array($va_random_items) && sizeof($va_random_items)){
 					print "<div id='browseSlideshow'>";
@@ -124,9 +145,15 @@
 						$va_object_info['title'] = $va_labels[$vn_object_id];
 						$va_object_info['media'] = $va_media[$vn_object_id];
 						$va_random_items[$vn_object_id] = $va_object_info;
-						print "<div id='browseRandomImage' style='padding:".$randomImagePadding."px 0px ".$randomImagePadding."px 0px;'>";
-						print caNavLink($this->request, $va_media[$va_object_info['object_id']]["tags"]["medium"], '', 'Detail', 'Object', 'Show', array('object_id' => $vn_object_id));
-						print "<div id='browseRandomCaption'>".caNavLink($this->request, $va_object_info['title'], '', 'Detail', 'Object', 'Show', array('object_id' => $vn_object_id))."</div></div>";
+						if ($vs_browse_target=='ca_occurrences') {
+							print "<div id='browseRandomImage' style='padding:".$randomImagePadding."px 0px ".$randomImagePadding."px 0px;'>";
+							print caNavLink($this->request, $va_media[$va_object_info['object_id']]["tags"]["medium"], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
+							print "<div id='browseRandomCaption'>".caNavLink($this->request, $va_object_info['title'], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id))."</div></div>";
+						} else {
+							print "<div id='browseRandomImage' style='padding:".$randomImagePadding."px 0px ".$randomImagePadding."px 0px;'>";
+							print caNavLink($this->request, $va_media[$va_object_info['object_id']]["tags"]["medium"], '', 'Detail', 'Object', 'Show', array('object_id' => $vn_object_id));
+							print "<div id='browseRandomCaption'>".caNavLink($this->request, $va_object_info['title'], '', 'Detail', 'Object', 'Show', array('object_id' => $vn_object_id))."</div></div>";
+						}
 					}
 					print "</div>";
 ?>

@@ -1,5 +1,5 @@
 <?php
-	JavascriptLoadManager::register("cycle");
+	AssetLoadManager::register("cycle");
 	$va_jumpToList = $this->getVar("jumpToList");
 ?>
 <div id="pageHeading"><img src='<?php print $this->request->getThemeUrlPath(); ?>/graphics/ncr/t_chronology.gif' width='141' height='23' border='0'></div><!-- end pageHeading -->

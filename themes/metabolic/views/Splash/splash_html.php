@@ -26,7 +26,7 @@
  * ----------------------------------------------------------------------
  */
  
-	JavascriptLoadManager::register("cycle");
+	AssetLoadManager::register("cycle");
 	$t_object = new ca_objects();
 		$t_featured = new ca_sets();
 	$featured_set = $t_featured->load(array('set_code' => 'splash'));

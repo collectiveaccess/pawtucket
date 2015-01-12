@@ -116,9 +116,12 @@ class FMPXMLResultReader extends BaseXMLDataReader {
 	 * @return bool
 	 */
 	public function read($ps_source, $pa_options=null) {
-		$this->opo_xml = DOMDocument::load($ps_source);
-		$this->opo_xpath = new DOMXPath($this->opo_xml);
-		
+		try {
+			$this->opo_xml = DOMDocument::load($ps_source);
+			$this->opo_xpath = new DOMXPath($this->opo_xml);
+		} catch (Exception $e) {
+			return null;
+		}
 		$this->opo_xpath->registerNamespace($this->ops_xml_namespace_prefix, $this->ops_xml_namespace);
 		
 		// get metadata 
@@ -186,6 +189,105 @@ class FMPXMLResultReader extends BaseXMLDataReader {
 			}
 			$vn_index++;
 		}
+	}
+	# -------------------------------------------------------
+	/**
+	 * 
+	 * 
+	 * @param string $ps_source
+	 * @param array $pa_options
+	 * @return bool
+	 */
+	public function nextRow() {
+		if (!($o_row = $this->opo_handle->item($this->opn_current_row))) { return false; }
+		
+		$this->opa_row_buf = array();
+		$this->_extractXMLValues($o_row);
+		
+		$this->opn_current_row++;
+		if ($this->opn_current_row > $this->numRows()) { return false; }
+		return true;
+	}
+	# -------------------------------------------------------
+	/**
+	 * 
+	 * 
+	 * @param string $ps_source
+	 * @param array $pa_options
+	 * @return bool
+	 */
+	public function seek($pn_row_num) {
+		if ($pn_row_num > $this->numRows()) { return false; }
+		
+		$this->opn_current_row = $pn_row_num;
+		return true;
+	}
+	# -------------------------------------------------------
+	/**
+	 * 
+	 * 
+	 * @param string $ps_spec
+	 * @param array $pa_options
+	 * @return mixed
+	 */
+	public function get($ps_spec, $pa_options=null) {
+		$vb_return_as_array = caGetOption('returnAsArray', $pa_options, false);
+		$vs_delimiter = caGetOption('delimiter', $pa_options, ';');
+		
+		if ($this->opb_tag_names_as_case_insensitive) { $ps_spec = strtolower($ps_spec); }
+		if (is_array($this->opa_row_buf) && ($ps_spec) && (isset($this->opa_row_buf[$ps_spec]))) {
+			if($vb_return_as_array) {
+				return $this->opa_row_buf[$ps_spec];
+			} else {
+				return join($vs_delimiter, $this->opa_row_buf[$ps_spec]);
+			}
+		}
+		return null;	
+	}
+	# -------------------------------------------------------
+	/**
+	 * 
+	 * 
+	 * @return mixed
+	 */
+	public function getRow($pa_options=null) {
+		if (is_array($this->opa_row_buf)) {
+			$va_row = $this->opa_row_buf;
+			foreach($va_row as $vs_k => $vs_v) {
+				if ($vs_k[0] == "/") { continue; }
+				$va_row[(($vs_k[0] == "/") ? '' : '/').$vs_k] = $vs_v;
+			}
+			return $va_row;
+		}
+		
+		return null;	
+	}
+	# -------------------------------------------------------
+	/**
+	 * 
+	 * 
+	 * @return int
+	 */
+	public function numRows() {
+		return (int)$this->opo_handle->length;
+	}
+	# -------------------------------------------------------
+	/**
+	 * 
+	 * 
+	 * @return int
+	 */
+	public function getInputType() {
+		return __CA_DATA_READER_INPUT_FILE__;
+	}
+	# -------------------------------------------------------
+	/**
+	 * Values can repeat for XML files
+	 * 
+	 * @return bool
+	 */
+	public function valuesCanRepeat() {
+		return true;
 	}
 	# -------------------------------------------------------
 }

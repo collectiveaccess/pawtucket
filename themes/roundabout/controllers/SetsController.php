@@ -72,7 +72,7 @@
  			if (!$this->request->isLoggedIn()) { $this->response->setRedirect(caNavUrl($this->request, '', 'LoginReg', 'form')); return; }
  			if (!$t_set = $this->_getSet()) { $t_set = new ca_sets(); }
  			
- 			JavascriptLoadManager::register('sortableUI');
+ 			AssetLoadManager::register('sortableUI');
  			
  			# --- get all sets for user
  			$va_sets = caExtractValuesByUserLocale($t_set->getSets(array('table' => 'ca_objects', 'user_id' => $this->request->getUserID())));

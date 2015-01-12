@@ -1,7 +1,7 @@
 <?php
 	$t_list = new ca_lists();
 	$vn_collection_type_id = $t_list->getItemIDFromList("object_types", "object");
-	JavascriptLoadManager::register('tabUI');
+	AssetLoadManager::register('tabUI');
 	
 	# --- get the access values for checking permissions
 	if($this->request->config->get("dont_enforce_access_settings")){

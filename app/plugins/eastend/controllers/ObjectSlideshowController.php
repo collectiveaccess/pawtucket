@@ -65,7 +65,7 @@
             
             $this->opo_result_context = new ResultContext($po_request, 'ca_objects', ResultContext::getLastFind($po_request, 'ca_objects'));
             
-            JavascriptLoadManager::register('cycle');
+            AssetLoadManager::register('cycle');
  		}
  		# -------------------------------------------------------
  		public function Index() {

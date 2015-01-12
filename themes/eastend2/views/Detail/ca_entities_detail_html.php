@@ -34,7 +34,7 @@
 	
 	$va_access_values	= $this->getVar('access_values');
 	
-	JavascriptLoadManager::register('smoothDivScrollVertical');
+	AssetLoadManager::register('smoothDivScrollVertical');
 
 if (!$this->request->isAjax()) {		
 ?>

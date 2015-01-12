@@ -1,6 +1,6 @@
 <?php
 /** ---------------------------------------------------------------------
- * JavascriptLoadManager.php : class to control loading of Javascript libraries
+ * AssetLoadManager.php : class to control loading of Javascript libraries
  * ----------------------------------------------------------------------
  * CollectiveAccess
  * Open-source collections management software
@@ -55,7 +55,7 @@
 	 */
 	$g_javascript_complementary = null;
 
-	class JavascriptLoadManager {
+	class AssetLoadManager {
 		# --------------------------------------------------------------------------------
 		
 		# --------------------------------------------------------------------------------
@@ -67,7 +67,7 @@
 			$g_javascript_config = Configuration::load($o_config->get('javascript_config'));
 			$g_javascript_load_list = array();
 			
-			JavascriptLoadManager::register('_default');
+			AssetLoadManager::register('_default');
 		}
 		# --------------------------------------------------------------------------------
 		/**
@@ -85,7 +85,7 @@
 		static function register($ps_package, $ps_library=null) {
 			global $g_javascript_config, $g_javascript_load_list;
 			
-			if (!$g_javascript_config) { JavascriptLoadManager::init(); }
+			if (!$g_javascript_config) { AssetLoadManager::init(); }
 			$va_packages = $g_javascript_config->getAssoc('packages');
 			if ($ps_library) {
 				// register package/library
@@ -112,7 +112,7 @@
 						$va_tmp = explode('/', $vs_path);
 						$vs_library = array_pop($va_tmp);
 						$vs_package = join('/', $va_tmp);
-						if (!JavascriptLoadManager::register($vs_package, $vs_library)) {
+						if (!AssetLoadManager::register($vs_package, $vs_library)) {
 							$vs_loaded_ok = false;
 						}
 					}
@@ -131,7 +131,7 @@
 		static function addComplementaryScript($ps_content=null) {
 			global $g_javascript_config, $g_javascript_load_list, $g_javascript_complementary;			
 
-			if (!$g_javascript_config) { JavascriptLoadManager::init(); }
+			if (!$g_javascript_config) { AssetLoadManager::init(); }
 			if (!$ps_content) return false;
 			$g_javascript_complementary[]=$ps_content;			
 			return true;
@@ -146,7 +146,7 @@
 		static function getLoadHTML($ps_baseurlpath) {
 			global $g_javascript_config, $g_javascript_load_list, $g_javascript_complementary;
 			
-			if (!$g_javascript_config) { JavascriptLoadManager::init(); }
+			if (!$g_javascript_config) { AssetLoadManager::init(); }
 			$vs_buf = '';
 			if (is_array($g_javascript_load_list)) {
 				foreach($g_javascript_load_list as $vs_lib => $vn_x) { 

@@ -184,7 +184,7 @@ if(is_array($va_hits_by_class['audio'])) {
 
 	//print $this->render('paging_controls_html.php');
 	
-	JavascriptLoadManager::register('cycle');		// load "ca.cycle" javascript library
+	AssetLoadManager::register('cycle');		// load "ca.cycle" javascript library
 ?>
 
 <script type="text/javascript">

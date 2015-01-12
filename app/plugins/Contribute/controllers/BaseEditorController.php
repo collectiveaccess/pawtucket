@@ -316,8 +316,8 @@
  		 */
  		protected function _initView($pa_options=null) {
  			// load required javascript
- 			JavascriptLoadManager::register('bundleableEditor');
- 			JavascriptLoadManager::register('imageScroller');
+ 			AssetLoadManager::register('bundleableEditor');
+ 			AssetLoadManager::register('imageScroller');
  			$t_subject = $this->opo_datamodel->getInstanceByTableName($this->ops_table_name);
  			$t_subject->purify(true);	// filter HTML for bad things like <script> tags and malformed markup
  			

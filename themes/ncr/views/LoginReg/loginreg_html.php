@@ -1,7 +1,7 @@
 <?php
 	global $g_ui_locale;
 
-	JavascriptLoadManager::register("cycle");
+	AssetLoadManager::register("cycle");
 ?>
 		<div id="loginRegFeatured">
 			<div><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/ncr/homePage/hp_2.jpg" width="500" height="625" border="0"></div>

@@ -45,9 +45,9 @@
  			$this->opo_client_services_config = Configuration::load($this->request->config->get('client_services_config'));
  			$this->view->setVar('client_services_config', $this->opo_client_services_config);
  			
-			JavascriptLoadManager::register("panel");
-			JavascriptLoadManager::register('cycle');
-			JavascriptLoadManager::register('bundleableEditor');
+			AssetLoadManager::register("panel");
+			AssetLoadManager::register('cycle');
+			AssetLoadManager::register('bundleableEditor');
  		}
  		# -------------------------------------------------------
  		/** 
@@ -92,7 +92,7 @@
  			if (!$this->request->isLoggedIn()) { $this->response->setRedirect(caNavUrl($this->request, '', 'LoginReg', 'form')); return; }
  			if (!$t_set = $this->_getSet(__CA_SET_READ_ACCESS__)) { $t_set = new ca_sets(); }
  			
- 			JavascriptLoadManager::register('sortableUI');
+ 			AssetLoadManager::register('sortableUI');
  			
  			# --- get all sets for user
  			$va_sets = caExtractValuesByUserLocale($t_set->getSets(array('table' => 'ca_objects', 'user_id' => $this->request->getUserID())));

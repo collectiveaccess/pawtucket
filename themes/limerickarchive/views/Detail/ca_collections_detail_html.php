@@ -31,8 +31,8 @@
 	$vs_title 					= $this->getVar('label');
 	
 	$va_access_values	= $this->getVar('access_values');
-	JavascriptLoadManager::register('tabUI');
-	JavascriptLoadManager::register('formUI');
+	AssetLoadManager::register('tabUI');
+	AssetLoadManager::register('formUI');
 	$qr_hits = $this->getVar('browse_results');
 	$va_items = array();
 	$va_item_classifications = array();

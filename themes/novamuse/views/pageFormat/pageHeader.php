@@ -36,7 +36,7 @@
 		<link href="<?php print $this->request->getBaseUrlPath(); ?>/app/plugins/Cataloging/themes/default/css/cataloging.css" rel="stylesheet" type="text/css" />
 <?php
 	}
-	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
+	print AssetLoadManager::getLoadHTML($this->request);
 ?>
 	<script type="text/javascript">
 		 jQuery(document).ready(function() {

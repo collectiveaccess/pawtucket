@@ -1,7 +1,7 @@
 		<div style="clear:both; height:0px;"><!-- empty --></div></div><!-- end pageArea -->
 		<div id="footer">
 			<div class="left-box">
-			<a href="#"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/footer-logo.jpg" width="113px" height="24px" alt="New York State Education Department" /></a>
+			<a href="http://www.nysed.gov"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/footer-logo.png" width="100px" height="79px" alt="New York State Education Department" /></a>
 			<p>
 				The New York State Archives is part of the Office of Cultural Education, an office 
 				of the New York State Education Department.
@@ -10,29 +10,29 @@
 		<ul>
 			<li class="list-item-one">
 				<ul>
-					<li><a href="#">About Us</a></li>
-					<li><a href="#">News</a></li>
-					<li><a href="#">Directions</a></li>
-					<li><a href="#">Contact Us</a></li>
-					<li><a href="#">Site Map</a></li>
+					<li><a href="http://www.archives.nysed.gov/about/index.shtml">About Us</a></li>
+					<li><a href="http://www.archives.nysed.gov/news/news_index.shtml">News</a></li>
+					<li><a href="http://www.archives.nysed.gov/research/res_serv_directions.shtml">Directions</a></li>
+					<li><a href="http://www.archives.nysed.gov/directories/index.shtml">Contact Us</a></li>
+					<li><a href="http://www.archives.nysed.gov/about/site-map">Site Map</a></li>
 				</ul>
 			</li>
 			<li class="list-item-two">
 				<ul>
-					<li><a href="#">New York Archives Magazine</a></li>
-					<li><a href="#">Archives Partnership Trust</a></li>
-					<li><a href="#">New York State Historical Records</a></li>
-					<li class="advisory-board"><a href="#">Advisory Board</a></li>
-					<li><a href="#">Online Catalog</a></li>
+					<li><a href="http://www.archives.nysed.gov/apt/magazine/index.shtml">New York Archives Magazine</a></li>
+					<li><a href="http://www.nysarchivestrust.org/">Archives Partnership Trust</a></li>
+					<li><a href="http://www.nyshrab.org/">New York State Historical Records</a></li>
+					<li class="advisory-board"><a href="http://www.nyshrab.org/">Advisory Board</a></li>
+					<li><a href="http://nysl.nysed.gov/uhtbin/cgisirsi.exe/x/x/0/49">Online Catalog</a></li>
 				</ul>
 			</li>
 			<li>
 				<ul>
-					<li><a href="#">Office of Cultural Education</a></li>
-					<li><a href="#">New York State Education Department</a></li>
-					<li><a href="#">New York State</a></li>
-					<li><a href="#">Privacy Policy</a></li>
-					<li><a href="#">Terms of Use</a></li>
+					<li><a href="http://www.oce.nysed.gov/">Office of Cultural Education</a></li>
+					<li><a href="http://www.nysed.gov/">New York State Education Department</a></li>
+					<li><a href="http://www.ny.gov/">New York State</a></li>
+					<li><a href="http://www.nysed.gov/privacy-policy">Privacy Policy</a></li>
+					<li><a href="http://www.nysed.gov/terms-of-use">Terms of Use</a></li>
 				</ul>
 			</li>
 		</ul>

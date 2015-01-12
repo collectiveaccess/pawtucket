@@ -96,9 +96,9 @@
 			$this->opo_browse->removeAllCriteria();
 			
  			parent::Index(true);
- 			JavascriptLoadManager::register('imageScroller');
- 			JavascriptLoadManager::register('browsable');
- 			JavascriptLoadManager::register('tabUI');
+ 			AssetLoadManager::register('imageScroller');
+ 			AssetLoadManager::register('browsable');
+ 			AssetLoadManager::register('tabUI');
  			
  			$t_object = new ca_objects();
  			$t_featured = new ca_sets();

@@ -113,7 +113,7 @@
  		# -------------------------------------------------------
  		public function index() {
 			#print $this->ops_tablename;
-			JavascriptLoadManager::register('cycle');
+			AssetLoadManager::register('cycle');
  			$this->getDefaults();
  			
  			// Remove any browse criteria previously set

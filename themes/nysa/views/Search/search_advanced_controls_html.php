@@ -65,7 +65,7 @@ if (!$this->request->isAjax()) {
 					<a href="#" onclick="jQuery('#caAdvancedSearch').submit(); return false;"><?php print _t('Search'); ?></a>
 				</div>
 				<div>
-					<a href="#" onclick="jQuery('#caAdvancedSearch input[type!=hidden]').val(''); jQuery('#caAdvancedSearch select').val('');"><?php print _t('Reset'); ?></a>
+					<a href="#" onclick="jQuery('#caAdvancedSearch input[type!=hidden]').val(''); jQuery('#caAdvancedSearch select').val(''); jQuery('#caAdvancedSearch textarea').val('');"><?php print _t('Reset'); ?></a>
 				</div>
 			</div>
 

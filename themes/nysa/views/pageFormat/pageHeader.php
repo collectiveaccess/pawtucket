@@ -27,7 +27,7 @@
 	<![endif]-->
 	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery-tileviewer/jquery.tileviewer.css" type="text/css" media="screen" />
 <?php
-	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
+	print AssetLoadManager::getLoadHTML($this->request);
 ?>
 	<script type="text/javascript">
 		 //jQuery(document).ready(function() {
@@ -143,24 +143,28 @@
 				<div id="logotext"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/NYSA_HeaderType.png" alt="New York State Archives" /></div>	
 				
 			<div class="right-box">
+				<div class="nysed"><a href="http://www.nysed.gov">New York State Education Department</a></div>
+			<div class="social">
 			<ul>
 				<li>
-					<a href="#"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/Facebook_icon.png" width="27px" height="27px" alt="" /></a>
+					<a href="https://www.facebook.com/nysarchives"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/Facebook_icon.png" width="27px" height="27px" alt="" /></a>
 				</li>
 				<li>
-					<a href="#"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/twitter_icon.png" width="27px" height="27px" alt="" /></a>
+					<a href="https://twitter.com/nysarchives"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/twitter_icon.png" width="27px" height="27px" alt="" /></a>
 				</li>
 				<li>
-					<a href="#"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/YouTubeIcon.png" width="27px" height="27px" alt="" /></a>
-				</li>
-				<li>
-					<a href="#"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/RSS_button.png" width="27px" height="27px" alt="" /></a>
+					<a href="https://www.youtube.com/user/nysarchives"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/YouTubeIcon.png" width="27px" height="27px" alt="" /></a>
 				</li>
 			</ul>
+			</div>
 			<div class="search-box">
-				<form action="#" method="get">
-					<input type="text" name="search" value="SEARCH SITE" />
-					<input class="submit" type="submit" name="s" value="" />
+				<form method="get" action="http://srv52.nysed.gov/search">
+					<input type="text" id="search" name ="q" value="" />
+					<input class="submit" type="submit" name="btnG" value/> 
+					<input type="hidden" name="site" value="Drupal_CA_XTF"/>
+					<input type="hidden" name="client" value="drupal_ca_xtf"/>
+					<input type="hidden" name="proxystylesheet" value="drupal_ca_xtf"/>
+					<input type="hidden" name="output" value="xml_no_dtd"/>
 				</form>
 			</div>
 		</div>
@@ -174,12 +178,12 @@
 ?>
 			<div id="nav">
 				<ul>
-				<li class="list-item-one"><?php print caNavLink($this->request, _t("DIGITAL COLLECTIONS"), "", "", "Browse", "Index", array("target" => "ca_objects")); ?></li>
-				<li><a href="#">RESEARCH</a></li>
-				<li><a href="#">MANAGING RECORDS</a></li>
-				<li><a href="#">GRANTS &amp; AWARDS</a></li>
-				<li><a href="#"><?php print caNavLink($this->request, _t("EDUCATION"), "", "", "Browse", "Index", array("target" => "ca_occurrences")); ?></a></li>
-				<li><a href="#">WORKSHOPS</a></li>
+				<li class="list-item-one"><a href="http://digitalcollections.archives.nysed.gov/">DIGITAL COLLECTIONS</a></li>
+				<li><a href="http://www.archives.nysed.gov/education">EDUCATION</a></li>
+				<li><a href="http://www.archives.nysed.gov/grants">GRANTS &amp; AWARDS</a></li>
+				<li><a href="http://www.archives.nysed.gov/records/index.shtml">MANAGING RECORDS</a></li>
+				<li><a href="http://www.archives.nysed.gov/research/index.shtml">RESEARCH</a></li>
+				<li><a href="http://www.archives.nysed.gov/workshops">WORKSHOPS</a></li>
 			</ul>
 			</div><!-- end nav -->
 <?php
@@ -236,11 +240,14 @@
 
 			</div><!-- end colored "Ditigal Collections" bar -->
 			<div id="menuBar">
+			<a href="http://www.archives.nysed.gov/education/index.shtml">EDUCATION HOME</a> 
 			<?php				
-				print caNavLink($this->request, _t("Browse Lesson Plans"), "", "", "Browse", "Index", array("target" => "ca_occurrences"));
 				#print caNavLink($this->request, _t("Advanced Search"), "", "", "AdvancedSearch", "Index", array("target" => "ca_occurrences"));
 				print " ".caNavLink($this->request, _t("About"), "", "", "About", "Education");
+				print caNavLink($this->request, _t("Browse Lesson Plans"), "", "", "Browse", "Index", array("target" => "ca_occurrences"));
+				print " ".caNavLink($this->request, _t("Copyright"), "", "", "About", "Copyright");
 ?>
+			<a href="http://digitalcollections.archives.nysed.gov/">VIEW ALL DOCUMENTS</a>
 			</div>
 <?php
 	}else{
@@ -262,8 +269,10 @@
 			<?php				
 				print " ".caNavLink($this->request, _t("Browse the Collection"), "", "", "Browse", "Index", array("target" => "ca_objects"));
 				print " ".caNavLink($this->request, _t("Advanced Search"), "", "", "AdvancedSearch", "Index", array("target" => "ca_objects"));
-				print " ".caNavLink($this->request, _t("About"), "", "", "About", "DigitalCollection");
+				#print " ".caNavLink($this->request, _t("About"), "", "", "About", "DigitalCollection");
+				print " ".caNavLink($this->request, _t("Copyright"), "", "", "About", "Copyright");
 ?>
+				<a href="/index.php/Browse/Index/target/ca_occurrences">LEARNING ACTIVITIES</a>
 			</div>
 <?php
 	

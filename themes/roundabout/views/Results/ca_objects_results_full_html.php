@@ -27,7 +27,7 @@
  * ----------------------------------------------------------------------
  */
  
-JavascriptLoadManager::register('jquery', 'expander'); 	
+AssetLoadManager::register('jquery', 'expander'); 	
 $vo_result 				= $this->getVar('result');
 $vn_items_per_page		= $this->getVar('current_items_per_page');
 $va_access_values 		= $this->getVar('access_values');

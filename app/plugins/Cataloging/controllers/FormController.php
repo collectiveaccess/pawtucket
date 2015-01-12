@@ -80,7 +80,7 @@
  			
  			CatalogingPlugin::setUIInfo($this->ops_ui_code, $this->opa_ui_info);
  			
- 			JavascriptLoadManager::register('panel');
+ 			AssetLoadManager::register('panel');
  			MetaTagManager::addLink('stylesheet', $po_request->getBaseUrlPath()."/app/plugins/Cataloging/themes/".$this->ops_theme."/css/cataloging.css",'text/css');
  			
  			$this->request->setParameter('dont_set_pawtucket2_last_page', '1');	// Setting this parameter ensures that the "last page" we (may) redirect to after submission isn't the Cataloging form itself

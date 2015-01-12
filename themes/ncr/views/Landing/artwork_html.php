@@ -1,5 +1,5 @@
 <?php
-	JavascriptLoadManager::register("cycle");
+	AssetLoadManager::register("cycle");
 ?>
 <div id="pageHeading"><img src='<?php print $this->request->getThemeUrlPath(); ?>/graphics/ncr/t_artworks.gif' width='111' height='23' border='0'></div><!-- end pageHeading -->
 <?php

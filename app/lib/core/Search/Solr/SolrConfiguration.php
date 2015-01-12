@@ -53,7 +53,11 @@ class SolrConfiguration {
 		$po_search_config = Configuration::load($po_app_config->get("search_config"));
 		$po_search_indexing_config = Configuration::load($po_search_config->get("search_indexing_config"));
 
-		$ps_solr_home_dir = $po_search_config->get('search_solr_home_dir');
+		if(defined('__CA_SOLR_HOME_DIR__') && (strlen(__CA_SOLR_HOME_DIR__)>0)) {
+			$ps_solr_home_dir = __CA_SOLR_HOME_DIR__;
+		} else {
+			$ps_solr_home_dir = $po_search_config->get('search_solr_home_dir');
+		}
 
 		$po_datamodel = Datamodel::load();
 		$po_search_base = new SearchBase();
@@ -232,6 +236,7 @@ class SolrConfiguration {
 
 					if(is_array($va_table_fields)){
 						foreach($va_table_fields as $vs_field_name => $va_field_options){
+							$vb_multival = false;
 							
 							if(in_array("STORE",$va_field_options)){
 								$vb_field_is_stored = true;
@@ -284,6 +289,8 @@ class SolrConfiguration {
 											$va_field_options['type'] = null;
 											break;
 									}
+
+									$vb_multival = ($t_instance instanceof BaseModelWithAttributes) && ($vs_field_name == $t_instance->getTypeFieldName());
 								}
 								$vs_type = (isset($va_field_options['type']) && $va_field_options['type']) ? $va_field_options['type'] : 'text';
 							}
@@ -292,6 +299,7 @@ class SolrConfiguration {
 
 							$vs_field_schema.='" indexed="true" ';
 							$vb_field_is_stored ? $vs_field_schema.='stored="true" ' : $vs_field_schema.='stored="false" ';
+							if($vb_multival) { $vs_field_schema.='multiValued="true" '; }
 							$vs_field_schema.='/>'.SolrConfiguration::nl();
 						}
 					}

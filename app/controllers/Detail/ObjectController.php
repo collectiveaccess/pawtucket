@@ -56,7 +56,7 @@
  		 * Displays the basic info for an object
  		 */ 
  		public function Show($pa_options=null) {
- 			JavascriptLoadManager::register('panel');
+ 			AssetLoadManager::register('panel');
  			parent::Show($pa_options);
  			
  			// redirect user if not logged in

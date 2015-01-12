@@ -39,7 +39,7 @@
 	$va_labels = $t_object->getPreferredDisplayLabelsForIDs(array_keys($va_random_items));
 	$va_media = $t_object->getPrimaryMediaForIDs(array_keys($va_random_items), array('small', 'thumbnail', 'preview','medium', 'widepreview'), array('checkAccess' => $this->getVar('access_values')));
 
-	JavascriptLoadManager::register('cycle');
+	AssetLoadManager::register('cycle');
 	
 	if (!$this->request->isAjax()) {
 		if ($this->getVar('browse_selector')) {

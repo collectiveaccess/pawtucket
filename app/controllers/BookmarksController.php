@@ -73,7 +73,7 @@
  			if (!$this->request->isLoggedIn()) { $this->response->setRedirect(caNavUrl($this->request, '', 'LoginReg', 'form')); return; }
  			if (!$t_folder = $this->_getFolder()) { $t_folder = new ca_bookmark_folders(); }
  			
- 			JavascriptLoadManager::register('sortableUI');
+ 			AssetLoadManager::register('sortableUI');
  			
  			# --- get all folders for user
  			$va_folders = $t_folder->getFolders($this->request->getUserID());

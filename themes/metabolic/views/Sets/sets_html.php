@@ -487,7 +487,7 @@
 		}
 <?php
 		if($this->request->isLoggedIn()){
-			JavascriptLoadManager::register('tokeninput');
+			AssetLoadManager::register('tokeninput');
 ?>
 			jQuery('#to_email').tokenInput('<?php print caNavUrl($this->request, 'Share/lookup', 'User', 'Get'); ?>', {
 				onResult: function (results) {
