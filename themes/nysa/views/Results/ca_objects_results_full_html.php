@@ -54,9 +54,36 @@ if($vo_result) {
 		$va_labels = $vo_result->getDisplayLabels($this->request);
 		$vs_caption = join('<br/>', $va_labels);
 		print "<div class='searchFullTitle'>".caNavLink($this->request, $vs_caption, '', 'Detail', 'Object', 'Show', array('object_id' => $vn_object_id))."</div>";
-		print "<div class='searchFullTextTitle'>"._t("ID")."</div>\n";
+		print "<div class='searchFullTextTitle'>"._t("Identifier")."</div>\n";
 		print "<div class='searchFullTextTextBlock'>".$vo_result->get("ca_objects.idno")."</div>";
-		print "</div><!-- END searchFullText -->\n";
+		print "<div class='searchFullTextTitle'>"._t("Repository")."</div>\n";
+		print "<div class='searchFullTextTextBlock'>".$vo_result->get("ca_objects.repository", array("convertCodesToDisplayText" => true))."</div>";
+#		print "<div class='searchFullTextTitle'>"._t("Description")."</div>\n";
+#		print "<div class='searchFullTextTextBlock'>".$vo_result->get("ca_objects.description")."</div>";
+		$myDescription = $vo_result->get("ca_objects.description");
+#		print $myDescription;
+		if (strlen($myDescription) > 0) {
+			print "<div class='searchFullTextTitle'>"._t("Description")."</div>\n";
+			if (strlen($myDescription) > 150) {
+				print "<div class='searchFullTextTextBlock'><div id='descriptiontext'>".substr($myDescription,0,150)."...</div></div>";
+			} else {
+				print "<div class='searchFullTextTextBlock'><div id='descriptiontext'>".$myDescription."</div></div>";
+			}
+#
+#					<script type="text/javascript">
+#						jQuery(document).ready(function() {
+#							jQuery('#descriptiontext').expander({
+#								slicePoint: 100,
+#								expandText: '<?php print _t('[more]'); ',
+#								userCollapse: false
+#							});
+#						});
+#					</script>
+
+		}
+
+		print "</div>
+		<!-- END searchFullText -->\n";
 		$vn_item_count++;
 		if(!$vo_result->isLastHit()){
 			print "<div class='divide' style='clear:left;'><!-- empty --></div>\n";

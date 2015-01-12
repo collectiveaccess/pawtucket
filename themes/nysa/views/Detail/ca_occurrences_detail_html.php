@@ -112,15 +112,21 @@ if (!$this->request->isAjax()) {
 			}else{
 				print "<div class='unit'>".caNavLink($this->request, _t("Download PDF"), 'cabutton cabuttonSmall', 'nysa', 'Download', 'Full', array('occurrence_id' => $vn_occurrence_id))."&nbsp;&nbsp;&nbsp;".caNavLink($this->request, _t("Customize and Download PDF"), 'cabutton cabuttonSmall', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id, 'mode' => 'print'))."</div><!-- end unit -->";
 			}
+                  if($ps_mode == "print"){
+                        print "<div class='unit'><input type='checkbox' checked onClick='toggle(this)'/> <b>Select All</b><br/></div><!-- end unit -->";
+                  }
+			print "<input type='button' id='hideshow' value='hide/show detail'>";
+			print "<div id='toptop' hidden>";	  
+				  
 			if($ps_mode == "print"){
-				print "<div class='unit'><input type='checkbox' checked name='print_fields[]' value='type'> <b>"._t("Lesson type")."</b>: ".unicode_ucfirst($t_occurrence->getTypeName())."</div><!-- end unit -->";
+				print "<div class='unit'><input type='checkbox' checked name='print_fields[]' value='type'> <b>"._t("Lesson type")."</b>:<br /> ".unicode_ucfirst($t_occurrence->getTypeName())."</div><!-- end unit -->";
 			}else{
-				print "<div class='unit'><b>"._t("Lesson type")."</b>: ".unicode_ucfirst($t_occurrence->getTypeName())."</div><!-- end unit -->";
+				print "<div class='unit'><b>"._t("Lesson type")."</b>:<br /> ".unicode_ucfirst($t_occurrence->getTypeName())."</div><!-- end unit -->";
 			}
 			# --- attributes in label: value format
-			$va_attributes = array("gradelevel", "lessonTopic", "learning_standard", "commonCore", "skills", "EdProject", "funder");
+			$va_attributes = array("gradelevel", "lessonTopic", "learning_standard", "commonCore", "skills", "social_studies_practices", "EdProject", "funder");
 			# --- which of these attributes can be edited when customizing?
-			$va_edit_attributes = array("lessonTopic", "learning_standard", "commonCore", "skills");
+			$va_edit_attributes = array("lessonTopic", "learning_standard", "commonCore", "skills", "social_studies_practices");
 			if(is_array($va_attributes) && (sizeof($va_attributes) > 0)){
 				foreach($va_attributes as $vs_attribute_code){
 					if($va_values = $t_occurrence->get("ca_occurrences.{$vs_attribute_code}", array("convertCodesToDisplayText" => false, "returnAsArray" => true))){
@@ -130,21 +136,35 @@ if (!$this->request->isAjax()) {
 								# --- display hierarchy path for "lessonTopic", "learning_standard", "commonCore"
 								if(in_array($vs_attribute_code, array("lessonTopic", "learning_standard", "commonCore"))){
 									$vs_tmp = "";
+									$vs_url = "";
 									$va_hierarchy_ancestors = $t_list_items->getHierarchyAncestors($va_value[$vs_attribute_code], array("idsOnly" => true, "includeSelf" => true));
 									if(is_array($va_hierarchy_ancestors) && sizeof($va_hierarchy_ancestors)){
 										# --- remove the root - we don't want to display it
 										$va_root = array_pop($va_hierarchy_ancestors);
 										if(is_array($va_hierarchy_ancestors) && sizeof($va_hierarchy_ancestors)){
 											foreach($va_hierarchy_ancestors as $vni => $vn_list_item_id){
-												$vs_tmp = $t_lists->getItemForDisplayByItemID($vn_list_item_id).(($vni > 0) ? " > ".$vs_tmp : "");
+												$vs_url = $t_lists->getItemUrlByItemID($vn_list_item_id);
+												if($vs_url == "") {
+													$vs_tmp = $t_lists->getItemForDisplayByItemID($vn_list_item_id).(($vni > 0) ? " > ".$vs_tmp : "");
+												} else {
+													$vs_tmp = "<a href=\"".$vs_url."\">".$t_lists->getItemForDisplayByItemID($vn_list_item_id).(($vni > 0) ? " > ".$vs_tmp : "")."</a>";
+												}
 											}
-											$va_output_parts[] = $vs_tmp;
+											if($ps_mode != "print"){
+												$va_output_parts[] = "<br/>".$vs_tmp;
+											} else {
+												$va_output_parts[] = $vs_tmp;
+											}
 										}
 									}
 								}else{							
 									$vs_value = "";
 									if($vs_value = trim($va_value[$vs_attribute_code])){
-										$va_output_parts[] = $t_lists->getItemForDisplayByItemID($vs_value);
+											if($ps_mode != "print"){
+												$va_output_parts[] = "<br/>".$t_lists->getItemForDisplayByItemID($vs_value);
+											} else {
+												$va_output_parts[] = $t_lists->getItemForDisplayByItemID($vs_value);
+											}
 									}
 								}
 							}
@@ -168,6 +188,7 @@ if (!$this->request->isAjax()) {
 					}
 				}
 			}
+			print "</div>"; #end toptop div
 			print "<hr>";
 			$va_options = array();
 			if($ps_mode == "print"){
@@ -218,7 +239,12 @@ if (!$this->request->isAjax()) {
 			if(sizeof($va_related_objects_links)){
 				$t_objects_x_occurrences = new ca_objects_x_occurrences();
 				$t_object = new ca_objects();
+				$count = 1;
 				foreach($va_related_objects_links as $vn_relation_id){
+					if (sizeof($va_related_objects_links) > 1) {
+						print "<strong>Document ".$count++;
+						print "</strong>";
+					}
 					$t_objects_x_occurrences->load($vn_relation_id);
 					$va_reps = $t_objects_x_occurrences->get("ca_objects_x_occurrences.representation_list", array("returnAsArray" => true, 'idsOnly' => true));
 					
@@ -236,7 +262,13 @@ if (!$this->request->isAjax()) {
 							print "</div><!-- end unit -->";
 						}
 					}
-					print "<div class='unit' style='font-size:11px; font-style:italic;'>".caNavLink($this->request, $t_objects_x_occurrences->get("ca_objects.preferred_labels.name"), '', 'Detail', 'Object', 'Show', array('object_id' => $t_objects_x_occurrences->get("ca_objects.object_id")));
+					print "<div class='unit' style='font-size:11px;'>[click to enlarge]</div>";
+					if ($t_objects_x_occurrences->get("ca_objects.access") == "1") {
+						print "<div class='unit' style='font-size:11px; font-style:italic;'>".caNavLink($this->request, $t_objects_x_occurrences->get("ca_objects.preferred_labels.name"), '', 'Detail', 'Object', 'Show', array('object_id' => $t_objects_x_occurrences->get("ca_objects.object_id")));
+					} else {
+						print "<div class='unit' style='font-size:11px; font-style:italic;'>";
+						print $t_objects_x_occurrences->get("ca_objects.preferred_labels.name");
+					}
 					if($va_dates = $t_objects_x_occurrences->get("ca_objects.date", array("returnAsArray" => true))){
 						foreach($va_dates as $va_date_info){
 							if($va_date_info["dc_dates_types"] == $vn_original_date){
@@ -251,7 +283,7 @@ if (!$this->request->isAjax()) {
 					print "</div>";
 					
 					if($ps_mode != "print"){
-						print "<div class='unit'>".caNavLink($this->request, _t("Create a Worksheet for This Document"), '', 'nysa', 'Download', 'BlankWorksheet', array('occurrence_id' => $vn_occurrence_id, 'relation_id' => $vn_relation_id))."</div><!-- end unit -->";
+						print "<div class='unit'>".caNavLink($this->request, _t("Create a New Worksheet for This Document"), '', 'nysa', 'Download', 'BlankWorksheet', array('occurrence_id' => $vn_occurrence_id, 'relation_id' => $vn_relation_id))."</div><!-- end unit -->";
 					}
 					# --- attributes on objects_x_occurrences record
 					$va_attributes = array("caption", "transcription", "translation", "description", "questions");
@@ -284,6 +316,9 @@ if (!$this->request->isAjax()) {
 								print "</div><!-- end unit -->";
 							}
 						}
+					}
+					if (sizeof($va_related_objects_links) > 1) {
+						print "<div class='divide' style='clear:left;'><!-- empty --></div>\n";
 					}
 				}
 			}
@@ -331,6 +366,21 @@ if (!$this->request->isAjax()) {
 			}
 ?>
 </div><!-- end detailBody -->
+<script language="javascript">
+    function toggle(source) {
+        var inputs = document.getElementsByTagName('input');
+        for(var i=0;i<inputs.length;i++) {
+            if(inputs[i].getAttribute('type')=='checkbox') {
+                inputs[i].checked = source.checked;
+            }
+        }
+    }
+	jQuery(document).ready(function() {
+		jQuery('#hideshow').live('click', function(event) {
+			jQuery('#toptop').toggle('show');
+		});
+	});
+</script>
 <?php
 }
 ?>

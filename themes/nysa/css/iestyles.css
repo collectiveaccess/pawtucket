@@ -1,0 +1,15 @@
+/* IE images that are links have blue boxes around them.  Couldn't remove the order without it messing up the layout, so I made the borders the color of the background instead */
+/*white border for header and page body elements*/
+a img {border-color:#FFFFFF;
+}
+
+/*putty color for the NYSED logo in the footer*/
+.left-box a img {border-color: rgb(230, 229, 220);
+}
+
+/*Right column of home page text had alignment issues.  Adjusted #hpText and #hpBrowse to get things back in line.*/
+#hpText {margin-left:0px;}
+
+#hpBrowse ul {margin-left:0;
+}
+

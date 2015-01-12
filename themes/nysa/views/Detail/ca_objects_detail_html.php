@@ -228,27 +228,11 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 				
 <?php
 			}
-			# --- identifier
-			if($t_object->get('idno')){
-				print "<div class='unit'><b>"._t("Identifier").":</b> ".$t_object->get('idno')."</div><!-- end unit -->";
-			}
-			# --- parent hierarchy info
-			if($t_object->get('parent_id')){
-				print "<div class='unit'><b>"._t("Part Of")."</b>: ".caNavLink($this->request, $t_object->get("ca_objects.parent.preferred_labels.name"), '', 'Detail', 'Object', 'Show', array('object_id' => $t_object->get('parent_id')))."</div>";
-			}
-			# --- attributes
-			$va_attributes = $this->request->config->get('ca_objects_detail_display_attributes');
-			if(is_array($va_attributes) && (sizeof($va_attributes) > 0)){
-				foreach($va_attributes as $vs_attribute_code){
-					if($vs_value = $t_object->get("ca_objects.{$vs_attribute_code}", array('convertCodesToDisplayText' => true, 'delimiter' => ', '))){
-						print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.{$vs_attribute_code}").":</b> {$vs_value}</div><!-- end unit -->";
-					}
-				}
-			}
+
 			# --- description
 			if($this->request->config->get('ca_objects_description_attribute')){
 				if($vs_description_text = $t_object->get("ca_objects.".$this->request->config->get('ca_objects_description_attribute'))){
-					print "<div class='unit'><div id='description'><b>".$t_object->getDisplayLabel("ca_objects.".$this->request->config->get('ca_objects_description_attribute')).":</b> {$vs_description_text}</div></div><!-- end unit -->";				
+					print "<div class='unit'><div id='description'> {$vs_description_text}</div></div><!-- end unit -->";				
 ?>
 					<script type="text/javascript">
 						jQuery(document).ready(function() {
@@ -262,6 +246,98 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 <?php
 				}
 			}
+
+			# --- identifier
+			if($t_object->get('idno')){
+				print "<div class='unit'><b>"._t("Identifier").":</b> ".$t_object->get('idno')."</div><!-- end unit -->";
+			}
+			
+			# --- parent hierarchy info
+			if($t_object->get('parent_id')){
+				print "<div class='unit'><b>"._t("Part Of")."</b>: ".caNavLink($this->request, $t_object->get("ca_objects.parent.preferred_labels.name"), '', 'Detail', 'Object', 'Show', array('object_id' => $t_object->get('parent_id')))."</div>";
+			}
+			# --- attributes
+			$va_attributes = $this->request->config->get('ca_objects_detail_display_attributes');
+			if(is_array($va_attributes) && (sizeof($va_attributes) > 0)){
+				foreach($va_attributes as $vs_attribute_code){
+					if($vs_value = $t_object->get("ca_objects.{$vs_attribute_code}", array('convertCodesToDisplayText' => true, 'delimiter' => ',<br/> '))){
+#						print $vs_attribute_code;
+						if($vs_attribute_code == "date") {
+						
+							$myArray = preg_split("/,<br\/>/", $vs_value, -1, PREG_SPLIT_NO_EMPTY);
+							$myString = "";
+							$tempString = "";
+							$count = 0;
+							foreach ($myArray as $datePart) {
+								if($count%2==1) {
+									if (preg_match("/Date Original/", $datePart)) {
+										$myString = $tempString;
+									} else if (preg_match("/Date Original/", $tempString)) {
+										$myString = $datePart;
+									}
+								}
+								$tempString = $datePart;
+								$count++;
+							}
+						
+						
+#							preg_match("/[\s\w,]*<br\/>\s*Date Original/", $vs_value, $matches);
+#							preg_match("/[\s\w]*/","$matches[0]", $myDate);
+#						print "[".$vs_value."]";
+#							if(strlen($myDate) > 0) {
+#								print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.{$vs_attribute_code}").":</b> {$myDate[0]}</div><!-- end unit -->";
+#							}
+							if(strlen($myString) > 0) {
+								print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.{$vs_attribute_code}").":</b> {$myString}</div><!-- end unit -->";
+							}
+						}
+						else if($vs_attribute_code == "rightsList") {
+							if ($vs_value == "New York State Archives") {
+								print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.{$vs_attribute_code}").":</b> This image is provided for education and research purposes. Rights may be reserved. Responsibility for securing permissions to distribute, publish, reproduce or other use rest with the user. For additional information see our <a href='/index.php/About/Copyright'>Copyright and Use Statement</a>.</div><!-- end unit -->";
+							} else {
+								print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.{$vs_attribute_code}").":</b> This record is not part of the New York State Archives' collection and is presented on our project partner's behalf for educational use only.  Please contact the home repository for information on copyright and reproductions.</div><!-- end unit -->";
+							}
+						}
+						else if($vs_attribute_code == "relation" or $vs_attribute_code == "alternateID") {
+							
+							$myArray = preg_split("/,<br\/>/", $vs_value, -1, PREG_SPLIT_NO_EMPTY);
+							$myString = "";
+							$tempString = "";
+							$count = 0;
+							foreach ($myArray as $rel) {
+								if ($count%2==1) {
+									$myString = $myString."<span class='labelName'>".$rel.":</span> ".$tempString;
+									if($count+1 < sizeof($myArray)) {
+										$myString = $myString.",<br/>";
+									}
+								}
+								$tempString = $rel;
+								$count++;
+							}
+							
+							if (strlen($vs_value) > 0) {
+								print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.{$vs_attribute_code}").":</b> {$myString}</div><!-- end unit -->";
+							}
+						}
+						else {
+							if (strlen($vs_value) > 0) {
+								print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.{$vs_attribute_code}").":</b> {$vs_value}</div><!-- end unit -->";
+							}
+						}
+					}
+				}
+			}
+
+			# --- repository
+			# --- Date
+			# --- Contributor
+			# --- Language
+			# --- Source
+			# --- Rights
+			# --- Relation
+			
+			# description came from here
+			
 			# --- child hierarchy info
 			$va_children = $t_object->get("ca_objects.children.preferred_labels", array('returnAsArray' => 1, 'checkAccess' => $va_access_values));
 			if(sizeof($va_children) > 0){

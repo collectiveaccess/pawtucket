@@ -184,10 +184,21 @@ a.caption:hover{
 #header .right-box {
 	float: right;
 	width: 253px;
-	padding: 43px 30px 0;
+	padding: 22px 30px 0;
 	font-size:12px;
 	font-family: 'Muli', sans-serif;
 }
+#header .right-box .nysed{font-size:1.2em;
+float:right;
+}
+
+#header .right-box .nysed a{color:#9B9386; 
+font-family: "Helvetica Neue", "Helvetica", Helvetica, Arial, sans-serif;
+}
+
+#header .right-box .social img {margin:5px 0 0 0;
+}
+
 #header .right-box ul {
 	float: right;
 	list-style:none;
@@ -205,7 +216,7 @@ a.caption:hover{
 	width: 253px;
 	height: 24px;
 	background-image: url('../graphics/search-bg.jpg');
-	margin: 16px 0 0;
+	margin: 11px 0 0;
 }
 #header .right-box .search-box input {
 	float: left;
@@ -453,19 +464,16 @@ font-size:13px;
 }
 
 #footer .left-box {
-	width: 247px;
+	width: 272px;
 	float: left;
-	padding: 0 0 0 4px;
+	padding: 0 20px 0 4px;
 }
 
 #footer .left-box img {
-	display: block;
+	float:left;
 }
 #footer .left-box p {	
-	padding: 13px 55px 0 0;
 	line-height: 14px;
-	float: left;
-	width: 192px;
 	font-size:12px;
 	font-weight:400;
 	font-family: 'Muli', sans-serif;
@@ -495,10 +503,10 @@ font-size:13px;
 	font-family: 'Muli', sans-serif;
 }
 #footer ul li.list-item-one {
-	width: 155px;
+	width: 120px;
 }
 #footer ul li.list-item-two {
-	width: 240px;
+	width: 245px;
 }
 #footer ul li li {
 	background-image: none;
@@ -588,6 +596,7 @@ div.searchlight-results div.searchlight-selected {
 	margin-top: 10px;
 	width: 360px;
 	text-align: left;
+	font-style:normal!important;
 }
 .tooltipText{ /* used in gallery */
 	text-align:center;
@@ -714,6 +723,8 @@ padding-top:0;
 	width:100%;
 	height:120px;
 }
+
+
 .tooltipCaption {
 	padding: 5px;
 	text-align: center;
@@ -851,6 +862,11 @@ margin-bottom:0;
 	outline-width:0px;
 	height:auto;
 }
+#detailBody .unit .labelName {
+font-weight:bold;
+color:#666666;
+}
+
 #mainContent h2 {margin: 15px 0 10px 0;
 padding:0;
 }
@@ -1105,7 +1121,7 @@ padding:0;
 /*  ADVANCED SEARCH FORM */
 /* ------------------------------------- */
 #caAdvancedSearchForm{
-	background-color: #E6E6E6;
+	background-color: rgb(230, 229, 220);
 	padding:10px 10px 0px 10px;
 	margin:0px 0px 15px 0px;
 	border-radius: 10px;
@@ -1119,14 +1135,15 @@ padding:0;
 	-webkit-border-top-right-radius: 10px;
 }
 #caAdvancedSearchForm input {
-	font-size:11px;
+	font-size:12px;
 	font-weight: normal;
 	padding: 0px 2px 0px 2px;
 	margin: 0px;
 	border: 1px solid rgb(126, 117, 105);
 }
 #caAdvancedSearchForm input[type="text"] {
-	font-size:11px;
+	height:14px;
+	font-size:12px;
 	font-weight: normal;
 	padding: 2px 2px 2px 2px;
 	margin: 0px;
@@ -1135,16 +1152,35 @@ padding:0;
 	outline-width:0px;
 }
 #caAdvancedSearchForm textarea {
-	font-size:11px;
+	height:16px;
+	font-size:12px;
 	font-weight: normal;
-	padding: 0px 2px 0px 2px;
+	padding: 2px 2px 2px 2px;
 	margin: 0px;
 	border: 1px solid rgb(126, 117, 105);
 	outline-style:none;
 	outline-width:0px;
+	
 }
+
+#caAdvancedSearchForm select#ca_objects_type_id {
+	width: 406px !important;
+	height: 21px !important;
+}
+
+#caAdvancedSearchForm textarea#ca_objects_description {
+	width: 400px !important;
+	height: 15px !important;
+}
+
+#caAdvancedSearchForm select#ca_objects_repository {
+	width: 406px !important;
+	height: 21px !important;
+}
+
 #caAdvancedSearchForm input[type="textarea"] {
-	font-size:11px;
+	height: 14px;
+	font-size:12px;
 	font-weight: normal;
 	padding: 2px 2px 2px 2px;
 	margin: 0px;
@@ -1331,7 +1367,7 @@ td.advSearchElement{
 	float:left;
 	width:630px;
 	text-align:left;
-	margin: 10px 0px 0px 0px;
+	margin: 10px 0px 10px 0px;
 }
 .searchFullTitle, .searchFullTitle a{
 	font-size:14px;
@@ -1545,7 +1581,7 @@ input.addItemToSetControlInThumbnails {
 	margin-bottom:10px;
 	size:14px;
 }
-#entityResults div, #collectionResults div, #occurrenceResults div, #placeResults div{
+#entityResults div, #collectionResults div, #placeResults div{
 	padding:5px;
 }
 #entityResults a, #collectionResults a, #occurrenceResults a, #placeResults a{
@@ -1553,11 +1589,14 @@ input.addItemToSetControlInThumbnails {
 	size:14px;
 }
 #entityResults .resultBg, #collectionResults .resultBg, #occurrenceResults .resultBg, #placeResults .resultBg{
-	background-color: #F2F2F2;
+	background-color: ;
 }
 #occurrenceResults .occThumb{
+	width: 250px;
 	float:left;
-	margin:0px 10px 10px 0px;
+	margin:10px 20px 10px 0px;
+	text-align:center;
+	position:relative;
 }
 
 
@@ -2046,13 +2085,13 @@ input.addItemToSetControlInThumbnails {
 	top: 100px; 
 	left: 50%; 
 	border: 3px solid #000000; 
-	background-color: #FFFFFF; 
+	background-color: rgb(230, 229, 220); 
 	width: 900px; 
 	height: 400px; 
 	display: none;
 	margin-left: -465px;
 	padding: 10px;
-	background-image: url("../graphics/bgStripeBW.gif");
+	/*background-image: url("../graphics/bgStripeBW.gif");*/
 	border-radius: 10px;
 	-moz-border-radius-bottomleft: 10px; 
 	-webkit-border-bottom-left-radius: 10px;
@@ -2086,7 +2125,7 @@ input.addItemToSetControlInThumbnails {
 .browseSelectPanel #title{ /*  used in browse and details with browse */
 	font-size: 34px;
 	font-weight:bold;
-	text-transform:uppercase;
+	text-transform: capitalize;
 	color:#333333;
 	line-height:1em;
 	padding-bottom:5px;

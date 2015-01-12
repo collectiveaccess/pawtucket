@@ -76,6 +76,8 @@
 <?php
 					}
 ?>
+						<li><a href="/index.php/Browse/Index/target/ca_collections">State Agencies</a>
+						</li>
 				</ul>
 				</div>
 			</div><!-- end hpBrowse-->

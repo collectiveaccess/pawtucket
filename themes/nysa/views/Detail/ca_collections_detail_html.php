@@ -78,7 +78,28 @@ if (!$this->request->isAjax()) {
 			if(is_array($va_attributes) && (sizeof($va_attributes) > 0)){
 				foreach($va_attributes as $vs_attribute_code){
 					if($vs_value = $t_collection->get("ca_collections.{$vs_attribute_code}", array('convertCodesToDisplayText' => true, 'delimiter' => ', '))){
-						print "<div class='unit'><b>".$t_collection->getDisplayLabel("ca_collections.{$vs_attribute_code}").":</b> {$vs_value}</div><!-- end unit -->";
+						if($vs_attribute_code == "alternateID" or $vs_attribute_code == "relation") {
+							
+							$myArray = preg_split("/,/", $vs_value, -1, PREG_SPLIT_NO_EMPTY);
+							$myString = "";
+							$tempString = "";
+							$count = 0;
+							foreach ($myArray as $rel) {
+								if ($count%2==1) {
+									$myString = "<span class='labelName'>".$myString.$rel.":</span> ".$tempString;
+									if($count+1 < sizeof($myArray)) {
+										$myString = $myString.",<br/>";
+									}
+								}
+								$tempString = $rel;
+								$count++;
+							}
+							
+							print "<div class='unit'><b>".$t_collection->getDisplayLabel("ca_collections.{$vs_attribute_code}").":</b> {$myString}</div><!-- end unit -->";
+						}
+						else {
+							print "<div class='unit'><b>".$t_collection->getDisplayLabel("ca_collections.{$vs_attribute_code}").":</b> {$vs_value}</div><!-- end unit -->";
+						}
 					}
 				}
 			}
@@ -168,14 +189,14 @@ if (!$this->request->isAjax()) {
 				print "</div><!-- end unit -->";
 			}
 			# --- vocabulary terms
-			$va_terms = $t_collection->get("ca_list_items", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
-			if(sizeof($va_terms) > 0){
-				print "<div class='unit'><h3>"._t("Subject").((sizeof($va_terms) > 1) ? "s" : "")."</h3>";
-				foreach($va_terms as $va_term_info){
-					print "<div>".caNavLink($this->request, $va_term_info['label'], '', '', 'Search', 'Index', array('search' => $va_term_info['name_singular']))."</div>";
-				}
-				print "</div><!-- end unit -->";
-			}		
+			#$va_terms = $t_collection->get("ca_list_items", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
+			#if(sizeof($va_terms) > 0){
+				#print "<div class='unit'><h3>"._t("Subject").((sizeof($va_terms) > 1) ? "s" : "")."</h3>";
+				#foreach($va_terms as $va_term_info){
+				#	print "<div>".caNavLink($this->request, $va_term_info['label'], '', '', 'Search', 'Index', array('search' => $va_term_info['name_singular']))."</div>";
+				#}
+				#print "</div><!-- end unit -->";
+			#}		
 			
 ?>
 
