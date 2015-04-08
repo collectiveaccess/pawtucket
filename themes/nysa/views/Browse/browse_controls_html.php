@@ -38,17 +38,28 @@
 	
 	$t_object = new ca_objects();
 	$t_occurrence = new ca_occurrences();
-	$va_random_items = array();
-	if ($vs_browse_target == "ca_objects") {
-		$va_random_items = $t_object->getRandomItems(10, array('checkAccess' => $this->getVar('access_values'), 'hasRepresentations' => 1));
-	} else if ($vs_browse_target == "ca_collections") {
-		$va_random_items = $t_occurrence->getRandomItems(10, array('checkAccess' => $this->getVar('access_values'), 'hasRepresentations' => 1));
-	}
-	$va_labels = array();
-	$va_media = array();
-	if(is_array($va_random_items) && sizeof($va_random_items)){
-		$va_labels = $t_object->getPreferredDisplayLabelsForIDs(array_keys($va_random_items));
-		$va_media = $t_object->getPrimaryMediaForIDs(array_keys($va_random_items), array('medium'), array('checkAccess' => $this->getVar('access_values')));
+	if (sizeof($va_criteria) == 0) {
+		$va_random_items = array();
+		if ($vs_browse_target == "ca_objects") {
+			$va_random_items = $t_object->getRandomItems(10, array('checkAccess' => $this->getVar('access_values'), 'hasRepresentations' => 1));
+		} elseif($vs_browse_target == "ca_occurrences"){
+			#$va_random_items = $t_occurrence->getRandomItems(10, array('checkAccess' => $this->getVar('access_values'), 'restrictToTypes' => array("CRQ", "DBQ", "essay", "docset")));
+			$va_random_items = $t_occurrence->getRandomItems(10, array('checkAccess' => $this->getVar('access_values')));
+		} else if ($vs_browse_target == "ca_collections") {
+			$va_random_items = $t_occurrence->getRandomItems(10, array('checkAccess' => $this->getVar('access_values'), 'hasRepresentations' => 1));
+		}
+		$va_labels = array();
+		$va_media = array();
+		if(is_array($va_random_items) && sizeof($va_random_items)){
+			if ($vs_browse_target == "ca_objects") {
+				$va_labels = $t_object->getPreferredDisplayLabelsForIDs(array_keys($va_random_items));
+				$va_media = $t_object->getPrimaryMediaForIDs(array_keys($va_random_items), array('medium'), array('checkAccess' => $this->getVar('access_values')));
+			}elseif($vs_browse_target == "ca_occurrences"){
+				#$va_labels = $t_occurrence->getPreferredDisplayLabelsForIDs(array_keys($va_random_items));
+				$vo_random_occs = caMakeSearchResult("ca_occurrences", array_keys($va_random_items));
+				#$va_media = $t_object->getPrimaryMediaForIDs(array_keys($va_random_items), array('medium'), array('checkAccess' => $this->getVar('access_values')));
+			}
+		}
 	}
 	AssetLoadManager::register('cycle');
 	
@@ -139,20 +150,30 @@
 				}
 				if(is_array($va_random_items) && sizeof($va_random_items)){
 					print "<div id='browseSlideshow'>";
-					foreach($va_random_items as $vn_object_id => $va_object_info) {
-						$randomImageHeight = $va_media[$va_object_info['object_id']]["info"]["medium"]["HEIGHT"];
-						$randomImagePadding = ((410 - $randomImageHeight) / 2);
-						$va_object_info['title'] = $va_labels[$vn_object_id];
-						$va_object_info['media'] = $va_media[$vn_object_id];
-						$va_random_items[$vn_object_id] = $va_object_info;
-						if ($vs_browse_target=='ca_occurrences') {
-							print "<div id='browseRandomImage' style='padding:".$randomImagePadding."px 0px ".$randomImagePadding."px 0px;'>";
-							print caNavLink($this->request, $va_media[$va_object_info['object_id']]["tags"]["medium"], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id));
-							print "<div id='browseRandomCaption'>".caNavLink($this->request, $va_object_info['title'], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vn_occurrence_id))."</div></div>";
-						} else {
+					if ($vs_browse_target=='ca_objects') {
+						foreach($va_random_items as $vn_object_id => $va_object_info) {							
+							$randomImageHeight = $va_media[$va_object_info['object_id']]["info"]["medium"]["HEIGHT"];
+							$randomImagePadding = ((410 - $randomImageHeight) / 2);
+							$va_object_info['title'] = $va_labels[$vn_object_id];
+							$va_object_info['media'] = $va_media[$vn_object_id];
+							$va_random_items[$vn_object_id] = $va_object_info;
 							print "<div id='browseRandomImage' style='padding:".$randomImagePadding."px 0px ".$randomImagePadding."px 0px;'>";
 							print caNavLink($this->request, $va_media[$va_object_info['object_id']]["tags"]["medium"], '', 'Detail', 'Object', 'Show', array('object_id' => $vn_object_id));
 							print "<div id='browseRandomCaption'>".caNavLink($this->request, $va_object_info['title'], '', 'Detail', 'Object', 'Show', array('object_id' => $vn_object_id))."</div></div>";
+						}
+					}elseif($vs_browse_target == "ca_occurrences"){
+						if($vo_random_occs->numHits()){
+							$t_object = new ca_objects();
+							while($vo_random_occs->nextHit()){
+								$t_object->load($vo_random_occs->get("ca_objects.object_id", array("limit" => 1)));
+								$va_rep = $t_object->getPrimaryRepresentation(array('medium'), array("checkAccess" => $va_access_values));
+								$randomImageHeight = $va_rep["info"]["medium"]["HEIGHT"];
+								$randomImagePadding = ((410 - $randomImageHeight) / 2);
+								print "<div id='browseRandomImage' style='padding:".$randomImagePadding."px 0px ".$randomImagePadding."px 0px;'>";
+								print caNavLink($this->request, $va_rep["tags"]["medium"], '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vo_random_occs->get("occurrence_id")));
+								print "<div id='browseRandomCaption'>".caNavLink($this->request, $vo_random_occs->get("ca_occurrences.preferred_labels"), '', 'Detail', 'Occurrence', 'Show', array('occurrence_id' => $vo_random_occs->get("occurrence_id")))."</div></div>";
+
+							}
 						}
 					}
 					print "</div>";

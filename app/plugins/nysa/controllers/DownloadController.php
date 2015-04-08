@@ -77,9 +77,9 @@
 					}
 					if(sizeof($va_output_parts)){
 						if(in_array($vs_attribute_code, $va_edit_attributes)){
-							$va_occ_info[$vs_attribute_code] = "<b>".$t_occurrence->getDisplayLabel("ca_occurrences.{$vs_attribute_code}")."</b>: ".$o_purifier->purify($this->request->getParameter($vs_attribute_code, pString));
+							$va_occ_info[$vs_attribute_code] = "<b>".$t_occurrence->getDisplayLabel("ca_occurrences.{$vs_attribute_code}")."</b>: ".str_replace(", ", "<br/>", $o_purifier->purify($this->request->getParameter($vs_attribute_code, pString)));
 						}else{
-							$va_occ_info[$vs_attribute_code] = "<b>".$t_occurrence->getDisplayLabel("ca_occurrences.{$vs_attribute_code}")."</b>: ".join(", ", $va_output_parts);
+							$va_occ_info[$vs_attribute_code] = "<b>".$t_occurrence->getDisplayLabel("ca_occurrences.{$vs_attribute_code}")."</b>: ".join("<br/>", $va_output_parts);
 						}
 					}
 				}
@@ -102,7 +102,7 @@
  			}
  			
  			# --- related objects
-			$va_related_objects_links = $t_occurrence->get("ca_objects_x_occurrences.relation_id", array("returnAsArray" => true));
+			$va_related_objects_links = $t_occurrence->get("ca_objects_x_occurrences.relation_id", array("returnAsArray" => true, "sort" => "ca_objects_x_occurrences.rank"));
 			$va_related_objects_info = array();
 			if(sizeof($va_related_objects_links)){
 				$t_objects_x_occurrences = new ca_objects_x_occurrences();
@@ -120,9 +120,18 @@
 								$va_media_info = $t_rep->getMediaInfo('media');
 								$vn_height = $va_media_info["large"]["HEIGHT"];
 								$vn_width = $va_media_info["large"]["WIDTH"];
-								if($vn_height > 900){
-									$vn_new_width = (900 * $vn_width)/$vn_height;
-									$va_reps_info[] = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='height:900px; width:".$vn_new_width."px;'>";
+								
+								if($vn_height > 600){
+									$vn_new_width = (600 * $vn_width)/$vn_height;
+									if($vn_new_width < 500){
+										$va_reps_info[] = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='height:600px; width:".$vn_new_width."px;'>";
+									}else{
+										$vn_new_height = (500 * $vn_height)/$vn_width;
+										$va_reps_info[] = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='width:500px; height:".$vn_new_height."px;'>";
+									}
+								}elseif($vn_width > 500){
+									$vn_new_height = (500 * $vn_height)/$vn_width;
+									$va_reps_info[] = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='width:500px; height:".$vn_new_height."px;'>";
 								}else{
 									$va_reps_info[] = $t_rep->getMediaTag('media', 'large');
 								}
@@ -221,7 +230,7 @@
 						}
 					}
 					if(sizeof($va_output_parts)){
-						$va_occ_info[$vs_attribute_code] = "<b>".$t_occurrence->getDisplayLabel("ca_occurrences.{$vs_attribute_code}")."</b>: ".join(", ", $va_output_parts);
+						$va_occ_info[$vs_attribute_code] = "<b>".$t_occurrence->getDisplayLabel("ca_occurrences.{$vs_attribute_code}")."</b>: ".join("<br/>", $va_output_parts);
 					}
 				}
  			}
@@ -251,7 +260,7 @@
 						$vs_tmp = "";
 						$vs_tmp .= "<div class='unit'><b>".$t_occurrence->getDisplayLabel("ca_occurrences.{$vs_attribute_code}")."</b><ol>";
 						foreach($va_values as $va_value_info){
-							$vs_tmp .= "<li>".$va_value_info[$vs_attribute_code]."</li>";
+							$vs_tmp .= "<li ".(($vs_attribute_code == "resources") ? "style='word-wrap: break-word;'" : "").">".$va_value_info[$vs_attribute_code]."</li>";
 						}
 						$vs_tmp .= "</ol></div><!-- end unit -->";
 						$va_occ_info2[$vs_attribute_code] = $vs_tmp;
@@ -262,7 +271,7 @@
 			}
  			
  			# --- related objects
-			$va_related_objects_links = $t_occurrence->get("ca_objects_x_occurrences.relation_id", array("returnAsArray" => true));
+			$va_related_objects_links = $t_occurrence->get("ca_objects_x_occurrences.relation_id", array("returnAsArray" => true, "sort" => "ca_objects_x_occurrences.rank"));
 			$va_related_objects_info = array();
 			if(sizeof($va_related_objects_links)){
 				$t_objects_x_occurrences = new ca_objects_x_occurrences();
@@ -278,9 +287,17 @@
 							$va_media_info = $t_rep->getMediaInfo('media');
 							$vn_height = $va_media_info["large"]["HEIGHT"];
 							$vn_width = $va_media_info["large"]["WIDTH"];
-							if($vn_height > 900){
-								$vn_new_width = (900 * $vn_width)/$vn_height;
-								$va_reps_info[] = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='height:900px; width:".$vn_new_width."px;'>";
+							if($vn_height > 600){
+								$vn_new_width = (600 * $vn_width)/$vn_height;
+								if($vn_new_width < 500){
+									$va_reps_info[] = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='height:600px; width:".$vn_new_width."px;'>";
+								}else{
+									$vn_new_height = (500 * $vn_height)/$vn_width;
+									$va_reps_info[] = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='width:500px; height:".$vn_new_height."px;'>";
+								}
+							}elseif($vn_width > 500){
+								$vn_new_height = (500 * $vn_height)/$vn_width;
+								$va_reps_info[] = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='width:500px; height:".$vn_new_height."px;'>";
 							}else{
 								$va_reps_info[] = $t_rep->getMediaTag('media', 'large');
 							}
@@ -419,11 +436,19 @@
 					$va_media_info = $t_rep->getMediaInfo('media');
 					$vn_height = $va_media_info["large"]["HEIGHT"];
 					$vn_width = $va_media_info["large"]["WIDTH"];
-					if($vn_height > 900){
-						$vn_new_width = (900 * $vn_width)/$vn_height;
-						$vs_image = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='height:900px; width:".$vn_new_width."px;'>";
+					if($vn_height > 600){
+						$vn_new_width = (600 * $vn_width)/$vn_height;
+						if($vn_new_width < 500){
+							$vs_image = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='height:600px; width:".$vn_new_width."px;'>";
+						}else{
+							$vn_new_height = (500 * $vn_height)/$vn_width;
+							$vs_image = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='width:500px; height:".$vn_new_height."px;'>";
+						}
+					}elseif($vn_width > 500){
+						$vn_new_height = (500 * $vn_height)/$vn_width;
+						$vs_image = "<img src='".$t_rep->getMediaUrl('media', 'large')."' style='width:500px; height:".$vn_new_height."px;'>";
 					}else{
-						$vs_image = $t_rep->getMediaTag("media", "large");
+						$vs_image = $t_rep->getMediaTag('media', 'large');
 					}
 					$va_images[] = $vs_image;
 				}

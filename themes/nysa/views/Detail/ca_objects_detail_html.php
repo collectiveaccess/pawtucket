@@ -249,6 +249,10 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 
 			# --- identifier
 			if($t_object->get('idno')){
+				if($vs_collection_idno = $t_object->get('ca_collections.idno')){
+					#print_r(@get_headers("http://iarchives.nysed.gov/xtf/view?docId=tei/".$vs_collection_idno."/".$t_object->get('idno').".xml"));
+					print "<div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=tei/".$vs_collection_idno."/".$t_object->get('idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Transcript")."&nbsp;&nbsp;&nbsp;</a></div>";
+				}
 				print "<div class='unit'><b>"._t("Identifier").":</b> ".$t_object->get('idno')."</div><!-- end unit -->";
 			}
 			
@@ -337,7 +341,10 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 			# --- Relation
 			
 			# description came from here
-			
+			if($t_object->get('ca_collections.idno', array('checkAccess' => $va_access_values))){
+				print "<br/><div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=".$t_object->get('ca_collections.idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Finding Aid")."&nbsp;&nbsp;&nbsp;</a></div>";
+			}	
+				
 			# --- child hierarchy info
 			$va_children = $t_object->get("ca_objects.children.preferred_labels", array('returnAsArray' => 1, 'checkAccess' => $va_access_values));
 			if(sizeof($va_children) > 0){
@@ -357,19 +364,26 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 				}
 				print "</div><!-- end unit -->";
 			}
+			# --- collections
+			$vs_collections = $t_object->get("ca_collections", array("template" => "<l>^ca_collections.preferred_labels.name</l> (^relationship_typename)<br/>\n", 'checkAccess' => $va_access_values));
+			if($vs_collections){
+				print "<div class='unit'><h3>"._t("Related collections")."</h3>";
+				print $vs_collections;
+				print "</div><!-- end unit -->";
+			}
 			
 			# --- entities
-			$va_entities = $t_object->get("ca_entities", array("template" => "<l>^ca_entities.preferred_labels.displayname</l> (^relationship_typename)", "returnAsLink" => true, "returnAllLocales" => false, "returnAsArray" => true, 'checkAccess' => $va_access_values, 'sort' => 'surname'));
-			if(sizeof($va_entities) > 0){	
+			$vs_entities = $t_object->get("ca_entities", array("template" => "<l>^ca_entities.preferred_labels.displayname</l> (^relationship_typename)<br/>\n", 'checkAccess' => $va_access_values, 'sort' => 'surname'));
+			if($vs_entities){	
 				print "<div class='unit'><h3>"._t("Related entities")."</h3>";
-				print join("<br/>\n", $va_entities);
+				print $vs_entities;
 				print "</div><!-- end unit -->";
 			}
 			
 			# --- occurrences
 			$va_occurrences = $t_object->get("ca_occurrences", array("returnAsArray" => true, 'checkAccess' => $va_access_values));
 			$va_sorted_occurrences = array();
-			if(sizeof($va_occurrences) > 0){
+			if(is_array($va_occurrences) && (sizeof($va_occurrences) > 0)){
 				$t_occ = new ca_occurrences();
 				$va_item_types = $t_occ->getTypeList();
 				foreach($va_occurrences as $va_occurrence) {
@@ -387,35 +401,27 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 			}
 			
 			# --- places
-			$va_places = $t_object->get("ca_places", array("template" => "<l>^ca_places.preferred_labels.name</l> (^relationship_typename)", "returnAsLink" => true, "returnAsArray" => true, 'checkAccess' => $va_access_values));
+			$vs_places = $t_object->get("ca_places", array("template" => "<l>^ca_places.preferred_labels.name</l> (^relationship_typename)<br/>\n", 'checkAccess' => $va_access_values));
 			
-			if(sizeof($va_places) > 0){
+			if($vs_places){
 				print "<div class='unit'><h3>"._t("Related places")."</h3>";
-				print join("<br/>\n", $va_places);
-				print "</div><!-- end unit -->";
-			}
-			
-			# --- collections
-			$va_collections = $t_object->get("ca_collections", array("template" => "<l>^ca_collections.preferred_labels.name</l> (^relationship_typename)", "returnAsLink" => true, "returnAsArray" => true, 'checkAccess' => $va_access_values));
-			if(sizeof($va_collections) > 0){
-				print "<div class='unit'><h3>"._t("Related collections")."</h3>";
-				print join("<br/>\n", $va_collections);
+				print $vs_places;
 				print "</div><!-- end unit -->";
 			}
 			
 			# --- lots
-			$va_object_lots = $t_object->get("ca_object_lots", array("template" => "<l>^preferred_labels.name</l> (^idno_stub)", "returnAsLink" => true, "returnAsArray" => true, 'checkAccess' => $va_access_values));
-			if(sizeof($va_object_lots) > 0){
+			$vs_object_lots = $t_object->get("ca_object_lots", array("template" => "<l>^preferred_labels.name</l> (^idno_stub)<br/>\n", 'checkAccess' => $va_access_values));
+			if($vs_object_lots){
 				print "<div class='unit'><h3>"._t("Related lot")."</h3>";
-				print join("<br/>\n", $va_object_lots);
+				print $vs_object_lots;
 				print "</div><!-- end unit -->";
 			}
 			
 			# --- vocabulary terms
-			$va_terms = $t_object->get("ca_list_items", array("template" => "<l>^ca_list_items.preferred_labels.name_plural</l> (^relationship_typename)", "returnAsLink" => true, "returnAsArray" => true, 'checkAccess' => $va_access_values));
-			if(sizeof($va_terms) > 0){
+			$vs_terms = $t_object->get("ca_list_items", array("template" => "<l>^ca_list_items.preferred_labels.name_plural</l> (^relationship_typename)<br/>\n", 'checkAccess' => $va_access_values));
+			if($vs_terms){
 				print "<div class='unit'><h3>"._t("Subjects")."</h3>";
-				print join("<br/>\n", $va_terms);
+				print $vs_terms;
 				print "</div><!-- end unit -->";
 			}
 			

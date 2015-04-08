@@ -31,6 +31,7 @@
 	$vs_title 					= $this->getVar('label');
 	
 	$va_access_values	= $this->getVar('access_values');
+	$vs_creator = $t_collection->get("ca_entities", array("delimiter" => ", ", "checkAccess" => $va_access_values, "restrictToRelationshipTypes" => array("creator")));
 
 if (!$this->request->isAjax()) {
 ?>
@@ -52,7 +53,7 @@ if (!$this->request->isAjax()) {
 			}
 ?>
 		</div><!-- end nav -->
-		<h2><?php print $vs_title; ?></h2>	
+		<h2><?php print $vs_title.(($vs_creator) ? ", ".$vs_creator : ""); ?></h2>	
 <?php
 			if((!$this->request->config->get('dont_allow_registration_and_login')) && $this->request->config->get('enable_bookmarks')){
 ?>
@@ -71,6 +72,7 @@ if (!$this->request->isAjax()) {
 			}
 			# --- identifier
 			if($t_collection->get('idno')){
+				print "<div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=".$t_collection->get('idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Finding Aid")."&nbsp;&nbsp;&nbsp;</a></div>";
 				print "<div class='unit'><b>"._t("Identifier")."</b>: ".$t_collection->get('idno')."</div><!-- end unit -->";
 			}
 			# --- attributes

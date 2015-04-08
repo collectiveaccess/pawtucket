@@ -71,8 +71,16 @@
             } elseif (($this->request->config->get('show_bristol_only'))&&($this->request->isLoggedIn())) {
             	$this->response->setRedirect(caNavUrl($this->request, "bristol", "Show", "Index"));
             }
+
             
 			$this->opo_browse = new ObjectBrowse($this->opo_result_context->getSearchExpression(), 'pawtucket2');
+			$this->opo_browse->removeAllCriteria();
+			$this->opo_browse->execute();
+			            
+            $this->opo_result_context->setAsLastFind();
+            $this->opo_result_context->setSearchExpression($this->opo_browse->getBrowseID());            
+            $this->opo_result_context->saveContext();
+            $this->request->session->setVar('pawtucket2_browse_target', 'ca_objects');
 			
 			$this->opa_views = array(
 				'full' => _t('List'),
@@ -84,10 +92,6 @@
 				'ca_objects.type_id' => _t('type'),
 				'ca_objects.idno' => _t('idno')
 			);
-			
- 			parent::__construct($po_request, $po_response, $pa_view_paths);
-				
-			$this->opo_browse = new ObjectBrowse($this->opo_result_context->getSearchExpression(), 'pawtucket2');
  		}
  		# -------------------------------------------------------
  		function Index($pa_options=null) {

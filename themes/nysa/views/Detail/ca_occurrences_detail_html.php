@@ -125,6 +125,7 @@ if (!$this->request->isAjax()) {
 			}
 			# --- attributes in label: value format
 			$va_attributes = array("gradelevel", "lessonTopic", "learning_standard", "commonCore", "skills", "social_studies_practices", "EdProject", "funder");
+			$t_list_item = new ca_list_items();
 			# --- which of these attributes can be edited when customizing?
 			$va_edit_attributes = array("lessonTopic", "learning_standard", "commonCore", "skills", "social_studies_practices");
 			if(is_array($va_attributes) && (sizeof($va_attributes) > 0)){
@@ -136,18 +137,26 @@ if (!$this->request->isAjax()) {
 								# --- display hierarchy path for "lessonTopic", "learning_standard", "commonCore"
 								if(in_array($vs_attribute_code, array("lessonTopic", "learning_standard", "commonCore"))){
 									$vs_tmp = "";
-									$vs_url = "";
 									$va_hierarchy_ancestors = $t_list_items->getHierarchyAncestors($va_value[$vs_attribute_code], array("idsOnly" => true, "includeSelf" => true));
 									if(is_array($va_hierarchy_ancestors) && sizeof($va_hierarchy_ancestors)){
 										# --- remove the root - we don't want to display it
 										$va_root = array_pop($va_hierarchy_ancestors);
 										if(is_array($va_hierarchy_ancestors) && sizeof($va_hierarchy_ancestors)){
 											foreach($va_hierarchy_ancestors as $vni => $vn_list_item_id){
-												$vs_url = $t_lists->getItemUrlByItemID($vn_list_item_id);
-												if($vs_url == "") {
+												if($ps_mode != "print"){
+													$vs_url = "";
+													if(in_array($vs_attribute_code, array("learning_standard", "commonCore"))){
+														# --- output as links
+														$t_list_item->load($vn_list_item_id);
+														$vs_url = $t_list_item->getWithTemplate("^external_link.url_entry");
+													}
+													if(!$vs_url) {
+														$vs_tmp = $t_lists->getItemForDisplayByItemID($vn_list_item_id).(($vni > 0) ? " > ".$vs_tmp : "");
+													} else {
+														$vs_tmp = "<a href='".$vs_url."' target='_blank'>".$t_lists->getItemForDisplayByItemID($vn_list_item_id)."</a>".(($vni > 0) ? " > ".$vs_tmp : "");
+													}
+												}else{
 													$vs_tmp = $t_lists->getItemForDisplayByItemID($vn_list_item_id).(($vni > 0) ? " > ".$vs_tmp : "");
-												} else {
-													$vs_tmp = "<a href=\"".$vs_url."\">".$t_lists->getItemForDisplayByItemID($vn_list_item_id).(($vni > 0) ? " > ".$vs_tmp : "")."</a>";
 												}
 											}
 											if($ps_mode != "print"){
@@ -161,7 +170,17 @@ if (!$this->request->isAjax()) {
 									$vs_value = "";
 									if($vs_value = trim($va_value[$vs_attribute_code])){
 											if($ps_mode != "print"){
-												$va_output_parts[] = "<br/>".$t_lists->getItemForDisplayByItemID($vs_value);
+												$vs_url = "";
+												if(in_array($vs_attribute_code, array("skills", "social_studies_practices"))){
+													# --- output as links
+													$t_list_item->load($vs_value);
+													$vs_url = $t_list_item->getWithTemplate("^external_link.url_entry");
+												}
+												if($vs_url){
+													$va_output_parts[] = "<br/><a href='".$vs_url."' target='_blank'>".$t_lists->getItemForDisplayByItemID($vs_value)."</a>";
+												}else{
+													$va_output_parts[] = "<br/>".$t_lists->getItemForDisplayByItemID($vs_value);
+												}
 											} else {
 												$va_output_parts[] = $t_lists->getItemForDisplayByItemID($vs_value);
 											}
@@ -234,7 +253,7 @@ if (!$this->request->isAjax()) {
 				}
 			}
 			# --- related objects
-			$va_related_objects_links = $t_occurrence->get("ca_objects_x_occurrences.relation_id", array("returnAsArray" => true));
+			$va_related_objects_links = $t_occurrence->get("ca_objects_x_occurrences.relation_id", array("returnAsArray" => true, "sort" => "ca_objects_x_occurrences.rank"));
 			
 			if(sizeof($va_related_objects_links)){
 				$t_objects_x_occurrences = new ca_objects_x_occurrences();
@@ -339,7 +358,7 @@ if (!$this->request->isAjax()) {
 								print "<div class='unit'><b>".$t_occurrence->getDisplayLabel("ca_occurrences.{$vs_attribute_code}")."</b>";
 								print "<ol>";
 								foreach($va_values as $va_value_info){
-									print "<li>".$va_value_info[$vs_attribute_code]."</li>";
+									print "<li ".(($vs_attribute_code == "resources") ? "style='word-wrap: break-word;'" : "").">".$va_value_info[$vs_attribute_code]."</li>";
 								}
 								print "</ol>";
 							}else{

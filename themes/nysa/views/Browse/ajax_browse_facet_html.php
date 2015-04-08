@@ -52,6 +52,7 @@
 	
 	$vs_group_mode = $this->getVar('group_mode');
 	$vm_modify_id = $this->getVar('modify') ? $this->getVar('modify') : '0';
+	$va_access_values = caGetUserAccessValues($this->request);
 ?>
 <script type="text/javascript">
 	function caUpdateFacetDisplay(grouping) {
@@ -262,10 +263,22 @@
 ?>
 			<table class='browseSelectPanelListTable'>
 <?php
+					if($va_facet_info["table"] == "ca_collections"){
+						$va_collection_ids = array();
+						foreach($va_items as $va_item) {
+							$va_collection_ids[] = $va_item["id"];
+						}
+						$vo_result = caMakeSearchResult("ca_collections", $va_collection_ids);
+						$va_collection_creators = array();
+						if($vo_result->numHits()){
+							while($vo_result->nextHit()){
+								$va_collection_creators[$vo_result->get("ca_collections.collection_id")] = 	$vo_result->get("ca_entities", array("delimiter" => ", ", "checkAccess" => $va_access_values, "restrictToRelationshipTypes" => array("creator")));
+							}
+						}
+					}
 					foreach($va_items as $va_item) {
 						$vs_label = caGetLabelForDisplay($va_facet, $va_item, $va_facet_info);
-					
-						$va_row[] = "<td class='browseSelectPanelListCell'>".caNavLink($this->request, $vs_label, 'browseSelectPanelLink', $this->request->getModulePath(), $this->request->getController(), ((strlen($vm_modify_id) > 0) ? 'modifyCriteria' : 'addCriteria'), array('facet' => $vs_facet_name, 'id' => $va_item['id'], 'mod_id' => $vm_modify_id))."</td>";
+						$va_row[] = "<td class='browseSelectPanelListCell'>".caNavLink($this->request, trim($vs_label).(($va_collection_creators[$va_item["id"]]) ? ", ".$va_collection_creators[$va_item["id"]] : ""), 'browseSelectPanelLink', $this->request->getModulePath(), $this->request->getController(), ((strlen($vm_modify_id) > 0) ? 'modifyCriteria' : 'addCriteria'), array('facet' => $vs_facet_name, 'id' => $va_item['id'], 'mod_id' => $vm_modify_id))."</td>";
 						
 						if (sizeof($va_row) == 5) {
 							print "<tr valign='top'>".join('', $va_row)."</tr>\n";
