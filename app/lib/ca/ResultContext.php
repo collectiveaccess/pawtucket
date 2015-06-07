@@ -576,21 +576,20 @@
 			$va_nav = $va_find_nav[$va_tmp[0]];
 			if (!$va_nav) { return false; }
 			
-			if (__CA_APP_TYPE__ == 'PAWTUCKET') {
+//			if (__CA_APP_TYPE__ == 'PAWTUCKET') {
 				// Pawtucket-specific navigation rewriting
-				$vs_path = __CA_APP_DIR__."/controllers/".(trim($va_nav['module_path']) ? trim($va_nav['module_path'])."/" : "").$va_nav['controller']."Controller.php";
-				if(!file_exists($vs_path)) { return false; }
-				require_once($vs_path);
-				$vs_controller_class = $va_nav['controller']."Controller";
-				//$va_nav = call_user_func_array( "{$vs_controller_class}::".$va_nav['action'] , array($po_request, $vs_table_name) );
-			
-				//$o_storage = ResultContext::_persistentStorageInstance($po_request);
-				///if (!($vs_action = $o_storage->getVar('result_last_context_'.$vs_table_name.'_action'))) {
-					$vs_action = 'Index'; //$va_nav['action'];
-				//}
-			} else {
+//				$vs_path = __CA_APP_DIR__."/controllers/".(trim($va_nav['module_path']) ? trim($va_nav['module_path'])."/" : "").$va_nav['controller']."Controller.php";
+//				if(!file_exists($vs_path)) { return false; }
+//				require_once($vs_path);
+//				$vs_controller_class = $va_nav['controller']."Controller";
+//				$va_nav = call_user_func_array( "{$vs_controller_class}::".$va_nav['action'] , array($po_request, $vs_table_name) );
+//				$o_storage = ResultContext::_persistentStorageInstance($po_request);
+//				if (!($vs_action = $o_storage->getVar('result_last_context_'.$vs_table_name.'_action'))) {
+//					$vs_action = 'Index'; //$va_nav['action'];
+//				}
+//			} else {
 				$vs_action = $va_nav['action'];
-			}
+//			}
 			
 			$va_params = array();
 			if (is_array($va_nav['params'])) {
