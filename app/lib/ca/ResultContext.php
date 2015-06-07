@@ -578,7 +578,9 @@
 			
 			if (__CA_APP_TYPE__ == 'PAWTUCKET') {
 				// Pawtucket-specific navigation rewriting
-				if (!require_once(__CA_APP_DIR__."/controllers/".(trim($va_nav['module_path']) ? trim($va_nav['module_path'])."/" : "").$va_nav['controller']."Controller.php")) { return false; }
+				$vs_path = __CA_APP_DIR__."/controllers/".(trim($va_nav['module_path']) ? trim($va_nav['module_path'])."/" : "").$va_nav['controller']."Controller.php";
+				if(!file_exists($vs_path)) { return false; }
+				require_once($vs_path);
 				$vs_controller_class = $va_nav['controller']."Controller";
 				//$va_nav = call_user_func_array( "{$vs_controller_class}::".$va_nav['action'] , array($po_request, $vs_table_name) );
 			
