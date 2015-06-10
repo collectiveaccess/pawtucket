@@ -33,7 +33,6 @@
 	require_once(__CA_MODELS_DIR__."/ca_commerce_communications.php");
  	require_once(__CA_APP_DIR__.'/helpers/accessHelpers.php');
  	require_once(__CA_APP_DIR__.'/helpers/clientServicesHelpers.php');
-	require_once(__CA_LIB_DIR__."/core/Parsers/htmlpurifier/HTMLPurifier.standalone.php");
  
  	class SetsController extends ActionController {
  		# -------------------------------------------------------
