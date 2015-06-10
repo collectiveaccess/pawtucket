@@ -3353,6 +3353,8 @@ class ca_users extends BaseModel {
 		$va_item_values = ca_lists::itemIDsToItemValues(array_keys($va_access_by_item_id), array('transaction' => $this->getTransaction()));
 	
 		$va_ret = array();
+		if(!is_array($va_item_values)) { return $va_ret; }
+
 		foreach($va_item_values as $vn_item_id => $vn_val) {
 			$va_ret[$vn_val] = $va_access_by_item_id[$vn_item_id];
 		}
