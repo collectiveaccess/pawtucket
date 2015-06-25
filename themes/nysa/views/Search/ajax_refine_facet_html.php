@@ -143,6 +143,35 @@
 <?php
 			break;
 		# ------------------------------------------------------------
+			case 'hierarchical';
+?>
+		<!--- BEGIN HIERARCHY BROWSER --->
+		<div id="hierarchyBrowser" class='hierarchyBrowser'>
+			<!-- Content for hierarchy browser is dynamically inserted here by ca.hierbrowser -->
+		</div><!-- end hierarchyBrowser -->
+		
+		<script type="text/javascript">
+				var oHierBrowser;
+				
+				jQuery(document).ready(function() {
+					
+					oHierBrowser = caUI.initHierBrowser('hierarchyBrowser', {
+						levelDataUrl: '<?php print caNavUrl($this->request, $this->request->getModulePath(), $this->request->getController(), 'getFacetHierarchyLevel', array('facet' => $vs_facet_name)); ?>',
+						initDataUrl: '<?php print caNavUrl($this->request, $this->request->getModulePath(), $this->request->getController(), 'getFacetHierarchyAncestorList', array('facet' => $vs_facet_name)); ?>',
+						
+						editUrl: '<?php print caNavUrl($this->request, $this->request->getModulePath(), $this->request->getController(), 'addCriteria', array('facet' => $vs_facet_name, 'id' => '')); ?>',
+						editButtonIcon: '<img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/buttons/arrow_grey_right.gif" border="0" title="Edit place">',
+						
+						initItemID: '<?php print $this->getVar('browse_last_id'); ?>',
+						indicatorUrl: '<?php print $this->request->getThemeUrlPath(); ?>/graphics/icons/indicator.gif',
+						
+						currentSelectionDisplayID: 'browseCurrentSelection'
+					});
+				});
+			</script>
+<?php
+				break;
+		# ------------------------------------------------------------
 		case 'alphabetical';
 		default:
 			$o_tep = new TimeExpressionParser();
