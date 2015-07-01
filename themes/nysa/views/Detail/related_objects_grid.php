@@ -33,6 +33,7 @@
 	
 	$va_access_values	= $this->getVar('access_values');
 	
+	if (!$qr_hits) { return; }
 ?>
 	<table border="0" cellpadding="0px" cellspacing="0px" width="100%">
 <?php
