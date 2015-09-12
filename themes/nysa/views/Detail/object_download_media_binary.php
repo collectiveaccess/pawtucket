@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2012 Whirl-i-Gig
+ * Copyright 2012-2015 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -33,8 +33,14 @@
 	header("Cache-Control: post-check=0, pre-check=0", false);
 	header("Pragma: no-cache");
 	header("Cache-control: private");
+	header('Content-Length: ' . filesize($vs_file_path));
+	header("Content-Disposition: attachment; filename=".preg_replace('![^A-Za-z0-9\.\-]+!', '_', $this->getVar('archive_name')));
 	
-	header("Content-Disposition: attachment; filename=".$this->getVar('archive_name'));
-	ob_end_flush();	// need to do this in order to not have read file use request memory due to buffering
-	readfile($vs_file_path);
-?>
+	set_time_limit(0);
+	$o_fp = @fopen($vs_file_path,"rb");
+	while(is_resource($o_fp) && !feof($o_fp)) {
+		print(@fread($o_fp, 1024*8));
+		ob_flush();
+		flush();
+	}
+	exit();
