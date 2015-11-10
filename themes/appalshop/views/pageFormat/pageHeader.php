@@ -1,5 +1,5 @@
 <?php
-	JavascriptLoadManager::register('superfish');
+	AssetLoadManager::register('superfish');
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
@@ -30,7 +30,7 @@
 	<![endif]-->
 	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery-tileviewer/jquery.tileviewer.css" type="text/css" media="screen" />
 <?php
-	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
+	print AssetLoadManager::getLoadHTML($this->request->getBaseUrlPath());
 ?>
 	<script type="text/javascript">
 		 jQuery(document).ready(function() {
