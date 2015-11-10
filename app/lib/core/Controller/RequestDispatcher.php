@@ -191,7 +191,6 @@ class RequestDispatcher extends BaseObject {
 								}
 								$this->ops_action = $vs_default_method;
 							} else {
-								die("!!!");
 								// Invalid controller path
 								$this->postError(2300, _t("Invalid controller path"), "RequestDispatcher->dispatch()");
 								return false;
