@@ -24,7 +24,7 @@
 	<![endif]-->
 	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery-tileviewer/jquery.tileviewer.css" type="text/css" media="screen" />
 <?php
-	print AssetLoadManager::getLoadHTML($this->request);
+	print JavascriptLoadManager::getLoadHTML($this->request->getBaseUrlPath());
 ?>
 	<script type="text/javascript">
 		 jQuery(document).ready(function() {
