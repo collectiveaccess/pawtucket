@@ -1,6 +1,8 @@
 /* IE images that are links have blue boxes around them.  Couldn't remove the order without it messing up the layout, so I made the borders the color of the background instead */
 /*white border for header and page body elements*/
 a img {border-color:#FFFFFF;
+color:#000000;
+text-decoration: none;
 }
 
 /*putty color for the NYSED logo in the footer*/
