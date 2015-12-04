@@ -70,7 +70,7 @@
 		$vs_browse_target_name = "";
 		switch($vs_browse_target){
 			case "ca_objects":
-				$vs_browse_target_name = " Documents";	
+				$vs_browse_target_name = "Browse for Documents";	
 			break;
 			# -----------------------------------------
 			case "ca_occurrences":
@@ -78,13 +78,13 @@
 			break;
 			# -----------------------------------------
 			case "ca_collections":
-				$vs_browse_target_name = " Collections";	
+				$vs_browse_target_name = "Browse for Collections";	
 			break;
 			# -----------------------------------------
 		}
 		
 ?>
-	<h1><?php print _t('Browse for %1', $vs_browse_target_name); ?></h1>
+	<h1><?php print _t($vs_browse_target_name); ?></h1>
 	<div id="browse"><div id="resultBox"> 
 <?php
 	}
@@ -100,9 +100,11 @@
 						$vn_i = 1;
 						$va_available_facets = $this->getVar('available_facets');
 						foreach($va_available_facets as $vs_facet_code => $va_facet_info) {
-							print "<a href='#' onclick='caUIBrowsePanel.showBrowsePanel(\"{$vs_facet_code}\");' class='facetLink'>".$va_facet_info['label_plural']."</a>";
-							if($vn_i < sizeof($va_available_facets)){
-								print ", ";
+							if($vs_facet_code <> 'collection_facet') {
+								print "<a href='#' onclick='caUIBrowsePanel.showBrowsePanel(\"{$vs_facet_code}\");' class='facetLink'>".$va_facet_info['label_plural']."</a>";
+								if($vn_i < sizeof($va_available_facets)){
+									print ", ";
+								}
 							}
 							$vn_i++;
 						}

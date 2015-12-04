@@ -36,6 +36,17 @@
 		// initialize CA Utils
 			var caUIUtils = caUI.initUtils();
 	</script>
+	<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-507388-26', 'auto');
+  ga('send', 'pageview');
+
+</script>
+
 </head>
 <body>
 		<div id="topBar">
@@ -136,14 +147,11 @@
 			<div id="header">
 			
 			<div class="logo">
-<?php
-				print caNavLink($this->request, "<img src='".$this->request->getThemeUrlPath()."/graphics/".$this->request->config->get('header_img')."' border='0'>", "", "", "", "");
-?>			
+			<a href="http://www.archives.nysed.gov"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/NYSA_Logo.jpg" alt="New York State Archives" border="0" /></a>		
 			</div>			
-				<div id="logotext"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/NYSA_HeaderType.png" alt="New York State Archives" /></div>	
+				<div id="logotext"><a href="http://www.archives.nysed.gov"><img src="<?php print $this->request->getThemeUrlPath(); ?>/graphics/NYSA_HeaderType.png" alt="New York State Archives" /></a></div>	
 				
 			<div class="right-box">
-				<div class="nysed"><a href="http://www.nysed.gov">New York State Education Department</a></div>
 			<div class="social">
 			<ul>
 				<li>
@@ -160,7 +168,7 @@
 			<div class="search-box">
 				<form method="get" action="http://srv52.nysed.gov/search">
 					<input type="text" id="search" name ="q" value="" />
-					<input class="submit" type="submit" name="btnG" value/> 
+					<input class="submit" type="submit" name="btnG" value=""/> 
 					<input type="hidden" name="site" value="Drupal_CA_XTF"/>
 					<input type="hidden" name="client" value="drupal_ca_xtf"/>
 					<input type="hidden" name="proxystylesheet" value="drupal_ca_xtf"/>
@@ -179,7 +187,7 @@
 			<div id="nav">
 				<ul>
 				<li class="list-item-one"><a href="http://digitalcollections.archives.nysed.gov/">DIGITAL COLLECTIONS</a></li>
-				<li><a href="http://www.archives.nysed.gov/education">EDUCATION</a></li>
+				<li><a href="http://www.archives.nysed.gov/education/index.shtml">EDUCATION</a></li>
 				<li><a href="http://www.archives.nysed.gov/grants">GRANTS &amp; AWARDS</a></li>
 				<li><a href="http://www.archives.nysed.gov/records/index.shtml">MANAGING RECORDS</a></li>
 				<li><a href="http://www.archives.nysed.gov/research/index.shtml">RESEARCH</a></li>
@@ -239,15 +247,13 @@
 				
 
 			</div><!-- end colored "Ditigal Collections" bar -->
-			<div id="menuBar">
-			<a href="http://www.archives.nysed.gov/education/index.shtml">EDUCATION HOME</a> 
+			<div id="menuBar"> 
 			<?php				
 				#print caNavLink($this->request, _t("Advanced Search"), "", "", "AdvancedSearch", "Index", array("target" => "ca_occurrences"));
 				print " ".caNavLink($this->request, _t("About"), "", "", "About", "Education");
-				print caNavLink($this->request, _t("Browse Lesson Plans"), "", "", "Browse", "Index", array("target" => "ca_occurrences"));
+				print caNavLink($this->request, _t("Browse Documents/Lessons"), "", "", "Browse", "Index", array("target" => "ca_occurrences"));
 				print " ".caNavLink($this->request, _t("Copyright"), "", "", "About", "Copyright");
 ?>
-			<a href="http://digitalcollections.archives.nysed.gov/">VIEW ALL DOCUMENTS</a>
 			</div>
 <?php
 	}else{
@@ -268,7 +274,7 @@
 			<div id="menuBar">
 			<?php				
 				print " ".caNavLink($this->request, _t("Browse the Collection"), "", "", "Browse", "Index", array("target" => "ca_objects"));
-				print " ".caNavLink($this->request, _t("Advanced Search"), "", "", "AdvancedSearch", "Index", array("target" => "ca_objects"));
+				#print " ".caNavLink($this->request, _t("Advanced Search"), "", "", "AdvancedSearch", "Index", array("target" => "ca_objects"));
 				#print " ".caNavLink($this->request, _t("About"), "", "", "About", "DigitalCollection");
 				print " ".caNavLink($this->request, _t("Copyright"), "", "", "About", "Copyright");
 ?>
