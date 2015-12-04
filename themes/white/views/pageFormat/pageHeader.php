@@ -136,7 +136,7 @@
         </ul>
 
         <ul id="support-sub" class="sublist" style="display: none;">
-            <li><a id="support-membership" href="http://www.whitecolumns.org/text.html?type=membership">Membership</a></li>
+            <li><a id="support-membership" href="http://www.whitecolumns.org/text.html?type=membership">Donate</a></li>
             <li><a id="support-funders" href="http://www.whitecolumns.org/text.html?type=funders">Funders</a></li>
             <li><a id="support-artists_for_wc" href="http://www.whitecolumns.org/text.html?type=artists_for_wc">Artists for<br />White Columns</a></li>
         </ul>
