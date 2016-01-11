@@ -59,22 +59,12 @@
 			$vs_base_url = str_replace("/lang/[A-Za-z_]+", "", $vs_base_url);
 			
 			if (is_array($va_ui_locales = $this->request->config->getList('ui_locales')) && (sizeof($va_ui_locales) > 1)) {
-				print caFormTag($this->request, $this->request->getAction(), 'caLocaleSelectorForm', null, 'get', 'multipart/form-data', '_top', array('disableUnsavedChangesWarning' => true));
-			
-				$va_locale_options = array();
-				foreach($va_ui_locales as $vs_locale) {
-					$va_parts = explode('_', $vs_locale);
-					$vs_lang_name = Zend_Locale::getTranslation(strtolower($va_parts[0]), 'language', strtolower($va_parts[0]));
-					$va_locale_options[$vs_lang_name] = $vs_locale;
-				}
 				if ($g_ui_locale == de_DE) {
 					print "<a href='".$vs_base_url."/lang/en_US'>English</a>";
 				}
 				if ($g_ui_locale == en_US) {
 					print "<a href='".$vs_base_url."/lang/de_DE'>Deutsch</a>";
 				}
-
-				print "</form>";
 			}
 ?>
 		</div></div><!-- end topbar -->
