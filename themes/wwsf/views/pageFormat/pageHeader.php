@@ -7,9 +7,8 @@
 	
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/global.css" rel="stylesheet" type="text/css" />
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/sets.css" rel="stylesheet" type="text/css" />
-	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/videojs/video-js.css" type="text/css" media="screen" />
-	<!--<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery-jplayer/jplayer.blue.monday.css" type="text/css" media="screen" />-->
-	<script src='/js/flowplayer/flowplayer-3.2.6.min.js' type='text/javascript'></script>
+	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/assets/videojs/video-js.css" type="text/css" media="screen" />
+	<!--<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/assets/jquery/jquery-jplayer/jplayer.blue.monday.css" type="text/css" media="screen" />-->
 	<!--[if IE]>
     <link rel="stylesheet" type="text/css" href="<?php print $this->request->getThemeUrlPath(true); ?>/css/iestyles.css" />
 	<![endif]-->
