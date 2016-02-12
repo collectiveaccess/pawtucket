@@ -10820,7 +10820,8 @@ $pa_options["display_form_field_tips"] = true;
 		");
 		
 		$va_most_viewed_items = array();
-		
+
+		if(!$qr_res) { return array(); }		
 		while($qr_res->nextRow()) {
 			$va_most_viewed_items[$qr_res->get($this->primaryKey())] = $qr_res->getRow();
 		}
