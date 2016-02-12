@@ -10908,6 +10908,7 @@ $pa_options["display_form_field_tips"] = true;
 				civ.view_id DESC
 			{$vs_limit_sql}
 		");
+		if(!$qr_res) { return array(); }
 		$va_recently_viewed_items = array();
 		
 		$vn_c = 0;
