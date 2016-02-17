@@ -359,6 +359,22 @@
  			}
  			parent::getFacet($pa_options);
  		}
+ 		# -------------------------------------------------------
+		/** 
+		 * Generate the URL for the "back to results" link from a browse result item
+		 * as an array of path components.
+		 */
+ 		public static function getReturnToResultsUrl($po_request) {
+ 			$va_ret = array(
+ 				'module_path' => '',
+ 				'controller' => 'Browse',
+ 				'action' => $po_request->getAction(),
+ 				'params' => array(
+ 					'key'
+ 				)
+ 			);
+			return $va_ret;
+ 		}
 		# -------------------------------------------------------
  	}
  ?>

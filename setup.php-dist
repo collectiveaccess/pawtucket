@@ -8,7 +8,7 @@
 #
 #               Pawtucket: Public-access front-end for CollectiveAccess
 #               Open-source collections management software
-#               Version 1.4
+#               Version 1.6
 #				
 # -------------------------------------------------------------------------------------------
 # Need help setting up? Visit http://www.collectiveaccess.org/forum
@@ -75,7 +75,6 @@ define("__CA_APP_NAME__", "collectiveaccess");
 #		
 #
 $_CA_THEMES_BY_DEVICE = array(
-	'iPhone' 		=> 'iphone',		// use the 'iphone' theme for iPhone devices such as iPhone and iPod Touch
 	'_default_' 	=> 'default'		// use the 'default' theme for everything else
 );
 
@@ -204,22 +203,12 @@ define("__CA_URL_ROOT__", str_replace($_SERVER['DOCUMENT_ROOT'], '', __CA_BASE_D
 define("__CA_SITE_HOSTNAME__", $_SERVER['HTTP_HOST']);
 
 
-#
-# If you use PayPal for e-commerce payments then you can set your account information 
-# below by uncommenting the __CA_PAYPAL* lines and assigning them appropriate values
-#
-#define("__CA_PAYPAL_API_USERNAME__", "your_paypal_api_username");
-#define("__CA_PAYPAL_API_PASSWORD__", "your_paypal_api_password");
-#define("__CA_PAYPAL_API_SIGNATURE__", "your_paypal_api_signature");
-#define("__CA_PAYPAL_API_ENVIRONMENT__", "sandbox");		// "sandbox" for testing or "live" for production use
-
-
 # --------------------------------------------------------------------------------------------
 # IT IS VERY UNLIKELY THAT YOU WILL NEED TO CHANGE ANYTHING UNDER THIS LINE
 # --------------------------------------------------------------------------------------------
 
 # Only MySQL databases are currently supported so leave this set to 'mysql'!
-define("__CA_DB_TYPE__", 'mysql');
+define("__CA_DB_TYPE__", 'mysqli');
 
 # Path to CollectiveAccess 'app' directory 
 define("__CA_APP_DIR__", __CA_BASE_DIR__."/app");
@@ -264,6 +253,9 @@ define("__CA_THEME__", $g_configuration_cache_suffix = caGetPreferredThemeForCur
 # Root-relative URL path to 'themes' directory
 define("__CA_THEMES_URL__", __CA_URL_ROOT__."/themes");
 
+define("__CA_THEME_DIR__", __CA_THEMES_DIR__."/".__CA_THEME__);
+define("__CA_THEME_URL__", __CA_THEMES_URL__."/".__CA_THEME__);
+
 # Path to local config directory - configuration containing theme-specific configuration
 # Note that this is not the same as the __CA_CONF_DIR__, which contains general application configuration
 # Theme-specific configuration simply allows you to override selected application configuration as-needed to suit the specific theme
@@ -299,7 +291,7 @@ if (defined('E_DEPRECATED')) {	// PHP 5.3/5.4
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2008-2013 Whirl-i-Gig
+ * Copyright 2008-2016 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
