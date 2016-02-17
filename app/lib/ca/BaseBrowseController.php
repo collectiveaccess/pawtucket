@@ -95,6 +95,15 @@
  			
  			$va_access_values = caGetUserAccessValues($this->request);
  			
+ 			
+ 			
+ 			//
+ 			// Enforce type restriction, if defined
+ 			// 
+ 			if ($this->opn_type_restriction_id > 0) {
+ 				$this->opo_browse->setTypeRestrictions(array($this->opn_type_restriction_id));
+ 			}
+ 			
  			//
  			// Restrict facets to specific group for main browse landing page (if set in app.conf config)
  			// 			
@@ -137,7 +146,7 @@
  			}
 			$vs_sort_direction = $this->opo_result_context->getCurrentSortDirection();
 
-//			$vb_sort_has_changed = $this->opo_result_context->sortHasChanged();
+			$vb_sort_has_changed = $this->opo_result_context->sortHasChanged();
 			
  			if (!$vn_page_num || $vb_criteria_have_changed) { $vn_page_num = 1; }
  			
@@ -172,11 +181,6 @@
  					return;
  				}
  			}
- 			
- 			//
- 			// Enforce type restriction, if defined
- 			// 
- 			$this->opo_browse->setTypeRestrictions(array($this->opn_type_restriction_id));
  			
  			MetaTagManager::setWindowTitle(_t('%1 browse', $this->browseName('plural')));
  			
@@ -253,7 +257,9 @@
 			if ($vo_result) {
 				if ($vb_criteria_have_changed || $vb_sort_has_changed) {
 					// Put the results id list into the results context - we used this for previous/next navigation
-					$this->opo_result_context->setResultList($vo_result->getPrimaryKeyValues());
+					$vo_full_result = $this->opo_browse->getResults(array('sort' => $vs_sort, 'sort_direction' => $vs_sort_direction));
+					$this->opo_result_context->setResultList($vo_full_result->getPrimaryKeyValues());
+					unset($vo_full_result);
 					$this->opo_result_context->setParameter('availableVisualizationChecked', 0);
 				}
 				
@@ -375,10 +381,10 @@
  			$vs_cache_key = md5(join("/", array($ps_facet_name,$vs_show_group,$vs_grouping,$vm_id)));
  			$va_facet_info = $this->opo_browse->getInfoForFacet($ps_facet_name);
  			
- 			if (($va_facet_info['group_mode'] != 'hierarchical') && ($vs_content = $this->opo_browse->getCachedFacetHTML($vs_cache_key))) { 
- 				$this->response->addContent($vs_content);
- 				return;
- 			}
+ 			//if (($va_facet_info['group_mode'] != 'hierarchical') && ($vs_content = $this->opo_browse->getCachedFacetHTML($vs_cache_key))) { 
+ 			//	$this->response->addContent($vs_content);
+ 			//	return;
+ 			//}
  			
  			// Enforce type restriction
  			$this->opo_browse->setTypeRestrictions(array($this->opn_type_restriction_id));
@@ -557,13 +563,9 @@
 						$va_facet_info['table'] = $this->ops_tablename;
 						// fall through to default case
 					default:
-						if (!$vn_id) {
-							switch($t_item->getHierarchyType()) {
-								case __CA_HIER_TYPE_SIMPLE_MONO__:
-									// Force top level to be root for simple mono hierarchies
-									$vn_id = $t_item->getHierarchyRootID();
-									break;
-							}
+						if (!$vn_id && ($t_item->getHierarchyType() == __CA_HIER_TYPE_SIMPLE_MONO__)) {
+							// Force top level to be root for simple mono hierarchies
+							$vn_id = $t_item->getHierarchyRootID();
 						}
 						if(!$vn_id) {
 							$va_hier_ids = $this->opo_browse->getHierarchyIDsForFacet($ps_facet_name, array('checkAccess' => $va_access_values));
@@ -577,12 +579,9 @@
 								foreach($va_hierarchy_list as $vn_i => $va_item) {
 									if (!in_array($vn_i, $va_hier_ids)) { continue; }	// only show hierarchies that have items in browse result
 									if ($vn_start <= $vn_c) {
-										$vn_id = $va_item[$t_item->primaryKey()];
-										
-										if (!isset($va_facet[$vn_id]) && ($vn_root == $vn_id)) { continue; }
+										$va_item['item_id'] = $va_item[$t_item->primaryKey()];
+										if (!isset($va_facet[$va_item['item_id']]) && ($vn_root == $va_item['item_id'])) { continue; }
 										if(is_array($va_access_values) && isset($va_item['access']) && (!in_array($va_item['access'], $va_access_values))) { continue; }
-										
-										$va_item['item_id'] = $vn_id;	// copy actual record id over hierarchy list item_id
 										unset($va_item['parent_id']);
 										unset($va_item['label']);
 										$va_json_data[$va_item['item_id']] = $va_item;

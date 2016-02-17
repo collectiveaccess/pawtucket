@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2009-2012 Whirl-i-Gig
+ * Copyright 2009-2012 Whirl-i- f
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -182,21 +182,15 @@
 				//		break;
 				//	}
 				//}
+				$this->opo_browse->addFacetConfiguration($vs_limit_facet_name = '_detail_browse_'.$this->ops_tablename, array(
+					'type' => 'authority', 'table' => $this->ops_tablename, 'relationship_table' => 'ca_objects_x_entities',
+					'restrict_to_types' => array(), 'restrict_to_relationship_types' => array(),
+					'label_singular' => 'Detail browse by '.$this->ops_tablename, 
+					'label_plural' => 'Detail browse by '.$this->ops_tablename,
+					'group_mode' => 'none',
+					'indefinite_article' => 'a'
+				));
 				
-				$vs_limit_facet_name = null;
-				$va_path = $this->opo_datamodel->getPath($this->ops_tablename, 'ca_objects');
-				
-				if ((sizeof($va_path) == 3) && ($va_path = array_keys($va_path)) && ($vs_rel_table = $va_path[1])) {
-					$this->opo_browse->addFacetConfiguration($vs_limit_facet_name = '_detail_browse_'.$this->ops_tablename, array(
-						'type' => 'authority', 'table' => $this->ops_tablename, 'relationship_table' => $vs_rel_table,
-						'restrict_to_types' => array(), 'restrict_to_relationship_types' => array(),
-						'label_singular' => 'Detail browse by '.$this->ops_tablename, 
-						'label_plural' => 'Detail browse by '.$this->ops_tablename,
-						'group_mode' => 'none',
-						'indefinite_article' => 'a'
-					));
-				}
-				$this->view->setVar('browse_results', $qr_hits);
 				if ($vs_limit_facet_name) {
 					if (($va_configured_type_restrictions = $this->request->config->getList($this->ops_tablename.'_detail_browse_type_restrictions')) && is_array($va_configured_type_restrictions)) {
 						$this->opo_browse->setTypeRestrictions($va_configured_type_restrictions, array('includeChildren' => false));
@@ -352,7 +346,9 @@
  			
  			// Record view
  			$t_item->registerItemView($this->request->getUserID());
- 			
+			
+ 			 MetaTagManager::setWindowTitle("Viewing: ".$t_item->get("preferred_labels"));
+			 
  			//
  			// Render view
  			//
