@@ -1,14 +1,14 @@
 <?php
 /* ----------------------------------------------------------------------
- * themes/default/views/Results/ca_objects_result_caption_html.php :
- * 		thumbnail search results
+ * themes/default/views/ca_places_full_html.php :
+ * 		full search results
  * ----------------------------------------------------------------------
  * CollectiveAccess
  * Open-source collections management software
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2009-2010 Whirl-i-Gig
+ * Copyright 2010 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -26,18 +26,40 @@
  *
  * ----------------------------------------------------------------------
  */
-?>
-<div class="thumbnailCaption">
-<?php
-	$vs_caption = "";
-	if($this->getVar('caption_title')){
-		$vs_caption .= "<i>";
-		$vs_caption .= (unicode_strlen($this->getVar('caption_title')) > 60) ? preg_replace('![^A-Za-z0-9]+$!', '', substr(strip_tags($this->getVar('caption_title')), 0, 57)).'...' : $this->getVar('caption_title');
-		$vs_caption .= "</i><br/>";
+ 
+ 	
+$vo_result 				= $this->getVar('result');
+$vn_items_per_page		= $this->getVar('current_items_per_page');
+
+if($vo_result) {
+	print '<div id="placeResults">';
+	
+	$vn_item_count = 0;
+	$va_tooltips = array();
+	$t_list = new ca_lists();
+	$vn_i = 0;
+	while(($vn_i < $vn_items_per_page) && ($vo_result->nextHit())) {
+		$vs_idno = $vo_result->get('ca_places.idno');
+		$vs_class = "";
+		$vn_item_count++;
+		if($vn_item_count == 2){
+			$vs_class = "resultBg";
+			$vn_item_count = 0;
+		}
+		
+		$vn_place_id = $vo_result->get('ca_places.place_id');
+		
+		
+		$va_labels = $vo_result->getDisplayLabels($this->request);
+		print "<div".(($vs_class) ? " class='$vs_class'" : "").">";
+		print caNavLink($this->request, join($va_labels, "; "), '', 'Detail', 'Place', 'Show', array('place_id' => $vn_place_id));
+		if($vs_idno){
+			print ", ".$vs_idno;
+		}
+		print "</div>\n";
+		$vn_i++;
+		
 	}
-	if($this->getVar('caption_idno')){
-		$vs_caption .= $this->getVar('caption_idno');
-	}
-	print caNavLink($this->request, $vs_caption, '', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar("object_id")));
+	print "</div>\n";
+}
 ?>
-</div>

@@ -31,9 +31,9 @@
 $vo_result 					= $this->getVar('result');
 $vn_items_per_page 	= $this->getVar('current_items_per_page');
 $va_access_values 		= $this->getVar('access_values');
+$access_id 				= $this->getVar('access_id');
 
 if($vo_result) {
-	print '<form id="caFindResultsForm">';
 	print '<table border="0" cellpadding="0px" cellspacing="0px" width="100%">'."\n<tr>\n";
 		$vn_display_cols = 6;
 		$vn_col = 0;
@@ -41,6 +41,10 @@ if($vo_result) {
 		
 		$t_list = new ca_lists();
 		while(($vn_item_count < $vn_items_per_page) && ($vo_result->nextHit())) {
+			$access = $vo_result->get('ca_objects.access');
+			if($access_id == 0 && $access != 1) {
+				continue;
+			}
 			$vn_object_id = $vo_result->get('object_id');
 			$va_labels = $vo_result->getDisplayLabels();
 			
@@ -48,40 +52,21 @@ if($vo_result) {
 			foreach($va_labels as $vs_label){
 				$vs_caption .= $vs_label;
 			}
-			$vs_secondary_label = $vo_result->get("ca_objects.nonpreferred_labels.name", array("delimiter" => "; "));
-			if($vs_secondary_label){
-				$vs_caption .= ": ".$vs_secondary_label;
-			}
-			if($vs_type = $vo_result->get("ca_objects.type_id", array("convertCodesToDisplayText" => true))){
-				$vs_caption .= "; ".$vs_type;
-			}
 			# --- get the height of the image so can calculate padding needed to center vertically
-			$va_media_info = $vo_result->getMediaInfo('ca_object_representations.media', 'thumbnail', null, array('checkAccess' => $va_access_values));
+			$va_media_info = $vo_result->getMediaInfo('ca_object_representations.media', 'thumbnail', array('checkAccess' => $va_access_values));
 			$vn_padding_top = 0;
 			$vn_padding_top_bottom =  ((130 - $va_media_info["HEIGHT"]) / 2);
 			
 			print "<td align='center' valign='top' class='searchResultTd'><div class='searchThumbBg searchThumbnail".$vn_object_id."' style='padding: ".$vn_padding_top_bottom."px 0px ".$vn_padding_top_bottom."px 0px;'>";
-?>
-				<input type='checkbox' name='add_to_set_ids' value='<?php print (int)$vn_object_id; ?>' class="addItemToSetControl addItemToSetControlInThumbnails" />
-					
-<?php
 			print caNavLink($this->request, $vo_result->getMediaTag('ca_object_representations.media', 'thumbnail', array('checkAccess' => $va_access_values)), '', 'Detail', 'Object', 'Show', array('object_id' => $vn_object_id));
 			
 			// Get thumbnail caption
 			$this->setVar('object_id', $vn_object_id);
 			$this->setVar('caption_title', $vs_caption);
-			#$this->setVar('caption_idno', $vo_result->get("ca_objects.idno"));
+			$this->setVar('caption_idno', $vo_result->get("ca_objects.idno"));
 			
 			print "</div><div class='searchThumbCaption searchThumbnail".$vn_object_id."'>".$this->render('Results/ca_objects_result_caption_html.php')."</div>";
 			print "</td>\n";
-			
-			// set view vars for tooltip
-			$this->setVar('tooltip_representation', $vs_media_tag = $vo_result->getMediaTag('ca_object_representations.media', 'small', array('checkAccess' => $va_access_values)));
-			$this->setVar('tooltip_title', $vs_caption);
-			$this->setVar('tooltip_idno', $vo_result->get("ca_objects.idno"));
-			TooltipManager::add(
-				".searchThumbnail{$vn_object_id}", $this->render('Results/ca_objects_result_tooltip_html.php')
-			);
 			
 			$vn_col++;
 			if($vn_col < $vn_display_cols){
@@ -105,6 +90,6 @@ if($vo_result) {
 			print "</tr>\n";
 		}
 		
-		print "\n</table></form>\n";
+		print "\n</table>\n";
 	}
 ?>

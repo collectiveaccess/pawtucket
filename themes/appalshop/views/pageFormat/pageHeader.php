@@ -183,8 +183,8 @@
 ?>
 			<div id="nav">
 <?php				
-				print caNavLink($this->request, _t("Browse The Collections"), '', '', 'Browse', 'Index')." ";
-				print caNavLink($this->request, _t("Finding Aids"), '', 'FindingAids', 'List', 'Index')." ";
+				print caNavLink($this->request, _t("Browse The Database"), '', '', 'Browse', 'clearCriteria')." ";
+				print caNavLink($this->request, _t("Collections"), '', 'FindingAids', 'List', 'Index')." ";
 				print caNavLink($this->request, _t("Special Projects"), '', 'simpleGallery', 'Show', 'Index');
 				#print join(" ", $this->getVar('nav')->getHTMLMenuBarAsLinkArray());
 ?>			

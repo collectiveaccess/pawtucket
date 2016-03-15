@@ -130,9 +130,18 @@
 				}
 				print join("; ", $va_display_extent_pieces)."</div><!-- end unit -->";
 			}
-			if($vs_creator = $t_collection->get("ca_entities", array('restrictToRelationshipTypes' => array('creator')))){
-				print "<div class='unit'><b>"._t('Creator')."</b><br/> {$vs_creator}</div><!-- end unit -->";
-			}				
+			$va_creators = $t_collection->get("ca_entities", array("restrictToRelationshipTypes" => array("creator"), "returnAsArray" => 1, 'checkAccess' => $va_access_values));
+			if(sizeof($va_creators) > 0){	
+?>
+				<div class="unit"><b><?php print _t("Creator"); ?></b><br/>
+<?php
+				foreach($va_creators as $va_creator) {
+					print "<div>".caNavLink($this->request, $va_creator["displayname"], '', '', 'Browse', 'clearAndAddCriteria', array('facet' => 'entity_facet', 'id' => $va_creator['entity_id']))."</div>\n";
+				}
+?>
+				</div><!-- end unit -->
+<?php
+			}			
 ?>
 	</div><!-- end leftCol -->
 			
@@ -224,7 +233,11 @@
 			print "<div class='unit'><b>"._t("External Link")."</b>: ";
 			$va_link_display = array();
 			foreach($va_links as $va_link){
-				$va_link_display[] = "<a href='".$va_link["url_entry"]."' target='_blank'>".$va_link["url_source"]."</a>";
+				if($va_link["url_source"]){
+					$va_link_display[] = "<a href='".$va_link["url_entry"]."' target='_blank'>".$va_link["url_source"]."</a>";
+				}else{
+					$va_link_display[] = "<a href='".$va_link["url_entry"]."' target='_blank'>".$va_link["url_entry"]."</a>";
+				}
 			}
 			print join(", ", $va_link_display)."</div>";
 		}
@@ -268,7 +281,7 @@
 			<div class="unit"><b><?php print _t("Related")." ".((sizeof($va_entities) > 1) ? _t("Entities") : _t("Entity")); ?></b><br/>
 <?php
 			foreach($va_entities as $va_entity) {
-				print "<div>".(($this->request->config->get('allow_detail_for_ca_entities')) ? caNavLink($this->request, $va_entity["label"], '', 'Detail', 'Entity', 'Show', array('entity_id' => $va_entity["entity_id"])) : $va_entity["label"])." (".$va_entity['relationship_typename'].")</div>\n";
+				print "<div>".caNavLink($this->request, $va_entity["displayname"], '', '', 'Browse', 'clearAndAddCriteria', array('facet' => 'entity_facet', 'id' => $va_entity['entity_id']))." (".$va_entity['relationship_typename'].")</div>\n";
 			}
 ?>
 			</div><!-- end unit -->

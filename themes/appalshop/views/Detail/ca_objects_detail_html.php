@@ -40,7 +40,7 @@
 	$va_display_options =				$this->getVar('primary_rep_display_options');
 
 ?>	
-	<div id="detailBody">
+	<div id="detailBody" class="objects">
 		<div id="pageNav">
 <?php
 			if (($this->getVar('is_in_result_list')) && ($vs_back_link = ResultContext::getResultsLinkForLastFind($this->request, 'ca_objects', _t("Back"), ''))) {
@@ -59,6 +59,28 @@
 ?>
 		</div><!-- end nav -->
 	<div id="detailWrapper">	
+			
+<?php	
+	$item_reps = $t_object->getRepresentations(array("preview170"), null, array('checkAccess' => $va_access_values));
+	if (sizeof($item_reps) > 1) {
+?>	
+		<div id='sideBar'><div id='more'>
+			<div id='moreTitle'>More images</div>
+			<div class='moreContent'>
+<?php
+			
+			foreach (array_slice($item_reps, 1) as $item_rep) {
+			$va_item_rep = $item_rep['tags']['preview170'];
+			
+			$vn_rep_id = $item_rep['representation_id'];
+				print "<a href='#' onclick='caMediaPanel.showPanel(\"".$this->request->getBaseUrlPath()."/index.php/Detail/Object/GetRepresentationInfo/object_id/".$vn_object_id."/representation_id/".$vn_rep_id."\"); return false;'>".$va_item_rep."</a>";
+			}
+?>			
+			</div>
+		</div></div>	<!-- end sideBar -->	
+<?php
+	}
+?>			
 		<div id="rightCol">
 <?php
 		if ($t_rep && $t_rep->getPrimaryKey()) {
@@ -201,14 +223,19 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 					print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.date")."</b><br/> {$vs_value}</div><!-- end unit -->";
 				}
 			}			
-			if($vs_creator = $t_object->get("ca_entities", array('restrictToRelationshipTypes' => array('artist', 'co_producer', 'composer', 'director', 'illustrator', 'performer', 'photographer', 'producer', 'writer')))){
-				print "<div class='unit'><b>"._t('Creator')."</b><br/> {$vs_creator}</div><!-- end unit -->";
-			}			
+			if($va_creators = $t_object->get("ca_entities", array('returnAsArray' => true, 'restrictToRelationshipTypes' => array('artist', 'co_producer', 'composer', 'director', 'illustrator', 'performer', 'photographer', 'producer', 'writer')))){
+				print "<div class='unit'><b>"._t('Creator(s)')."</b><br/>";
+				$va_creator_display = array();
+				foreach($va_creators as $va_creator){
+					print caNavLink($this->request, $va_creator["displayname"], '', '', 'Browse', 'clearAndAddCriteria', array('facet' => 'entity_facet', 'id' => $va_creator['entity_id']))." (".$va_creator["relationship_typename"].")<br/>"; 
+				}
+				print "</div><!-- end unit -->";
+			}
 			if($va_contributors = $t_object->get("ca_entities", array('returnAsArray' => true, 'restrictToRelationshipTypes' => array('actor', 'animator', 'audio_engineer', 'author', 'broadcast_engineer', 'camera_assistant', 'camera_operator', 'cinematographer', 'composer', 'contributing_artist', 'editor', 'engineer', 'filmmaker', 'interviewee', 'interviewer', 'musician', 'narrator', 'performer', 'recording_engineer', 'sound_mixer', 'subject', 'writer')))){
 				print "<div class='unit'><b>"._t('Contributor(s)')."</b><br/>";
 				$va_contributor_display = array();
 				foreach($va_contributors as $va_contributor){
-					print $va_contributor["displayname"]." (".$va_contributor["relationship_typename"].")<br/>"; 
+					print caNavLink($this->request, $va_contributor["displayname"], '', '', 'Browse', 'clearAndAddCriteria', array('facet' => 'entity_facet', 'id' => $va_contributor['entity_id']))." (".$va_contributor["relationship_typename"].")<br/>"; 
 				}
 				print "</div><!-- end unit -->";
 			}
@@ -289,9 +316,6 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 				if($t_object->get("ca_objects.preservation_date")){
 					print $t_object->get("ca_objects.preservation_date")."; ";
 				}
-				if($t_object->get("ca_objects.sponsor")){
-					print $t_object->get("ca_objects.sponsor").".";
-				}
 				print "</div>";
 			}
 			if($vs_access_restrictions = $t_object->get("ca_objects.access_restrictions")){
@@ -344,13 +368,13 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 			if(sizeof($va_places) > 0){
 				print "<div class='unit'><h2>"._t("Related Place").((sizeof($va_places) > 1) ? "s" : "")."</h2>";
 				foreach($va_places as $va_place_info){
-					print "<div>".(($this->request->config->get('allow_detail_for_ca_places')) ? caNavLink($this->request, $va_place_info['label'], '', 'Detail', 'Place', 'Show', array('place_id' => $va_place_info['place_id'])) : $va_place_info['label'])." (".$va_place_info['relationship_typename'].")</div>";
+					print "<div>".caNavLink($this->request, $va_place_info['label'], '', '', 'Browse', 'clearAndAddCriteria', array('facet' => 'place_facet', 'id' => $va_place_info['place_id']))." (".$va_place_info['relationship_typename'].")</div>";
 				}
 				print "</div><!-- end unit -->";
 			}
-		if($t_object->get('coverage')){
-			print "<div class='unit'><b>"._t("Coverage")."</b><br/>".$t_object->get('coverage')."</div><!-- end unit -->";
-		}
+		#if($t_object->get('coverage')){
+		#	print "<div class='unit'><b>"._t("Coverage")."</b><br/>".$t_object->get('coverage')."</div><!-- end unit -->";
+		#}
 		if($t_object->get('georeference')){
 			$o_map = new GeographicMap(250, 250, 'map');
 			$o_map->mapFrom($t_object, 'georeference');
@@ -428,33 +452,14 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 // 			}			
 ?>			
 	</div><!-- end rightSide-->
+	<div style="clear:both"><!--empty --></div>
 </div><!-- end leftCol-->
 </div><!-- end detailWrapper-->	
-	<div id='sideBar'>
-<?php	
-	$item_reps = $t_object->getRepresentations(array("preview170"), null, array('checkAccess' => $va_access_values));
-	if (sizeof($item_reps) > 1) {
-?>	
-		<div id='more'>
-			<div id='moreTitle'>More images</div>
-			<div class='moreContent'>
 <?php
-			
-			foreach (array_slice($item_reps, 1) as $item_rep) {
-			$va_item_rep = $item_rep['tags']['preview170'];
-			
-			$vn_rep_id = $item_rep['representation_id'];
-				print "<a href='#' onclick='caMediaPanel.showPanel(\"".$this->request->getBaseUrlPath()."/index.php/Detail/Object/GetRepresentationInfo/object_id/".$vn_object_id."/representation_id/".$vn_rep_id."\"); return false;'>".$va_item_rep."</a>";
-			}
-?>			
-			</div>
-		</div>		
-<?php
-	}
-			# --- output related object images as links
-			$va_related_objects = $t_object->get("ca_objects", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));
+		# --- output related object images as links
+			$va_related_objects = $t_object->get("ca_objects", array("returnAsArray" => 1));
 			if (sizeof($va_related_objects)) {
-			print "<div id='relatedItems'>";
+			print "<br/><div id='relatedItems'>";
 			print "<div id='relatedTitle'>Related Items</div>";	
 				foreach($va_related_objects as $vn_rel_id => $va_info){
 					$t_rel_object = new ca_objects($va_info["object_id"]);
@@ -476,10 +481,8 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 				print "</div>";
 			}
 			
-?>			
-		
-	
-	</div>	<!-- end sideBar -->
+
+?>
 
 	</div><!-- end detailBody -->
 <?php

@@ -122,9 +122,15 @@
 				}
 				print "<div class='unit'><b>".$t_occurrence->getDisplayLabel("ca_occurrences.duration")."</b><br/> {$vs_value} {$va_approximate}</div><!-- end unit -->";
 			}
-			if($vs_creator = $t_occurrence->get("ca_entities", array('restrictToRelationshipTypes' => array('artist', 'co_producer', 'composer', 'director', 'illustrator', 'performer', 'photographer', 'producer', 'writer')))){
-				print "<div class='unit'><b>"._t('Creator(s)')."</b><br/> {$vs_creator}</div><!-- end unit -->";
-			}
+			if($va_creators = $t_occurrence->get("ca_entities", array('returnAsArray' => true, 'restrictToRelationshipTypes' => array('artist', 'co_producer', 'composer', 'director', 'illustrator', 'performer', 'photographer', 'producer', 'writer')))){
+				print "<div class='unit'><b>"._t('Creator(s)')."</b><br/>";
+				$va_contributor_display = array();
+				foreach($va_creators as $va_creator){
+					print caNavLink($this->request, $va_creator["displayname"], '', '', 'Browse', 'clearAndAddCriteria', array('facet' => 'entity_facet', 'id' => $va_creator['entity_id']))." (".$va_creator["relationship_typename"].")<br/>"; 
+				}
+				print "</div><!-- end unit -->";
+			}		
+		
 ?>
 	</div><!-- end leftCol -->
 			
@@ -138,12 +144,17 @@
 			print "<div class='unit'><b>"._t('Contributor(s)')."</b><br/>";
 			$va_contributor_display = array();
 			foreach($va_contributors as $va_contributor){
-				print $va_contributor["displayname"]." (".$va_contributor["relationship_typename"].")<br/>"; 
+				print caNavLink($this->request, $va_contributor["displayname"], '', '', 'Browse', 'clearAndAddCriteria', array('facet' => 'entity_facet', 'id' => $va_contributor['entity_id']))." (".$va_contributor["relationship_typename"].")<br/>"; 
 			}
 			print "</div><!-- end unit -->";
-		}		
-		if($vs_sponsor = $t_occurrence->get("ca_entities", array('restrictToRelationshipTypes' => array('sponsor'), 'delimiter' => ', '))){
-			print "<div class='unit'><b>"._t('sponsor(s)')."</b><br/> {$vs_sponsor}</div><!-- end unit -->";
+		}
+		if($va_sponsors = $t_occurrence->get("ca_entities", array('returnAsArray' => true, 'restrictToRelationshipTypes' => array('sponsor')))){
+			print "<div class='unit'><b>"._t('Sponsor(s)')."</b><br/>";
+			$va_sponsor_display = array();
+			foreach($va_sponsors as $va_sponsor){
+				print caNavLink($this->request, $va_sponsor["displayname"], '', '', 'Browse', 'clearAndAddCriteria', array('facet' => 'entity_facet', 'id' => $va_sponsor['entity_id']))."<br/>"; 
+			}
+			print "</div><!-- end unit -->";
 		}
 		# --- vocabulary terms
 		$va_terms = $t_occurrence->get("ca_list_items", array("returnAsArray" => 1, 'checkAccess' => $va_access_values));

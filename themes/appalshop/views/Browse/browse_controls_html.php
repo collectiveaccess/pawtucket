@@ -109,7 +109,7 @@ if (sizeof($va_criteria)) {
 				
 			} else {
 				print "<div id='browseRight'>";
-				print "<h1>"._t('Browse the Collection')."</h1>";
+				print "<h1>"._t('Browse the Collections')."</h1>";
 				print $this->render('Browse/browse_intro_text_html.php');
 				if (sizeof($va_facets)) { 
 					print "<div id='facetList'>";

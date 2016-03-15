@@ -1,14 +1,13 @@
 <?php
 /* ----------------------------------------------------------------------
- * themes/default/views/Results/ca_objects_result_caption_html.php :
- * 		thumbnail search results
+ * themes/default/views/ca_object_search_secondary_results.php :
  * ----------------------------------------------------------------------
  * CollectiveAccess
  * Open-source collections management software
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2009-2010 Whirl-i-Gig
+ * Copyright 2010 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -26,18 +25,12 @@
  *
  * ----------------------------------------------------------------------
  */
+ 
+if (!$this->request->config->get('do_secondary_searches')) { return; }
+
+	print $this->render('Results/search_secondary_results/ca_entities_html.php');
+	print $this->render('Results/search_secondary_results/ca_places_html.php');
+	print $this->render('Results/search_secondary_results/ca_occurrences_html.php');
+	print $this->render('Results/search_secondary_results/ca_collections_html.php');
 ?>
-<div class="thumbnailCaption">
-<?php
-	$vs_caption = "";
-	if($this->getVar('caption_title')){
-		$vs_caption .= "<i>";
-		$vs_caption .= (unicode_strlen($this->getVar('caption_title')) > 60) ? preg_replace('![^A-Za-z0-9]+$!', '', substr(strip_tags($this->getVar('caption_title')), 0, 57)).'...' : $this->getVar('caption_title');
-		$vs_caption .= "</i><br/>";
-	}
-	if($this->getVar('caption_idno')){
-		$vs_caption .= $this->getVar('caption_idno');
-	}
-	print caNavLink($this->request, $vs_caption, '', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar("object_id")));
-?>
-</div>
+<div style="clear:both;"><!-- empty --></div>

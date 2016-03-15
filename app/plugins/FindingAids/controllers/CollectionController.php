@@ -75,7 +75,7 @@
 			#$t_collection = new ca_collections(45);
  			#$this->view->setVar('t_item', $t_collection);		
  					
- 			$this->render('/index_html.php');
+ 			$this->render('index_html.php');
  		}
  		# ------------------------------------------------------- 		
  		/**

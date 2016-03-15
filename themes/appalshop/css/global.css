@@ -497,7 +497,7 @@ p.slideTitle {
 #hpFeatured{
 	float:left;
 	margin: 0px 0px 0px 0px;
-	width:825px;
+	width:853px;
 	height: 430px;
 	background-color:#fff;
 	text-align:center;
@@ -505,13 +505,13 @@ p.slideTitle {
 }
 #hpFeatured div{
 	float:left;
-	width:814px !important;
+	width:842px !important;
 	text-align:left;
 	/*background-color:#F1F1F1;*/
 }
 #hpFeatured img{
 	margin:0px auto 0px auto;
-	width:615px;
+	width:642px;
 }
 #featuredScrollCaption {
 	height: 40px;
@@ -539,7 +539,7 @@ p.slideTitle {
 }
 #navImgs {
 	float:left;
-	width: 100px;
+	width: 72px;
 	padding:0px;
 	padding-right:15px;
 	margin:0px;
@@ -659,16 +659,20 @@ p.slideTitle {
 	font-weight:bold;
 	font-size:13px;
 }
-#spotTwoContent h1 a, #spotOneContent h1 a{
+#spotOneContent h1 a{
+	font-style: normal !important;
+	font-size: 16px;
+	font-family: georgia;
+	text-decoration:none;
+	line-height:1.2em;
+}
+#spotTwoContent h1 a{
 	font-style: italic;
 	font-size: 18px;
 	font-family: georgia;
 	text-decoration:none;
-}
+} 
 #spotTwoContent h1 a:hover, #spotOneContent h1 a:hover{
-	font-style: italic;
-	font-size: 18px;
-	font-family: georgia;
 	color:#333;
 	text-decoration:underline;
 }
@@ -940,7 +944,11 @@ p.slideTitle {
 }
 #sideBar {
 	float:right;
-	width:295px;
+	width:100px;
+}
+#sideBar img{
+	width:100%;
+	height:auto;
 }
 #more {
 	-moz-box-shadow: 3px 3px 5px #aaa;
@@ -990,6 +998,11 @@ p.slideTitle {
 	border-left:1px solid #ddd;
 	background-color:#f2f2f2;
 }
+#detailBody.objects #relatedItems {
+	max-width:615px;
+	margin-left:auto;
+	margin-right:auto;
+}
 #detailBody.collection #relatedItems, #detailBody.work #relatedItems{
 	clear:both;
 	margin-top:25px;
@@ -1012,7 +1025,6 @@ p.slideTitle {
 	float:left;
 	width:615px;
 }
-
 #detailBody #rightCol .unit{
 	margin-bottom:12px;
 	line-height:18px;
@@ -1026,6 +1038,25 @@ p.slideTitle {
 	margin-bottom:15px;
 	float:left;
 	padding:10px 0px 10px 10px;
+}
+#detailBody.objects #detailWrapper {
+	float:none;
+	margin-left:auto;
+	margin-right:auto;
+	width:auto;
+	text-align:center;
+}
+#detailBody.objects #rightCol, #detailBody.objects #leftCol{
+	float:none;
+	margin-left:auto;
+	margin-right:auto;
+}
+#detailBody.objects #rightCol{
+	width:800px;
+	text-align:center;
+}
+#detailBody.objects #rightCol div{
+	text-align:center;
 }
 #detailBody #colImage {
 	margin-bottom:25px;
@@ -1110,11 +1141,23 @@ p.slideTitle {
 #objDetailImage{
 	margin-bottom:0px;
 	text-align:center;
-	margin-right:30px;
+	margin-right:12px;
 }
 #BookReaderContainer{
 	width: 580px;
 	height: 500px;
+}
+#objDetailImage #BookReaderContainer{
+	width: 800px;
+	height: 650px;
+}
+
+.video-js{
+	margin-left:auto;
+	margin-right:auto;
+}
+.caAudioPlayer{
+	margin-left:190px;
 }
 /* force the z-index of the bookreader to be lower than the caMediaPanel when embedded in the page */
 #detailBody #BookReaderContainer div{
@@ -1126,6 +1169,9 @@ p.slideTitle {
 }
 #objDetailToolbar img{
 	margin-left:5px;
+}
+#objDetailImage{
+	text-align:center;
 }
 #objDetailImageNav {
 	background-color: #e6e6e6;
@@ -2957,6 +3003,7 @@ div.jGrowl div.jGrowl-closer {
 	margin:			0;
 	padding:		0;
 	list-style:		none;
+	z-index:2000;
 }
 .sf-menu {
 	line-height:	1.0;

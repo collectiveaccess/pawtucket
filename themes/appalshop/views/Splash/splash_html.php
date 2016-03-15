@@ -40,7 +40,7 @@
 	$t_featured = new ca_sets();
 	$t_featured->load(array('set_code' => $this->request->config->get('featured_set_name')));
 	
-	$set_items = $t_featured->getItems(array('thumbnailVersions' => Array("large", "tiny")));
+	$set_items = $t_featured->getItems(array('thumbnailVersions' => Array("large", "tiny", "icon")));
 
 
 #	$set_item_captions = array();
@@ -88,7 +88,7 @@
 			$vn_object_id = $item['row_id'];
 			#$vn_height_padding = round((430-$va_image_height)/2);
 
-			print "<div><img src='".$item['representation_url_large']."' rel='".$item['representation_url_tiny']."' name='".$this->request->getBaseUrlPath()."/index.php/Detail/Object/Show/object_id/".$vn_object_id."'/>";
+			print "<div><img src='".$item['representation_url_large']."' rel='".$item['representation_url_icon']."' name='".$this->request->getBaseUrlPath()."/index.php/Detail/Object/Show/object_id/".$vn_object_id."'/>";
 			print "<span class='featuredCaption'><p class='slideTitle'>".$va_caption."</p></span></div>"; 
 		}	
 	}	
@@ -104,11 +104,8 @@
 			<div id="spotOneContent">
 <?php
 	$t_set = new ca_sets();
-	$va_special_projects = caExtractValuesByUserLocale($t_set->getSets(array('table' => 'ca_objects', 'checkAccess' => $va_access_values, 'setType' => 'public_presentation')));
+	$va_special_projects = caExtractValuesByUserLocale($t_set->getSets(array('table' => 'ca_objects', 'checkAccess' => $va_access_values, 'setType' => 'special_projects')));
  			
-	# Enforce access control on set
-	#print_r($va_special_projects);
-
 		$i = 0;
 		foreach ($va_special_projects as $vn_set_id => $va_special_project) {
 			print "<div class='section'>";
@@ -190,7 +187,9 @@ $('#hpFeatured').cycle({
     fx:     'fade', 
     speed:  '1000', 
     timeout: '4000', 
-    pager:  '#navImgs', 
+    pager:  '#navImgs',
+    pause:	true,     // true to enable "pause on hover" 
+    pauseOnPagerHover: true,
      
     pagerAnchorBuilder: function(i, slide) { 
         return '<a href="#"><img src="'

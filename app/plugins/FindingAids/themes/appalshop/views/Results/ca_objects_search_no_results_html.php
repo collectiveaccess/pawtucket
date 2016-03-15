@@ -1,6 +1,6 @@
 <?php
 /* ----------------------------------------------------------------------
- * themes/default/views/Results/ca_objects_result_caption_html.php :
+ * themes/default/views/ca_objects_search_no_results_html.php :
  * 		thumbnail search results
  * ----------------------------------------------------------------------
  * CollectiveAccess
@@ -8,7 +8,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2009-2010 Whirl-i-Gig
+ * Copyright 2008-2010 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -26,18 +26,6 @@
  *
  * ----------------------------------------------------------------------
  */
+
+	print "<p>"._t("To search the collection, simply type in the words that best describe what you are looking for and click on the \"search\" button. By default, the search engine will return only matches that contain all of the words in your search. The more words entered, the more restrictive the search.")."</p>";
 ?>
-<div class="thumbnailCaption">
-<?php
-	$vs_caption = "";
-	if($this->getVar('caption_title')){
-		$vs_caption .= "<i>";
-		$vs_caption .= (unicode_strlen($this->getVar('caption_title')) > 60) ? preg_replace('![^A-Za-z0-9]+$!', '', substr(strip_tags($this->getVar('caption_title')), 0, 57)).'...' : $this->getVar('caption_title');
-		$vs_caption .= "</i><br/>";
-	}
-	if($this->getVar('caption_idno')){
-		$vs_caption .= $this->getVar('caption_idno');
-	}
-	print caNavLink($this->request, $vs_caption, '', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar("object_id")));
-?>
-</div>

@@ -32,7 +32,7 @@
 	$vs_caption = "";
 	if($this->getVar('caption_title')){
 		$vs_caption .= "<i>";
-		$vs_caption .= (unicode_strlen($this->getVar('caption_title')) > 60) ? preg_replace('![^A-Za-z0-9]+$!', '', substr(strip_tags($this->getVar('caption_title')), 0, 57)).'...' : $this->getVar('caption_title');
+		$vs_caption .= (unicode_strlen($this->getVar('caption_title')) > 45) ? preg_replace('![^A-Za-z0-9]+$!', '', substr(strip_tags($this->getVar('caption_title')), 0, 30)).'...' : $this->getVar('caption_title');
 		$vs_caption .= "</i><br/>";
 	}
 	if($this->getVar('caption_idno')){

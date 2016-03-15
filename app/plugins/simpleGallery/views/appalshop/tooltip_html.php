@@ -1,14 +1,13 @@
 <?php
 /* ----------------------------------------------------------------------
- * themes/default/views/Results/ca_objects_result_caption_html.php :
- * 		thumbnail search results
+ * app/plugins/simpleGallery/tooltip_html.php : 
  * ----------------------------------------------------------------------
  * CollectiveAccess
  * Open-source collections management software
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2009-2010 Whirl-i-Gig
+ * Copyright 2010 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -26,18 +25,19 @@
  *
  * ----------------------------------------------------------------------
  */
+ 
 ?>
-<div class="thumbnailCaption">
+<div class="tooltipText">
 <?php
-	$vs_caption = "";
-	if($this->getVar('caption_title')){
-		$vs_caption .= "<i>";
-		$vs_caption .= (unicode_strlen($this->getVar('caption_title')) > 60) ? preg_replace('![^A-Za-z0-9]+$!', '', substr(strip_tags($this->getVar('caption_title')), 0, 57)).'...' : $this->getVar('caption_title');
-		$vs_caption .= "</i><br/>";
+	if($this->getVar('tooltip_image')){
+		print "<div style='text-align:center; margin-bottom:10px;'>".$this->getVar('tooltip_image');
+		if($this->getVar('tooltip_image_name')){
+			print "<div style='font-style:italic; font-size:11px;'>".$this->getVar('tooltip_image_name')."</div>";
+		}
+		print "</div>";
 	}
-	if($this->getVar('caption_idno')){
-		$vs_caption .= $this->getVar('caption_idno');
+	if($this->getVar('tooltip_text')){
+		print "<div style='text-align:center; width:400px;'>".$this->getVar('tooltip_text')."</div>";
 	}
-	print caNavLink($this->request, $vs_caption, '', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar("object_id")));
 ?>
 </div>

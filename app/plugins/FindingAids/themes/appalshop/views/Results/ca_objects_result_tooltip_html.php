@@ -1,6 +1,6 @@
 <?php
 /* ----------------------------------------------------------------------
- * themes/default/views/Results/ca_objects_result_caption_html.php :
+ * themes/default/views/Results/ca_objects_result_tooltip_html.php :
  * 		thumbnail search results
  * ----------------------------------------------------------------------
  * CollectiveAccess
@@ -27,17 +27,20 @@
  * ----------------------------------------------------------------------
  */
 ?>
-<div class="thumbnailCaption">
+<div class="tooltipImage">
+	<?php print $this->getVar('tooltip_representation'); ?>
+</div>
+<div class="tooltipCaption">
 <?php
-	$vs_caption = "";
-	if($this->getVar('caption_title')){
-		$vs_caption .= "<i>";
-		$vs_caption .= (unicode_strlen($this->getVar('caption_title')) > 60) ? preg_replace('![^A-Za-z0-9]+$!', '', substr(strip_tags($this->getVar('caption_title')), 0, 57)).'...' : $this->getVar('caption_title');
-		$vs_caption .= "</i><br/>";
+	if($this->getVar('tooltip_title')){
+		print "<div><b>TITLE:</b> ";
+		print (unicode_strlen($this->getVar('tooltip_title')) > 200) ? substr(strip_tags($this->getVar('tooltip_title')), '0', '200')."..." : $this->getVar('tooltip_title');
+		print "</div>";
 	}
-	if($this->getVar('caption_idno')){
-		$vs_caption .= $this->getVar('caption_idno');
+	if($this->getVar('tooltip_idno')){
+		print "<div><b>ID:</b> ";
+		print $this->getVar('tooltip_idno');
+		print "</div>";
 	}
-	print caNavLink($this->request, $vs_caption, '', 'Detail', 'Object', 'Show', array('object_id' => $this->getVar("object_id")));
 ?>
 </div>
