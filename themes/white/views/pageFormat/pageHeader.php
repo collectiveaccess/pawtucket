@@ -6,23 +6,25 @@
 	<META NAME="Description" CONTENT="">
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/global.css" rel="stylesheet" type="text/css" />
 	<link href="<?php print $this->request->getThemeUrlPath(true); ?>/css/sets.css" rel="stylesheet" type="text/css" />
+	<!--
 	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/videojs/video-js.css" type="text/css" media="screen" />
 	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery-jplayer/jplayer.blue.monday.css" type="text/css" media="screen" />
+	-->
 	
 	<!--[if IE]>
     <link rel="stylesheet" type="text/css" href="<?php print $this->request->getThemeUrlPath(true); ?>/css/iestyles.css" />
 	<![endif]-->
 	
 	<!--[if (!IE)|(gte IE 8)]><!-->
-	<link href="<?php print $this->request->getBaseUrlPath(); ?>/js/DV/viewer-datauri.css" media="screen" rel="stylesheet" type="text/css" />
-	<link href="<?php print $this->request->getBaseUrlPath(); ?>/js/DV/plain-datauri.css" media="screen" rel="stylesheet" type="text/css" />
-	<link href="<?php print $this->request->getBaseUrlPath(); ?>/js/DV/plain.css" media="screen" rel="stylesheet" type="text/css" />
+	<link href="<?php print $this->request->getBaseUrlPath(); ?>/assets/DV/viewer-datauri.css" media="screen" rel="stylesheet" type="text/css" />
+	<link href="<?php print $this->request->getBaseUrlPath(); ?>/assets/DV/plain-datauri.css" media="screen" rel="stylesheet" type="text/css" />
+	<link href="<?php print $this->request->getBaseUrlPath(); ?>/assets/DV/plain.css" media="screen" rel="stylesheet" type="text/css" />
 	<!--<![endif]-->
 	<!--[if lte IE 7]>
 	<link href="<?php print $this->request->getBaseUrlPath(); ?>/viewer.css" media="screen" rel="stylesheet" type="text/css" />
 	<link href="<?php print $this->request->getBaseUrlPath(); ?>/plain.css" media="screen" rel="stylesheet" type="text/css" />
 	<![endif]-->
-	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/js/jquery/jquery-tileviewer/jquery.tileviewer.css" type="text/css" media="screen" />
+	<link rel="stylesheet" href="<?php print $this->request->getBaseUrlPath(); ?>/assets/jquery/jquery-tileviewer/jquery.tileviewer.css" type="text/css" media="screen" />
 <?php
 	print AssetLoadManager::getLoadHTML($this->request);
 ?>
@@ -102,19 +104,19 @@
         </ul>
         <ul id="exhibitions-sub" class="sublist" style="display: none;">
 
-            <li><a id="exhibitions-current" href="http://www.whitecolumns.org/exhibitions.html?type=current">Current</a></li>
-            <li><a id="exhibitions-past" href="http://www.whitecolumns.org/exhibitions.html?type=past">Past</a></li>
-            <li><a id="exhibitions-upcoming" href="http://www.whitecolumns.org/exhibitions.html?type=upcoming">Upcoming</a></li>
+            <li><a id="exhibitions-current" href="../sections/current.php">Current</a></li>
+            <li><a id="exhibitions-past" href="../sections/past.php">Past</a></li>
+            <li><a id="exhibitions-upcoming" href="../sections/future.php">Upcoming</a></li>
         </ul>
         <ul>
             <li><a id="projects" href="#" onclick="selectMenu(this.id); return false;">Projects</a></li>
         </ul>
 
         <ul id="projects-sub" class="sublist" style="display: none;">
-            <li><a id="projects-editions" href="http://www.whitecolumns.org/text.html?type=editions">Editions</a></li>
-            <li><a id="projects-publications" href="http://www.whitecolumns.org/text.html?type=publications">Publications</a></li>
-            <li><a id="projects-the_sound" href="http://www.whitecolumns.org/text.html?type=the_sound">TSoWC</a></li>
-			<li><a id="projects-other" href="http://www.whitecolumns.org/text.html?type=other">Other Projects</a></li>
+            <li><a id="projects-editions" href="../sections/editions.php">Editions</a></li>
+            <li><a id="projects-publications" href="../sections/publications.php">Publications</a></li>
+            <li><a id="projects-the_sound" href="../sections/tsowc.php">TSoWC</a></li>
+			<li><a id="projects-other" href="../sections/other.php">Other Projects</a></li>
         </ul>
     </div>
 
@@ -134,7 +136,7 @@
         </ul>
 
         <ul id="support-sub" class="sublist" style="display: none;">
-            <li><a id="support-membership" href="http://www.whitecolumns.org/text.html?type=membership">Membership</a></li>
+            <li><a id="support-membership" href="http://www.whitecolumns.org/text.html?type=membership">Donate</a></li>
             <li><a id="support-funders" href="http://www.whitecolumns.org/text.html?type=funders">Funders</a></li>
             <li><a id="support-artists_for_wc" href="http://www.whitecolumns.org/text.html?type=artists_for_wc">Artists for<br />White Columns</a></li>
         </ul>

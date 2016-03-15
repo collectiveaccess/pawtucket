@@ -72,17 +72,31 @@ if (!$this->request->isAjax()) {
 			}
 			# --- identifier
 			if($t_collection->get('idno')){
-				print "<div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=".$t_collection->get('idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Finding Aid")."&nbsp;&nbsp;&nbsp;</a></div>";
+				$va_attributes = $this->request->config->get('ca_collections_detail_display_attributes');
+				if(is_array($va_attributes) && (sizeof($va_attributes) > 0)){
+					foreach($va_attributes as $vs_attribute_code){
+						if($vs_value = $t_collection->get("ca_collections.{$vs_attribute_code}", array('convertCodesToDisplayText' => true, 'delimiter' => ', '))){
+							if($vs_attribute_code == "findingaid1") {
+								if($vs_value == "Yes") {
+									print "<div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=".$t_collection->get('idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Finding Aid")."&nbsp;&nbsp;&nbsp;</a></div>";
+								}
+							}
+						}
+					}
+				}
+			
+			
+#				print "<div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=".$t_collection->get('idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Finding Aid")."&nbsp;&nbsp;&nbsp;</a></div>";
 				print "<div class='unit'><b>"._t("Identifier")."</b>: ".$t_collection->get('idno')."</div><!-- end unit -->";
 			}
 			# --- attributes
 			$va_attributes = $this->request->config->get('ca_collections_detail_display_attributes');
 			if(is_array($va_attributes) && (sizeof($va_attributes) > 0)){
 				foreach($va_attributes as $vs_attribute_code){
-					if($vs_value = $t_collection->get("ca_collections.{$vs_attribute_code}", array('convertCodesToDisplayText' => true, 'delimiter' => ', '))){
+					if($vs_value = $t_collection->get("ca_collections.{$vs_attribute_code}", array('convertCodesToDisplayText' => true, 'delimiter' => ',, '))){
 						if($vs_attribute_code == "alternateID" or $vs_attribute_code == "relation") {
 							
-							$myArray = preg_split("/,/", $vs_value, -1, PREG_SPLIT_NO_EMPTY);
+							$myArray = preg_split("/,,/", $vs_value, -1, PREG_SPLIT_NO_EMPTY);
 							$myString = "";
 							$tempString = "";
 							$count = 0;
@@ -98,6 +112,8 @@ if (!$this->request->isAjax()) {
 							}
 							
 							print "<div class='unit'><b>".$t_collection->getDisplayLabel("ca_collections.{$vs_attribute_code}").":</b> {$myString}</div><!-- end unit -->";
+						}
+						else if($vs_attribute_code == "findingaid1") {
 						}
 						else {
 							print "<div class='unit'><b>".$t_collection->getDisplayLabel("ca_collections.{$vs_attribute_code}").":</b> {$vs_value}</div><!-- end unit -->";

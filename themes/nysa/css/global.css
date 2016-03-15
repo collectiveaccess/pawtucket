@@ -11,9 +11,9 @@ body {
 	padding:0px;
 }
 
-textarea {
+/*textarea {
 	resize: none;
-}
+}*/
 
 /* ------------------------------------- */
 /* general styles */
@@ -67,6 +67,14 @@ a{
 	color: #006794;
 	text-decoration: underline;
 }
+
+a img {
+	border-color: #FFFFFF;
+}
+
+.left-box a img {border-color: rgb(230, 229, 220);
+}
+
 HR{
 	border:1px solid #DEDEDE;
 }
@@ -730,6 +738,7 @@ padding-top:0;
 	text-align: center;
 	font-style: italic;
 }
+
 #hpBrowse{
 	background-image: url('../graphics/dotted-border.jpg');
 	background-repeat:repeat-x;
@@ -824,7 +833,7 @@ margin-bottom:0;
 	width:800px;
 }
 #detailBody .unit input[type="text"] {
-	font-size:11px;
+	font-size:14px;
 	font-weight: normal;
 	padding: 2px 2px 2px 2px;
 	margin: 0px;
@@ -834,7 +843,7 @@ margin-bottom:0;
 	outline-width:0px;
 }
 #detailBody .unit textarea {
-	font-size:11px;
+	font-size:14px;
 	font-weight: normal;
 	padding: 0px 2px 0px 2px;
 	margin: 0px;
@@ -843,7 +852,7 @@ margin-bottom:0;
 	height:100px;
 }
 #detailBody .unit input[type="textarea"] {
-	font-size:11px;
+	font-size:14px;
 	font-weight: normal;
 	padding: 2px 2px 2px 2px;
 	margin: 0px;

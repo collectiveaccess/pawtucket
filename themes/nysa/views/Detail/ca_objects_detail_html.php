@@ -251,7 +251,20 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 			if($t_object->get('idno')){
 				if($vs_collection_idno = $t_object->get('ca_collections.idno')){
 					#print_r(@get_headers("http://iarchives.nysed.gov/xtf/view?docId=tei/".$vs_collection_idno."/".$t_object->get('idno').".xml"));
-					print "<div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=tei/".$vs_collection_idno."/".$t_object->get('idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Transcript")."&nbsp;&nbsp;&nbsp;</a></div>";
+					# get transcript y/n
+					$va_attributes = $this->request->config->get('ca_objects_detail_display_attributes');
+					if(is_array($va_attributes) && (sizeof($va_attributes) > 0)){
+						foreach($va_attributes as $vs_attribute_code){
+							if($vs_value = $t_object->get("ca_objects.{$vs_attribute_code}", array('convertCodesToDisplayText' => true, 'delimiter' => ',<br/> '))){
+								if($vs_attribute_code == "transcript") {
+									if($vs_value == "Yes") {
+										print "<div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=tei/".$vs_collection_idno."/".$t_object->get('idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Transcript / Translation")."&nbsp;&nbsp;&nbsp;</a></div>";
+									}
+								}
+							}
+						}
+					}
+#						print "<div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=tei/".$vs_collection_idno."/".$t_object->get('idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Transcript / Translation")."&nbsp;&nbsp;&nbsp;</a></div>";
 				}
 				print "<div class='unit'><b>"._t("Identifier").":</b> ".$t_object->get('idno')."</div><!-- end unit -->";
 			}
@@ -323,6 +336,8 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 								print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.{$vs_attribute_code}").":</b> {$myString}</div><!-- end unit -->";
 							}
 						}
+						else if($vs_attribute_code == "transcript") {
+						}
 						else {
 							if (strlen($vs_value) > 0) {
 								print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.{$vs_attribute_code}").":</b> {$vs_value}</div><!-- end unit -->";
@@ -342,7 +357,7 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 			
 			# description came from here
 			if($t_object->get('ca_collections.idno', array('checkAccess' => $va_access_values))){
-				print "<br/><div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=".$t_object->get('ca_collections.idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Finding Aid")."&nbsp;&nbsp;&nbsp;</a></div>";
+#				print "<br/><div class='unit'><a href='http://iarchives.nysed.gov/xtf/view?docId=".$t_object->get('ca_collections.idno').".xml' target='_blank' class='cabutton'>&nbsp;&nbsp;&nbsp;"._t("Finding Aid")."&nbsp;&nbsp;&nbsp;</a></div>";
 			}	
 				
 			# --- child hierarchy info

@@ -452,11 +452,12 @@
 					}
 					
 					$vn_show_zoom = true;
+					/*
 					if($t_rep && $t_rep->getAnnotationCount() > 0) {
 						print '<a href="#" onclick="openClipList(); return false;" style="margin-right:30px;">'._t('Chapters').'</a> ';
 						//$vn_show_download_link = false;
 						$vn_show_zoom = false;
-					}
+					}*/
 					
 					# --- download link if creative commons
 					if($vn_show_download_link){

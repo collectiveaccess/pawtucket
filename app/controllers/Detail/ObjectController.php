@@ -90,7 +90,7 @@
  			if(!$vn_object_id) { $vn_object_id = 0; }
  			$t_rep = new ca_object_representations($pn_representation_id);
  			
- 			$va_opts = array('display' => $ps_display_type, 'object_id' => $vn_object_id, 'order_item_id' => $pn_order_item_id, 'onlyShowRepresentationsInOrder' => ($pn_order_item_id ? true : false), 'containerID' => $ps_containerID, 'access' => caGetUserAccessValues($this->request));
+ 			$va_opts = array('display' => $ps_display_type, 'object_id' => $vn_object_id, 'order_item_id' => $pn_order_item_id, 'onlyShowRepresentationsInOrder' => ($pn_order_item_id ? true : false), 'containerID' => $ps_containerID, 'access' =>  !$this->request->config->get('dont_enforce_access_settings_for_representations') ? caGetUserAccessValues($this->request) : null);
  			if (strlen($vs_use_book_viewer = $this->request->getParameter('use_book_viewer', pInteger))) { $va_opts['use_book_viewer'] = (bool)$vs_use_book_viewer; }
 
  			$this->response->addContent($t_rep->getRepresentationViewerHTMLBundle($this->request, $va_opts));

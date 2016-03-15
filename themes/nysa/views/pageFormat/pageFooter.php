@@ -11,10 +11,11 @@
 			<li class="list-item-one">
 				<ul>
 					<li><a href="http://www.archives.nysed.gov/about/index.shtml">About Us</a></li>
-					<li><a href="http://www.archives.nysed.gov/news/news_index.shtml">News</a></li>
-					<li><a href="http://www.archives.nysed.gov/research/res_serv_directions.shtml">Directions</a></li>
 					<li><a href="http://www.archives.nysed.gov/directories/index.shtml">Contact Us</a></li>
+					<li><a href="http://iarchives.nysed.gov/xtf/search?">Finding Aids</a></li>
+					<li><a href="http://www.archives.nysed.gov/news">News</a></li>
 					<li><a href="http://www.archives.nysed.gov/about/site-map">Site Map</a></li>
+					
 				</ul>
 			</li>
 			<li class="list-item-two">
@@ -23,12 +24,11 @@
 					<li><a href="http://www.nysarchivestrust.org/">Archives Partnership Trust</a></li>
 					<li><a href="http://www.nyshrab.org/">New York State Historical Records</a></li>
 					<li class="advisory-board"><a href="http://www.nyshrab.org/">Advisory Board</a></li>
-					<li><a href="http://nysl.nysed.gov/uhtbin/cgisirsi.exe/x/x/0/49">Online Catalog</a></li>
+					<li><a href="http://www.oce.nysed.gov/">Office of Cultural Education</a></li>
 				</ul>
 			</li>
 			<li>
 				<ul>
-					<li><a href="http://www.oce.nysed.gov/">Office of Cultural Education</a></li>
 					<li><a href="http://www.nysed.gov/">New York State Education Department</a></li>
 					<li><a href="http://www.ny.gov/">New York State</a></li>
 					<li><a href="http://www.nysed.gov/privacy-policy">Privacy Policy</a></li>
