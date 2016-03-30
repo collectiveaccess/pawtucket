@@ -122,7 +122,7 @@
 				}
 				print "<div class='unit'><b>".$t_occurrence->getDisplayLabel("ca_occurrences.duration")."</b><br/> {$vs_value} {$va_approximate}</div><!-- end unit -->";
 			}
-			if($va_creators = $t_occurrence->get("ca_entities", array('returnAsArray' => true, 'restrictToRelationshipTypes' => array('artist', 'co_producer', 'composer', 'director', 'illustrator', 'performer', 'photographer', 'producer', 'writer')))){
+			if($va_creators = $t_occurrence->get("ca_entities", array('returnAsArray' => true, 'checkAccess' => $va_access_values, 'restrictToRelationshipTypes' => array('artist', 'co_producer', 'composer', 'director', 'illustrator', 'performer', 'photographer', 'producer', 'writer')))){
 				print "<div class='unit'><b>"._t('Creator(s)')."</b><br/>";
 				$va_contributor_display = array();
 				foreach($va_creators as $va_creator){
@@ -140,7 +140,7 @@
 			print "<div class='unit'><b>".$t_occurrence->getDisplayLabel("ca_occurrences.work_description_w_type")."</b><br/> {$vs_desc}</div><!-- end unit -->";
 		}
 					
-		if($va_contributors = $t_occurrence->get("ca_entities", array('returnAsArray' => true, 'restrictToRelationshipTypes' => array('actor', 'animator', 'audio_engineer', 'author', 'broadcast_engineer', 'camera_assistant', 'camera_operator', 'cinematographer', 'composer', 'contributing_artist', 'editor', 'engineer', 'filmmaker', 'interviewee', 'interviewer', 'musician', 'narrator', 'performer', 'recording_engineer', 'sound_mixer', 'subject', 'writer')))){
+		if($va_contributors = $t_occurrence->get("ca_entities", array('returnAsArray' => true, 'checkAccess' => $va_access_values, 'restrictToRelationshipTypes' => array('actor', 'animator', 'audio_engineer', 'author', 'broadcast_engineer', 'camera_assistant', 'camera_operator', 'cinematographer', 'composer', 'contributing_artist', 'editor', 'engineer', 'filmmaker', 'interviewee', 'interviewer', 'musician', 'narrator', 'performer', 'recording_engineer', 'sound_mixer', 'subject', 'writer')))){
 			print "<div class='unit'><b>"._t('Contributor(s)')."</b><br/>";
 			$va_contributor_display = array();
 			foreach($va_contributors as $va_contributor){
@@ -148,7 +148,7 @@
 			}
 			print "</div><!-- end unit -->";
 		}
-		if($va_sponsors = $t_occurrence->get("ca_entities", array('returnAsArray' => true, 'restrictToRelationshipTypes' => array('sponsor')))){
+		if($va_sponsors = $t_occurrence->get("ca_entities", array('returnAsArray' => true, 'checkAccess' => $va_access_values, 'restrictToRelationshipTypes' => array('sponsor')))){
 			print "<div class='unit'><b>"._t('Sponsor(s)')."</b><br/>";
 			$va_sponsor_display = array();
 			foreach($va_sponsors as $va_sponsor){

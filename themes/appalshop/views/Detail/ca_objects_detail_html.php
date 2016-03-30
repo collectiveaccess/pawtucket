@@ -223,7 +223,7 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 					print "<div class='unit'><b>".$t_object->getDisplayLabel("ca_objects.date")."</b><br/> {$vs_value}</div><!-- end unit -->";
 				}
 			}			
-			if($va_creators = $t_object->get("ca_entities", array('returnAsArray' => true, 'restrictToRelationshipTypes' => array('artist', 'co_producer', 'composer', 'director', 'illustrator', 'performer', 'photographer', 'producer', 'writer')))){
+			if($va_creators = $t_object->get("ca_entities", array('returnAsArray' => true, 'checkAccess' => $va_access_values, 'restrictToRelationshipTypes' => array('artist', 'co_producer', 'composer', 'director', 'illustrator', 'performer', 'photographer', 'producer', 'writer')))){
 				print "<div class='unit'><b>"._t('Creator(s)')."</b><br/>";
 				$va_creator_display = array();
 				foreach($va_creators as $va_creator){
@@ -231,7 +231,7 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 				}
 				print "</div><!-- end unit -->";
 			}
-			if($va_contributors = $t_object->get("ca_entities", array('returnAsArray' => true, 'restrictToRelationshipTypes' => array('actor', 'animator', 'audio_engineer', 'author', 'broadcast_engineer', 'camera_assistant', 'camera_operator', 'cinematographer', 'composer', 'contributing_artist', 'editor', 'engineer', 'filmmaker', 'interviewee', 'interviewer', 'musician', 'narrator', 'performer', 'recording_engineer', 'sound_mixer', 'subject', 'writer')))){
+			if($va_contributors = $t_object->get("ca_entities", array('returnAsArray' => true, 'checkAccess' => $va_access_values, 'restrictToRelationshipTypes' => array('actor', 'animator', 'audio_engineer', 'author', 'broadcast_engineer', 'camera_assistant', 'camera_operator', 'cinematographer', 'composer', 'contributing_artist', 'editor', 'engineer', 'filmmaker', 'interviewee', 'interviewer', 'musician', 'narrator', 'performer', 'recording_engineer', 'sound_mixer', 'subject', 'writer')))){
 				print "<div class='unit'><b>"._t('Contributor(s)')."</b><br/>";
 				$va_contributor_display = array();
 				foreach($va_contributors as $va_contributor){
