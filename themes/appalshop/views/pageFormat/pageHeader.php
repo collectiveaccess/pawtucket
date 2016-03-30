@@ -58,16 +58,16 @@
 			<ul class='sf-menu'>
 				<li><a href='#'>About</a>
 					<ul>
-						<li><a href='http://archive.appalshop.org/news/?page_id=7'>History of Appalshop</a></li>
-						<li><a href='http://archive.appalshop.org/news/?page_id=75'>The Archive</a></li>
-						<li><a href='http://archive.appalshop.org/news/?page_id=9'>Supporters</a></li>
-						<li><a href='http://archive.appalshop.org/news/?page_id=11'>Staff</a></li>
+						<li><a href='/news/?page_id=7'>History of Appalshop</a></li>
+						<li><a href='/news/?page_id=75'>The Archive</a></li>
+						<li><a href='/news/?page_id=9'>Supporters</a></li>
+						<li><a href='/news/?page_id=11'>Staff</a></li>
 					</ul>
 				</li>
-				<li><a href='http://archive.appalshop.org/news'>News</a></li>
-				<li><a href='http://archive.appalshop.org/news/?page_id=13'>Services</a></li>
-				<li><a href='http://archive.appalshop.org/news/?page_id=15'>Support</a></li>
-				<li><a href='http://archive.appalshop.org/news/?page_id=17'>Contact</a></li>
+				<li><a href='/news'>News</a></li>
+				<li><a href='/news/?page_id=13'>Services</a></li>
+				<li><a href='/news/?page_id=15'>Support</a></li>
+				<li><a href='/news/?page_id=17'>Contact</a></li>
 			</ul>
 			<a href='https://www.facebook.com/Appalshop?fref=ts'><img src='<?php print $this->request->getThemeUrlPath(); ?>/graphics/f_logo.jpg' border='0' style='margin:0px 5px 0px 8px;'></a>
 			<a href='https://twitter.com/AppalArchive'><img src='<?php print $this->request->getThemeUrlPath(); ?>/graphics/imgres.jpg' border='0'></a>
