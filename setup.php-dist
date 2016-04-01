@@ -8,7 +8,7 @@
 #
 #               Pawtucket: Public-access front-end for CollectiveAccess
 #               Open-source collections management software
-#               Version 1.4
+#               Version 1.6
 #				
 # -------------------------------------------------------------------------------------------
 # Need help setting up? Visit http://www.collectiveaccess.org/forum
@@ -75,7 +75,6 @@ define("__CA_APP_NAME__", "collectiveaccess");
 #		
 #
 $_CA_THEMES_BY_DEVICE = array(
-	'iPhone' 		=> 'iphone',		// use the 'iphone' theme for iPhone devices such as iPhone and iPod Touch
 	'_default_' 	=> 'default'		// use the 'default' theme for everything else
 );
 
@@ -218,8 +217,8 @@ define("__CA_SITE_HOSTNAME__", $_SERVER['HTTP_HOST']);
 # IT IS VERY UNLIKELY THAT YOU WILL NEED TO CHANGE ANYTHING UNDER THIS LINE
 # --------------------------------------------------------------------------------------------
 
-# Only MySQL databases are currently supported so leave this set to 'mysql'!
-define("__CA_DB_TYPE__", 'mysql');
+# Valid values are 'mysql' (old mysql drivers for PHP <= 5.6), 'mysqli' (newer mysql drivers; required for PHP 7.0) or 'pdo_mysql' (newest drivers)
+define("__CA_DB_TYPE__", 'mysqli');
 
 # Path to CollectiveAccess 'app' directory 
 define("__CA_APP_DIR__", __CA_BASE_DIR__."/app");
@@ -283,11 +282,7 @@ require_once(__CA_APP_DIR__.'/version.php');
 # includes commonly used classes
 require_once(__CA_APP_DIR__.'/helpers/preload.php');
 
-if (defined('E_DEPRECATED')) {	// PHP 5.3/5.4
-	error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);
-} else {	// PHP <= 5.2
-	error_reporting(E_ALL & ~E_NOTICE);
-}
+error_reporting(E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT);
 
 /* ----------------------------------------------------------------------
  * setup.php : 	defines paths for Pawtucket public access front-end; enables the 
@@ -299,7 +294,7 @@ if (defined('E_DEPRECATED')) {	// PHP 5.3/5.4
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2008-2013 Whirl-i-Gig
+ * Copyright 2008-2016 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -317,4 +312,3 @@ if (defined('E_DEPRECATED')) {	// PHP 5.3/5.4
  *
  * ----------------------------------------------------------------------
  */
-?>
