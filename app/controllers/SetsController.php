@@ -26,7 +26,7 @@
  * ----------------------------------------------------------------------
  */
  
- 	require_once(__CA_LIB_DIR__."/core/Error.php");
+ 	require_once(__CA_LIB_DIR__."/core/ApplicationError.php");
 	require_once(__CA_MODELS_DIR__."/ca_sets.php");
 	require_once(__CA_MODELS_DIR__."/ca_objects.php");
 	require_once(__CA_MODELS_DIR__."/ca_commerce_transactions.php");

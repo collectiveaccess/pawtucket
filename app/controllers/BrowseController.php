@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2009-2011 Whirl-i-Gig
+ * Copyright 2009-2016 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -315,7 +315,7 @@
  		/**
  		 * Override browse index to check if we need to honor the "use_splash_page_for_start_of_browse" setting and  redirect user to the splash page
  		 */
- 		public function Index() {
+ 		public function Index($pa_options=null) {
 			if ($this->request->config->get('use_splash_page_for_start_of_browse') && !$this->opo_browse->numCriteria()) { $this->response->setRedirect(caNavUrl($this->request, '', 'Splash', 'Index')); return; }
 			parent::Index();
 		}
@@ -375,4 +375,3 @@
  		}
 		# -------------------------------------------------------
  	}
- ?>
