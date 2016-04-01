@@ -39,7 +39,7 @@ use Hoa\Visitor;
  *
  * Most of the artithmetic function parsing code was taken from Hoa\Math\Visitor\Arithmetic
  */
-class ExpressionVisitor implements Visitor\Visit {
+class ExpressionVisitor { //implements Visitor\Visit {
 
 	protected $opa_functions = array();
 	protected $opa_variables = array();
@@ -74,7 +74,6 @@ class ExpressionVisitor implements Visitor\Visit {
 			'round'			=> xcallable('round'),
 			'random'		=> xcallable('rand'),
 			'current'		=> xcallable('caIsCurrentDate'),
-			'isvaliddate'	=> xcallable('caIsValidDate'),
 			'future'		=> xcallable('caDateEndsInFuture'),
 			'wc'			=> xcallable('str_word_count'),
 			'length'		=> xcallable('strlen'),

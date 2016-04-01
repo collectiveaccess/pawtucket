@@ -292,5 +292,19 @@ if(!(bool)$this->request->config->get("splash_disable_random_objects")){
  			return ($ps_mode == 'singular') ? _t('browse') : _t('browses');
  		}
  		# ------------------------------------------------------
+		/** 
+		 * Generate the URL for the "back to results" link from a browse result item
+		 * as an array of path components.
+		 */
+ 		public static function getReturnToResultsUrl($po_request) {
+ 			$va_ret = array(
+ 				'module_path' => '',
+ 				'controller' => 'Splash',
+ 				'action' => $po_request->getAction(),
+ 				'params' => array()
+ 			);
+			return $va_ret;
+ 		}
+		# -------------------------------------------------------
  	}
  ?>

@@ -828,5 +828,19 @@
  			$this->Index();
  		}
  		# -------------------------------------------------------
+		/** 
+		 * Generate the URL for the "back to results" link from a browse result item
+		 * as an array of path components.
+		 */
+ 		public static function getReturnToResultsUrl($po_request) {
+ 			$va_ret = array(
+ 				'module_path' => '',
+ 				'controller' => 'Sets',
+ 				'action' => $po_request->getAction(),
+ 				'params' => array()
+ 			);
+			return $va_ret;
+ 		}
+		# -------------------------------------------------------
  	}
  ?>

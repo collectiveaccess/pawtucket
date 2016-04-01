@@ -647,9 +647,9 @@ class DisplayTemplateParser {
 									'includeBlankValuesInTopLevelForPrefetch' => false,
 									'unique' => $vb_unique,
 									'aggregateUnique' => $vb_aggregate_unique,
+									'filterNonPrimaryRepresentations' => $vb_filter_non_primary_reps,
 									'relationIDs' => $va_relation_ids,
-									'relationshipTypeIDs' => $va_relationship_type_ids,
-									'filterNonPrimaryRepresentations' => $vb_filter_non_primary_reps
+									'relationshipTypeIDs' => $va_relationship_type_ids
 								]
 							)
 						);

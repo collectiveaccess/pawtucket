@@ -44,6 +44,8 @@ require_once(__CA_LIB_DIR__.'/core/Zend/Registry.php');
 require_once(__CA_LIB_DIR__.'/core/Cache/MemoryCache.php'); // is used in utilityHelpers
 require_once(__CA_APP_DIR__.'/helpers/utilityHelpers.php');
 require_once(__CA_APP_DIR__.'/helpers/initializeLocale.php');
+require_once(__CA_APP_DIR__.'/helpers/displayHelpers.php');
+require_once(__CA_APP_DIR__.'/helpers/themeHelpers.php');
 
 if (isset($_COOKIE['CA_'.__CA_APP_NAME__.'_ui_locale'])) {
 	$g_ui_locale = $_COOKIE['CA_'.__CA_APP_NAME__.'_ui_locale'];
@@ -61,6 +63,7 @@ require_once(__CA_LIB_DIR__.'/ca/MetaTagManager.php');
 require_once(__CA_LIB_DIR__.'/ca/AssetLoadManager.php');
 require_once(__CA_LIB_DIR__.'/ca/TooltipManager.php');
 require_once(__CA_LIB_DIR__.'/ca/FooterManager.php');
+require_once(__CA_LIB_DIR__.'/ca/ResultContext.php');
 
 require_once(__CA_LIB_DIR__.'/ca/AppNavigation.php');
 

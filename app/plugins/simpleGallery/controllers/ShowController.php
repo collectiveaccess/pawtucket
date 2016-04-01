@@ -183,5 +183,19 @@
  			$this->render($this->ops_theme.'/ajax_item_info_html.php');
  		}
  		# -------------------------------------------------------
+		/** 
+		 * Generate the URL for the "back to results" link from a browse result item
+		 * as an array of path components.
+		 */
+ 		public static function getReturnToResultsUrl($po_request) {
+ 			$va_ret = array(
+ 				'module_path' => '',
+ 				'controller' => 'simpleGallery',
+ 				'action' => $po_request->getAction(),
+ 				'params' => array()
+ 			);
+			return $va_ret;
+ 		}
+		# -------------------------------------------------------
  	}
  ?>

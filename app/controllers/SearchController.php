@@ -27,7 +27,6 @@
  */
  	require_once(__CA_LIB_DIR__."/ca/BaseSearchController.php");
  	require_once(__CA_LIB_DIR__."/ca/Browse/ObjectBrowse.php");
-	require_once(__CA_LIB_DIR__."/ca/Search/DidYouMean.php");
 	require_once(__CA_LIB_DIR__."/core/Datamodel.php");
  	require_once(__CA_LIB_DIR__."/ca/Search/ObjectSearch.php");
  	require_once(__CA_LIB_DIR__."/ca/Search/EntitySearch.php");
@@ -479,6 +478,22 @@
 		public function searchName($ps_mode='singular') {
  			return ($ps_mode == 'singular') ? _t('search') : _t('searches');
  		}
+ 		
+ 		# -------------------------------------------------------
+		/** 
+		 * Generate the URL for the "back to results" link from a browse result item
+		 * as an array of path components.
+		 */
+ 		public static function getReturnToResultsUrl($po_request) {
+ 			$va_ret = array(
+ 				'module_path' => '',
+ 				'controller' => 'Search',
+ 				'action' => $po_request->getAction(),
+ 				'params' => array(
+ 					'search'
+ 				)
+ 			);
+			return $va_ret;
+ 		}
 		# -------------------------------------------------------
 	}
- ?>

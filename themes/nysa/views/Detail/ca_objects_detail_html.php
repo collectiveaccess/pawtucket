@@ -380,7 +380,7 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 				print "</div><!-- end unit -->";
 			}
 			# --- collections
-			$vs_collections = $t_object->get("ca_collections", array("template" => "<l>^ca_collections.preferred_labels.name</l> (^relationship_typename)<br/>\n", 'checkAccess' => $va_access_values));
+			$vs_collections = $t_object->get("ca_collections", array("template" => "<unit relativeTo='ca_collections'><l>^ca_collections.preferred_labels.name</l> (^relationship_typename)</unit><br/>\n", 'checkAccess' => $va_access_values));
 			if($vs_collections){
 				print "<div class='unit'><h3>"._t("Related collections")."</h3>";
 				print $vs_collections;
@@ -388,7 +388,7 @@ if (!$this->request->config->get('dont_allow_registration_and_login')) {
 			}
 			
 			# --- entities
-			$vs_entities = $t_object->get("ca_entities", array("template" => "<l>^ca_entities.preferred_labels.displayname</l> (^relationship_typename)<br/>\n", 'checkAccess' => $va_access_values, 'sort' => 'surname'));
+			$vs_entities = $t_object->get("ca_entities", array("template" => "<unit relativeTo='ca_entities'><l>^ca_entities.preferred_labels.displayname</l> (^relationship_typename)</unit><br/>\n", 'checkAccess' => $va_access_values, 'sort' => 'surname'));
 			if($vs_entities){	
 				print "<div class='unit'><h3>"._t("Related entities")."</h3>";
 				print $vs_entities;
