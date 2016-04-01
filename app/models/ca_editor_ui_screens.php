@@ -7,7 +7,7 @@
  * ----------------------------------------------------------------------
  *
  * Software by Whirl-i-Gig (http://www.whirl-i-gig.com)
- * Copyright 2008-2015 Whirl-i-Gig
+ * Copyright 2008-2016 Whirl-i-Gig
  *
  * For more information visit http://www.CollectiveAccess.org
  *
@@ -35,6 +35,7 @@
    */
 
 require_once(__CA_LIB_DIR__.'/ca/BundlableLabelableBaseModelWithAttributes.php');
+require_once(__CA_MODELS_DIR__.'/ca_metadata_elements.php');
 require_once(__CA_MODELS_DIR__.'/ca_editor_uis.php');
 require_once(__CA_MODELS_DIR__.'/ca_editor_ui_bundle_placements.php');
 require_once(__CA_MODELS_DIR__.'/ca_editor_ui_screen_type_restrictions.php');
@@ -1109,6 +1110,26 @@ class ca_editor_ui_screens extends BundlableLabelableBaseModelWithAttributes {
 										'default' => '0',
 										'label' => _t('Hide "Update Location" controls'),
 										'description' => _t('Check this option if you want to to hide the "Update Location" controls in this bundle placement.')
+									),
+									'hide_add_to_occurrence_controls' => array(
+										'formatType' => FT_NUMBER,
+										'displayType' => DT_CHECKBOXES,
+										'width' => "10", 'height' => "1",
+										'takesLocale' => false,
+										'default' => '0',
+										'label' => _t('Hide "Add to" occurrence controls'),
+										'description' => _t('Check this option if you want to to hide the "Add to" occurrence controls in this bundle placement.'),
+										'hideOnSelect' => ['add_to_occurrence_types']
+									),
+									'add_to_occurrence_types' => array(
+										'formatType' => FT_TEXT,
+										'displayType' => DT_SELECT,
+										'useList' => 'occurrence_types',
+										'takesLocale' => false,
+										'default' => '',
+										'width' => "275px", 'height' => "75px",
+										'label' => _t('Show "Add to" occurrence controls for'),
+										'description' => ''
 									),
 									'useHierarchicalBrowser' => array(
 										'formatType' => FT_TEXT,

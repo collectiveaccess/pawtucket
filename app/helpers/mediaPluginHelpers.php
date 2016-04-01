@@ -35,6 +35,7 @@
    */
 
  	require_once(__CA_LIB_DIR__.'/core/Configuration.php');
+	require_once(__CA_LIB_DIR__."/core/Parsers/MediaMetadata/XMPParser.php");
 
 	# ------------------------------------------------------------------------------------------------
 	/**
@@ -45,7 +46,7 @@
 	 */
 	function caGetExternalApplicationPath($ps_application_name) {
 		$o_config = Configuration::load();
-		if (!($o_ext_app_config = Configuration::load($o_config->get('external_applications')))) { return null; }
+		if (!($o_ext_app_config = Configuration::load(__CA_CONF_DIR__.'/external_applications.conf'))) { return null; }
 
 		return $o_ext_app_config->get($ps_application_name.'_app');
 	}
@@ -462,7 +463,7 @@
 	function caExtractEmbeddedMetadata($po_instance, $pa_metadata, $pn_locale_id) {
 		if (!is_array($pa_metadata)) { return false; }
 		$vb_did_mapping = false;
-		if (!($vs_media_metadata_config = $po_instance->getAppConfig()->get('media_metadata'))) { return false; }
+		if (!($vs_media_metadata_config = __CA_CONF_DIR__.'/media_metadata.conf')) { return false; }
 		$o_metadata_config = Configuration::load($vs_media_metadata_config);
 
 		$va_mappings = $o_metadata_config->getAssoc('import_mappings');
@@ -697,93 +698,6 @@
 		return $vs_tmp_filepath;
 	}
 	# ------------------------------------------------------------------------------------------------
-	/**
-	 * Embed XMP metadata into representation media. Embedding is performed on a copy of the representation media and placed
-	 * into the system tmp directory. The original media is never modified.
-	 *
-	 * @param BaseModel $po_object ca_objects instance to pull metadata from for embedding
-	 * @param BaseModel $po_representation ca_object_representations instance to pull metadata from for embedding
-	 * @param string $ps_version Version of media to embed into. If omitted "original" version is used.
-	 * @return string Path to copy of media with embedded metadata. False is returned in the embedding failed.
-	 */
-	function caEmbedMetadataIntoRepresentation($po_object, $po_representation, $ps_version="original") {
-		if (!($vs_media_metadata_config = $po_representation->getAppConfig()->get('media_metadata'))) { return false; }
-		$o_metadata_config = Configuration::load($vs_media_metadata_config);
-
-		$vs_mimetype = $po_representation->getMediaInfo('media', $ps_version, 'MIMETYPE');
-		if (!in_array($vs_mimetype, array('image/jpeg'))) { return false; }		// Don't try to embed in files other than JPEGs
-		$vs_filepath = $po_representation->getMediaPath('media', $ps_version);
-		if (!file_exists($vs_filepath)) { return false; }
-
-		$va_mappings = $o_metadata_config->getAssoc('export_mappings');
-		$o_xmp = new XMPParser();
-
-		copy($vs_filepath, $vs_tmp_filepath = caGetTempDirPath()."/".time().md5($vs_filepath));
-
-		$o_xmp->parse($vs_tmp_filepath);
-		$o_xmp->initMetadata();
-
-		if (is_object($po_object) && isset($va_mappings['ca_objects']) && is_array($va_mappings['ca_objects'])) {
-			$va_mapping = $va_mappings['ca_objects'];
-			$vs_type = $po_object->getTypeCode();
-			if (isset($va_mapping[$vs_type]) && is_array($va_mapping[$vs_type])) {
-				$va_mapping = $va_mapping[$vs_type];
-			} else {
-				if (isset($va_mapping['__default__']) && is_array($va_mapping['__default__'])) {
-					$va_mapping = $va_mapping['__default__'];
-				} else {
-					return null;
-				}
-			}
-
-			if (is_array($va_mapping)) {
-				foreach($va_mapping as $vs_xmp => $va_ca) {
-					$va_tmp = explode(':', $vs_xmp);
-					if (sizeof($va_tmp) > 1) { $vs_xmp = $va_tmp[1];}
-					foreach($va_ca as $vs_ca => $va_opts) {
-						if (preg_match('!^static:!', $vs_ca)) {
-							$vs_val = preg_replace('!^static:!', '', $vs_ca);
-						} else {
-							$vs_val = $po_object->get($vs_ca, $va_opts);
-						}
-						if ($vs_val) { $o_xmp->set($vs_xmp, $vs_val); }
-					}
-				}
-			}
-		}
-
-		if (is_object($po_representation) && isset($va_mappings['ca_object_representations']) && is_array($va_mappings['ca_object_representations'])) {
-			$va_mapping = $va_mappings['ca_object_representations'];
-			$vs_type = $po_representation->getTypeCode();
-			if (isset($va_mapping[$vs_type]) && is_array($va_mapping[$vs_type])) {
-				$va_mapping = $va_mapping[$vs_type];
-			} else {
-				if (isset($va_mapping['__default__']) && is_array($va_mapping['__default__'])) {
-					$va_mapping = $va_mapping['__default__'];
-				} else {
-					return null;
-				}
-			}
-
-			if (is_array($va_mapping)) {
-				foreach($va_mapping as $vs_xmp => $va_ca) {
-					$va_tmp = explode(':', $vs_xmp);
-					if (sizeof($va_tmp) > 1) { $vs_xmp = $va_tmp[1];}
-					foreach($va_ca as $vs_ca => $va_opts) {
-						if (preg_match('!^static:!', $vs_ca)) {
-							$vs_val = preg_replace('!^static:!', '', $vs_ca);
-						} else {
-							$vs_val = $po_representation->get($vs_ca, $va_opts);
-						}
-						if ($vs_val) { $o_xmp->set($vs_xmp, $vs_val); }
-					}
-				}
-			}
-		}
-		$o_xmp->write();
-		return $vs_tmp_filepath;
-	}
-	# ------------------------------------------------------------------------------------------------
 	function caExportMediaMetadataForRecord($ps_table, $ps_type_code, $pn_id) {
 		$o_app_config = Configuration::load();
 
@@ -869,7 +783,7 @@
 	function caGetDefaultMediaIconTag($ps_type, $pn_width, $pn_height, $pa_options=null) {
 		if (is_array($va_selected_size = caGetMediaIconForSize($ps_type, $pn_width, $pn_height, $pa_options))) {
 			$o_config = Configuration::load();
-			$o_icon_config = Configuration::load($o_config->get('default_media_icons'));
+			$o_icon_config = Configuration::load(__CA_CONF_DIR__.'/default_media_icons.conf');
 			$va_icons = $o_icon_config->getAssoc($ps_type);
 			return caHTMLImage($o_icon_config->get('icon_folder_url').'/'.$va_icons[$va_selected_size['size']], array('width' => $va_selected_size['width'], 'height' => $va_selected_size['height']));
 		}
@@ -891,7 +805,7 @@
 	function caGetDefaultMediaIconUrl($ps_type, $pn_width, $pn_height, $pa_options=null) {
 		if (is_array($va_selected_size = caGetMediaIconForSize($ps_type, $pn_width, $pn_height, $pa_options))) {
 			$o_config = Configuration::load();
-			$o_icon_config = Configuration::load($o_config->get('default_media_icons'));
+			$o_icon_config = Configuration::load(__CA_CONF_DIR__.'/default_media_icons.conf');
 			$va_icons = $o_icon_config->getAssoc($ps_type);
 			return $o_icon_config->get('icon_folder_url').'/'.$va_icons[$va_selected_size['size']];
 		}
@@ -913,7 +827,7 @@
 	function caGetDefaultMediaIconPath($ps_type, $pn_width, $pn_height, $pa_options=null) {
 		if (is_array($va_selected_size = caGetMediaIconForSize($ps_type, $pn_width, $pn_height, $pa_options))) {
 			$o_config = Configuration::load();
-			$o_icon_config = Configuration::load($o_config->get('default_media_icons'));
+			$o_icon_config = Configuration::load(__CA_CONF_DIR__.'/default_media_icons.conf');
 			$va_icons = $o_icon_config->getAssoc($ps_type);
 			return $o_icon_config->get('icon_folder_path').'/'.$va_icons[$va_selected_size['size']];
 		}
@@ -927,7 +841,7 @@
 	 */
 	function caGetMediaIconForSize($ps_type, $pn_width, $pn_height, $pa_options=null) {
 		$o_config = Configuration::load();
-		$o_icon_config = Configuration::load($o_config->get('default_media_icons'));
+		$o_icon_config = Configuration::load(__CA_CONF_DIR__.'/default_media_icons.conf');
 
 		$vs_selected_size = null;
 		if (is_array($va_icons = $o_icon_config->getAssoc($ps_type))) {

@@ -141,8 +141,8 @@ class WLPlugMediaPDFWand Extends BaseMediaPlugin implements IWLPlugMedia {
 	public function register() {
 		$this->opo_config = Configuration::load();
 		
-		$this->opo_search_config = Configuration::load($this->opo_config->get('search_config'));
-		$this->opo_external_app_config = Configuration::load($this->opo_config->get('external_applications'));
+		$this->opo_search_config = Configuration::load(__CA_CONF_DIR__.'/search.conf');
+		$this->opo_external_app_config = Configuration::load(__CA_CONF_DIR__.'/external_applications.conf');
 		
 		$this->ops_ghostscript_path = $this->opo_external_app_config->get('ghostscript_app');
 		$this->ops_pdftotext_path = $this->opo_external_app_config->get('pdftotext_app');
@@ -426,7 +426,7 @@ class WLPlugMediaPDFWand Extends BaseMediaPlugin implements IWLPlugMedia {
 								$vn_start = $vn_end = null;
 								$vs_acc = '';
 								for($vn_i=0; $vn_i < mb_strlen($vs_text_line_content); $vn_i++) {
-									if (preg_match("![{$vs_indexing_regex}]!", $vs_text_line_content[$vn_i])) {
+									if (preg_match("![{$vs_indexing_regex}]!u", mb_substr($vs_text_line_content, $vn_i, 1))) {
 										// word boundary
 										if ($vs_acc) {
 											$vs_acc = mb_strtolower($vs_acc);
