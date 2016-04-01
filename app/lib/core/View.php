@@ -208,7 +208,7 @@ class View extends BaseObject {
 		if($vs_tags = json_encode($va_tags)) {
 			file_put_contents($vs_compiled_path, $vs_tags);
 		} else {
-			unlink($vs_compiled_path);
+			@unlink($vs_compiled_path);
 		}
 		return $va_tags;
 	}
@@ -226,7 +226,6 @@ class View extends BaseObject {
 			if (file_exists($vs_path.'/'.$ps_filename.".".$g_ui_locale)) {
 				// if a l10ed view is at same path than normal but having the locale as last extension, display it (eg. splash_intro_text_html.php.fr_FR)
 				$va_tags = $this->compile($vs_path.'/'.$ps_filename.".".$g_ui_locale);
-
 				break;
 			}
 			elseif (file_exists($vs_path.'/'.$ps_filename)) {
@@ -292,7 +291,7 @@ class View extends BaseObject {
 			foreach($va_compile as $vs_var) {
 				$vm_val = isset($va_vars[$vs_var]) ? $va_vars[$vs_var] : '';
 				$vn_count = 0;
-				$vs_buf = str_replace('{{{'.$vs_var.'}}}', $vm_val, $vs_buf, $vn_count);		
+				$vs_buf = str_replace('{{{'.$vs_var.'}}}', $vm_val, $vs_buf, $vn_count);				
 			}
 		}
 		
