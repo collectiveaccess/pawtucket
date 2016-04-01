@@ -1,7 +1,14 @@
 CollectiveAccess Pawtucket README
 ---------------------------------
 
-Thanks for downloading CollectiveAccess Pawtucket version 1.4!
+Thanks for downloading CollectiveAccess Pawtucket version 1.6!
+
+This is an update of the old "Pawtucket1" application with current (v1.6) CollectiveAccess libraries
+and database support, as well as support for PHP 7. For new projects it is suggested to start with 
+Pawtucket2 (https://github.com/collectiveaccess/pawtucket2.git), which more featureful while being easier 
+to customize. This version of Pawtucket is made available primarily for users maintaining older installations.
+
+---------------------------------
 
 Pawtucket is general purpose public-access publishing tool for
 CollectiveAccess. It provides an easy way to create web sites around data
@@ -33,6 +40,6 @@ Pawtucket fit into most any existing design scheme.
 How to Install
 --------------
 You can find installation instructions for Pawtucket at http://docs.collectiveaccess.org/wiki/Installing_Pawtucket
-Release notes are available at http://docs.collectiveaccess.org/wiki/Release_Notes_for_Pawtucket_1.4
+Release notes are available at http://docs.collectiveaccess.org/wiki/Release_Notes_for_Pawtucket_1.6
 
 If you are updating an existing installation see http://docs.collectiveaccess.org/wiki/Upgrading_Pawtucket
