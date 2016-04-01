@@ -10882,7 +10882,7 @@ $pa_options["display_form_field_tips"] = true;
 			$vs_limit_sql = "LIMIT ".intval($pn_limit);
 		}
 		
-		$va_wheres = array('(civc.table_num = '.intval($this->tableNum()).')');
+		$va_wheres = array();
 		if (is_array($pa_options['checkAccess']) && sizeof($pa_options['checkAccess']) && ($this->hasField('access'))) {
 			$va_wheres[] = 't.access IN ('.join(',', $pa_options['checkAccess']).')';
 		}
@@ -10914,7 +10914,6 @@ $pa_options["display_form_field_tips"] = true;
 		if ($vs_where_sql = join(' AND ', $va_wheres)) {
 			$vs_where_sql = ' WHERE '.$vs_where_sql;
 		}
-		
 		
 		$qr_res = $o_db->query("
 			SELECT t.*, t.view_count cnt
