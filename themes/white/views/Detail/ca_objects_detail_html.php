@@ -73,7 +73,7 @@
 					<div id="objDetailRepScrollingViewerImageContainer"></div>
 				</div>
 				<div id="objDetailImageNav">
-					<div >
+					
 
 <?php
 #		if ($vn_num_reps > 1) {
@@ -115,6 +115,9 @@ foreach($va_reps as $va_rep) {
 					</div>
 			</div><!-- end objDetailImage -->
 <?php
+		}
+		if ($va_embed = $t_object->get('ca_objects.embed_code')) {
+			print "<div style='text-align:center;'>".$va_embed."</div>";
 		}
 ?>
 		</div><!-- end rightCol -->

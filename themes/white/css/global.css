@@ -501,6 +501,8 @@ width: 640px;
 	padding-top: 20px;
 	border-top: 1px solid #000;
 	font-size: 14px;
+	margin-left: 65px;
+	margin-top:10px;
 }
 #objDetailRelObjects td.imageIcon{
 	width: 72px;
