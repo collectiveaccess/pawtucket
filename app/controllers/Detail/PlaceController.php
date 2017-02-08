@@ -64,8 +64,8 @@
  		/**
  		 * shows the basic info for a place
  		 */ 
- 		public function Show() {
- 			parent::Show();
+ 		public function Show($pa_option=null) {
+ 			parent::Show($pa_option);
  		}
  		# -------------------------------------------------------
  	}

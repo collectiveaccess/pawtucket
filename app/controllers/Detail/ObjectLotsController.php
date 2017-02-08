@@ -61,8 +61,8 @@
  		/**
  		 * shows the basic info for an object lot
  		 */ 
- 		public function Show() {
- 			parent::Show();
+ 		public function Show($pa_option=null) {
+ 			parent::Show($pa_option);
  		}
  		# -------------------------------------------------------
  	}

@@ -64,8 +64,8 @@
  		/**
  		 * shows the basic info for an entity
  		 */ 
- 		public function Show() {
- 			parent::Show();
+ 		public function Show($pa_options=null) {
+ 			parent::Show($pa_options);
  		}
  		# -------------------------------------------------------
  	}

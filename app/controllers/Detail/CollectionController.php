@@ -64,8 +64,8 @@
  		/**
  		 * shows the basic info for a collection
  		 */ 
- 		public function Show() {
- 			parent::Show();
+ 		public function Show($pa_option=null) {
+ 			parent::Show($pa_option);
  		}
  		# -------------------------------------------------------
  	}
