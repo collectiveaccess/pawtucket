@@ -980,20 +980,28 @@
 		if(isset($pa_options['action'])){
 			$vs_action = $pa_options['action'];
 		} else {
-			$vs_action = caGetDetailForType($ps_table, caGetOption('type_id', $pa_options, null), array('request' => $po_request, 'preferredDetail' => caGetOption('preferredDetail', $pa_options, null)));
-		}
-		if (caUseIdentifiersInUrls() && $t_table->getProperty('ID_NUMBERING_ID_FIELD')) {
-			$va_ids = $t_table->getFieldValuesForIDs(array($pn_id), array($t_table->getProperty('ID_NUMBERING_ID_FIELD')));
-			if (is_array($va_ids) && ($vn_id_for_idno = array_shift($va_ids))) {
-				$vb_id_exists = true;
+			switch($ps_table) {
+				case 'ca_objects':
+					$vs_controller .= '/Object';
+					break;
+				case 'ca_entities':
+					$vs_controller .= '/Entity';
+					break;
+				case 'ca_occurrences':
+					$vs_controller .= '/Occurrence';
+					break;
+				case 'ca_places':
+					$vs_controller .= '/Place';
+					break;
+				case 'ca_collection':
+					$vs_controller .= '/Collection';
+					break;
 			}
-			if (strlen($vn_id_for_idno)) {
-				$pn_id = $vn_id_for_idno;
-			} else {
-				$pn_id = "id:{$pn_id}";
-			}
+			//$vs_action = caGetDetailForType($ps_table, caGetOption('type_id', $pa_options, null), array('request' => $po_request, 'preferredDetail' => caGetOption('preferredDetail', $pa_options, null)));
+			$vs_action = 'Show';
 		}
-		$vs_action .= "/".rawurlencode($pn_id);
+		
+		$vs_action .= "/".$t_table->primaryKey()."/".rawurlencode($pn_id);
 		
 		if (isset($pa_options['verifyLink']) && $pa_options['verifyLink']) {
 			// Make sure record link points to exists

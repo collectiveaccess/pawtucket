@@ -119,7 +119,7 @@
 			}
 			
 			# --- entities
-			$va_entities = $t_object->get("ca_entities", array("template" => "<l>^ca_entities.preferred_labels.displayname</l> (^relationship_typename)", "returnAsLink" => true, "returnAllLocales" => false, "returnAsArray" => true, 'checkAccess' => $va_access_values, 'sort' => 'surname'));
+			$va_entities = $t_object->get("ca_entities", array("template" => "<unit relativeTo='ca_entities'><l>^ca_entities.preferred_labels.displayname</l> (^relationship_typename)</unit>", "returnAllLocales" => false, "returnAsArray" => true, 'checkAccess' => $va_access_values, 'sort' => 'surname'));
 			if(sizeof($va_entities) > 0){	
 				print "<div class='unit'><h2>"._t("Related entities")."</h2>";
 				print join("<br/>\n", $va_entities);
@@ -147,7 +147,7 @@
 			}
 			
 			# --- places
-			$va_places = $t_object->get("ca_places", array("template" => "<l>^ca_places.preferred_labels.name</l> (^relationship_typename)", "returnAsLink" => true, "returnAsArray" => true, 'checkAccess' => $va_access_values));
+			$va_places = $t_object->get("ca_places", array("template" => "<unit relativeTo='ca_places'><l>^ca_places.preferred_labels.name</l> (^relationship_typename)</unit>", "returnAsArray" => true, 'checkAccess' => $va_access_values));
 			
 			if(sizeof($va_places) > 0){
 				print "<div class='unit'><h2>"._t("Related places")."</h2>";
@@ -156,7 +156,7 @@
 			}
 			
 			# --- collections
-			$va_collections = $t_object->get("ca_collections", array("template" => "<l>^ca_collections.preferred_labels.name</l> (^relationship_typename)", "returnAsLink" => true, "returnAsArray" => true, 'checkAccess' => $va_access_values));
+			$va_collections = $t_object->get("ca_collections", array("template" => "<unit relativeTo='ca_collections'><l>^ca_collections.preferred_labels.name</l> (^relationship_typename)</unit>","returnAsArray" => true, 'checkAccess' => $va_access_values));
 			if(sizeof($va_collections) > 0){
 				print "<div class='unit'><h2>"._t("Related collections")."</h2>";
 				print join("<br/>\n", $va_collections);
@@ -164,7 +164,7 @@
 			}
 			
 			# --- lots
-			$va_object_lots = $t_object->get("ca_object_lots", array("template" => "<l>^preferred_labels.name</l> (^idno_stub)", "returnAsLink" => true, "returnAsArray" => true, 'checkAccess' => $va_access_values));
+			$va_object_lots = $t_object->get("ca_object_lots", array("template" => "<unit relativeTo='ca_object_lots'><l>^preferred_labels.name</l> (^idno_stub)</unit>", "returnAsArray" => true, 'checkAccess' => $va_access_values));
 			if(sizeof($va_object_lots) > 0){
 				print "<div class='unit'><h2>"._t("Related lot")."</h2>";
 				print join("<br/>\n", $va_object_lots);
@@ -172,7 +172,7 @@
 			}
 			
 			# --- vocabulary terms
-			$va_terms = $t_object->get("ca_list_items", array("template" => "<l>^ca_list_items.preferred_labels.name_plural</l> (^relationship_typename)", "returnAsLink" => true, "returnAsArray" => true, 'checkAccess' => $va_access_values));
+			$va_terms = $t_object->get("ca_list_items", array("template" => "<unit relativeTo='ca_list_items'><l>^ca_list_items.preferred_labels.name_plural</l> (^relationship_typename)</unit>", "returnAsArray" => true, 'checkAccess' => $va_access_values));
 			if(sizeof($va_terms) > 0){
 				print "<div class='unit'><h2>"._t("Subjects")."</h2>";
 				print join("<br/>\n", $va_terms);
