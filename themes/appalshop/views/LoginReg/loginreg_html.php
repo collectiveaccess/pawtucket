@@ -49,7 +49,8 @@
 				</div>
 				
 			</div><!-- end loginForm -->
-			<div id="registerForm">
+			<!-- commenting this out for prelaunch pw protetion without registration -->
+			<div id="registerForm" style="display:none;">
 				<h1><?php print _t("Register"); ?></h1>
 				<div class="bg">
 					<form action="<?php print caNavUrl($this->request, '', 'LoginReg', 'register', array()); ?>" method="post" name="registration">
