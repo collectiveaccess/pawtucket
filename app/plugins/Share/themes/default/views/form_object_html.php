@@ -62,17 +62,17 @@
 				<div class="formLabel">
 					<?php print ($va_errors["to_email"]) ? "<div class='formErrors'>".$va_errors["to_email"]."</div>" : ""; ?>
 					<?php print _t("To e-mail address (Enter multiple addresses separated by commas)"); ?><br/>
-					<input type="text" name="to_email" value="<?php print $vs_to_email; ?>">
+					<input type="text" name="to_email" value="<?php print htmlspecialchars($vs_to_email); ?>">
 				</div>
 				<div class="formLabel">
 					<?php print ($va_errors["from_name"]) ? "<div class='formErrors'>".$va_errors["from_name"]."</div>" : ""; ?>
 					<?php print _t("Your name"); ?><br/>
-					<input type="text" name="from_name" value="<?php print $vs_from_name; ?>">
+					<input type="text" name="from_name" value="<?php print htmlspecialchars($vs_from_name); ?>">
 				</div>
 				<div class="formLabel">
 					<?php print ($va_errors["from_email"]) ? "<div class='formErrors'>".$va_errors["from_email"]."</div>" : ""; ?>
 					<?php print _t("Your E-mail Address"); ?><br/>
-					<input type="text" name="from_email" value="<?php print $vs_from_email; ?>">
+					<input type="text" name="from_email" value="<?php print htmlspecialchars($vs_from_email); ?>">
 				</div>
 <?php
 				if(!$this->request->isLoggedIn()){
@@ -86,14 +86,14 @@
 							<?php print _t("Security Question (to prevent SPAMbots)"); ?><br/>
 							<?php print $vn_num1; ?> + <?php print $vn_num2; ?> = <input name="security" value="" id="security" type="text" size="3" style="width:50px;" />
 						</div>
-						<input type="hidden" name="sum" value="<?php print $vn_sum; ?>">
+						<input type="hidden" name="sum" value="<?php print htmlspecialchars($vn_sum); ?>">
 <?php
 				}
 ?>
 				<div class="formLabel">
 					<?php print ($va_errors["subject"]) ? "<div class='formErrors'>".$va_errors["subject"]."</div>" : ""; ?>
 					<?php print _t("Subject"); ?><br/>
-					<input type="text" name="subject" value="<?php print $vs_subject; ?>">
+					<input type="text" name="subject" value="<?php print htmlspecialchars($vs_subject); ?>">
 				</div>
 				<div class="formLabel">
 					<?php print ($va_errors["message"]) ? "<div class='formErrors'>".$va_errors["message"]."</div>" : ""; ?>
