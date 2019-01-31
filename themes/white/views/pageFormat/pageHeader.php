@@ -161,12 +161,7 @@
         </ul>
         <ul>
 
-            <li><a id="links" href="http://www.whitecolumns.org/text.html?type=links">Links</a></li>
-        </ul>
-    </div>
-    <div style="float: left; width: 50px; margin-left:-30px;">
-        <ul>
-
+          <!--  <li><a id="links" href="http://www.whitecolumns.org/text.html?type=links">Links</a></li>-->
             <li><a id="archive1" href="http://www.whitecolumns.org/archive">Archive</a></li>
         </ul>
     </div>
