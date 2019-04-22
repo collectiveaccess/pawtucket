@@ -116,7 +116,7 @@
             <li><a id="projects-editions" href="../sections/editions.php">Editions</a></li>
             <li><a id="projects-publications" href="../sections/publications.php">Publications</a></li>
             <li><a id="projects-the_sound" href="../sections/tsowc.php">TSoWC</a></li>
-			<li><a id="projects-other" href="../sections/other.php">Other Projects</a></li>
+			<li><a id="projects-other" href="../sections/nyamg.php">New York Artists' Memorial Garden</a></li>
         </ul>
     </div>
 
